@@ -24,18 +24,18 @@ var (
 title: Reference
 description: csi-vault CLI Reference
 menu:
-  product_csi_vault_{{ .Version }}:
+  product_pharmer_{{ .Version }}:
     identifier: reference
     name: Reference
     weight: 1000
-menu_name: product_csi_vault_{{ .Version }}
+menu_name: product_pharmer_{{ .Version }}
 ---
 `))
 
 	_ = template.Must(tplFrontMatter.New("cmd").Parse(`---
 title: {{ .Name }}
 menu:
-  product_csi_vault_{{ .Version }}:
+  product_pharmer_{{ .Version }}:
     identifier: {{ .ID }}
     name: {{ .Name }}
     parent: reference
@@ -43,7 +43,7 @@ menu:
     weight: 0
 {{ end }}
 product_name: pharmer
-menu_name: product_csi_vault_{{ .Version }}
+menu_name: product_pharmer_{{ .Version }}
 section_menu_id: reference
 {{- if .RootCmd }}
 aliases:
@@ -55,7 +55,7 @@ aliases:
 
 // ref: https://github.com/spf13/cobra/blob/master/doc/md_docs.md
 func main() {
-	rootCmd := cmds.NewRootCmd()
+	rootCmd := cmds.NewRootCmd("")
 	dir := runtime.GOPath() + "/src/github.com/kubevault/csi-driver/docs/reference"
 	fmt.Printf("Generating cli markdown tree in: %v\n", dir)
 	err := os.RemoveAll(dir)
