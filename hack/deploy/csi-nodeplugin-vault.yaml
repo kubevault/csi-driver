@@ -1,0 +1,82 @@
+---
+kind: DaemonSet
+apiVersion: apps/v1beta2
+metadata:
+  name: csi-vaultplugin
+spec:
+  selector:
+    matchLabels:
+      app: csi-vaultplugin
+  template:
+    metadata:
+      labels:
+        app: csi-vaultplugin
+    spec:
+      serviceAccount: csi-vaultplugin
+      hostNetwork: true
+      containers:
+        - name: driver-registrar
+          image: quay.io/k8scsi/driver-registrar:v0.2.0
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi/
+              # TODO(arslan): the registar is not implemented yet
+              # - name: registrar-socket-dir
+              #   mountPath: /var/lib/csi/sockets/
+        - name: csi-vaultplugin
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          image: kubevault/csi-driver:v0.0.1
+          args :
+            - init
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--token=$(VAULT_ACCESS_TOKEN)"
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: VAULT_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vaulttoken
+                  key: token
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: pods-mount-dir
+              mountPath: /var/lib/kubelet
+              # needed so that any mounts setup inside this container are
+              # propagated back to the host machine.
+              mountPropagation: "Bidirectional"
+            - mountPath: /dev
+              name: device-dir
+      volumes:
+        # TODO(arslan): the registar is not implemented yet
+        #- name: registrar-socket-dir
+        #  hostPath:
+        #    path: /var/lib/kubelet/device-plugins/
+        #    type: DirectoryOrCreate
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/com.vault.csi.vaultbs
+            type: DirectoryOrCreate
+        - name: pods-mount-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: /dev
