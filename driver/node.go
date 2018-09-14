@@ -5,6 +5,7 @@ import (
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -16,6 +17,57 @@ var (
 // volume to a staging path. Once mounted, NodePublishVolume will make sure to
 // mount it to the appropriate path
 func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
+	d.log.Info("node stage volume called")
+	mnt := req.VolumeCapability.GetMount()
+	options := mnt.MountFlags
+
+	fsType := "tmpfs"
+	if mnt.FsType != "" {
+		fsType = mnt.FsType
+	}
+
+	ll := d.log.WithFields(logrus.Fields{
+		"volume_id": req.VolumeId,
+		//"volume_name":         vol.Label,
+		"staging_target_path": req.StagingTargetPath,
+		//	"source":              source,
+		"fsType":        fsType,
+		"mount_options": options,
+		"method":        "node_stage_volume",
+	})
+
+	/*
+		formatted, err := d.mounter.IsFormatted(source)
+		if err != nil {
+			return nil, err
+		}
+
+		if !formatted {
+			ll.Info("formatting the volume for staging")
+			if err := d.mounter.Format(source, fsType); err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+		} else {
+			ll.Info("source device is already formatted")
+		}
+
+		ll.Info("mounting the volume for staging")
+
+		mounted, err := d.mounter.IsMounted(source, target)
+		if err != nil {
+			return nil, err
+		}
+
+		if !mounted {
+			if err := d.mounter.Mount(source, target, fsType, options...); err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+		} else {
+			ll.Info("source device is already mounted to the target path")
+		}
+	*/
+	ll.Info("formatting and mounting stage volume is finished")
+	return &csi.NodeStageVolumeResponse{}, nil
 	return nil, nil
 }
 

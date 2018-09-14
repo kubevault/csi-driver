@@ -1,12 +1,23 @@
 package driver
 
+import (
+	"io/ioutil"
+	"os"
+	"path"
+	"regexp"
+	"strings"
+
+	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/juju/errors"
+)
+
 // Mounter is responsible for formatting and mounting volumes
 type Mounter interface {
 	// Format formats the source with the given filesystem type
 	Format(source, fsType string) error
 
 	// Mount mounts source to target with the given fstype and options.
-	Mount(source, target, fsType string, options ...string) error
+	Mount(source, target, fsType string, options map[string]string) error
 
 	// Unmount unmounts the given target
 	Unmount(target string) error
@@ -29,7 +40,35 @@ func (m *mounter) Format(source, fsType string) error {
 	return nil
 }
 
-func (m *mounter) Mount(source, target, fsType string, opts ...string) error {
+//https://medium.com/@gmaliar/dynamic-secrets-on-kubernetes-pods-using-vault-35d9094d169
+func (m *mounter) Mount(source, target, fsType string, opts map[string]string) error {
+	stringPolicies, ok := opts["vault/policies"]
+	if !ok {
+		return errors.Errorf("Missing policies")
+	}
+	policies := strings.Split(strings.Replace(stringPolicies, " ", "", -1), ",")
+	if len(policies) == 0 {
+		return errors.Errorf("Empty policies")
+	}
+
+	poduidreg := regexp.MustCompile("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{8}")
+	poduid := poduidreg.FindString(source)
+	if poduid == "" {
+		return errors.Errorf("Couldn't extract poduid from path %v", source)
+	}
+
+	client, err := NewVaultClient("", &vaultapi.TLSConfig{Insecure: true})
+	if err != nil {
+		return err
+	}
+	token, metadata, err := client.GetTokenData(policies, poduid, true)
+	if err != nil {
+		return err
+	}
+	err = writeTokenData(token, metadata, target, "vault-token")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -43,4 +82,30 @@ func (m *mounter) IsFormatted(source string) (bool, error) {
 
 func (m *mounter) IsMounted(source, target string) (bool, error) {
 	return false, nil
+}
+
+func writeTokenData(token string, metadata []byte, dir, tokenfilename string) error {
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		return errors.Errorf("Failed to mkdir %v: %v", dir, err)
+	}
+
+	tokenpath := path.Join(dir, tokenfilename)
+	fulljsonpath := path.Join(dir, strings.Join([]string{tokenfilename, ".json"}, ""))
+
+	err = ioutil.WriteFile(tokenpath, []byte(strings.TrimSpace(token)), 0644)
+	if err != nil {
+		return err
+	}
+	err = os.Chmod(tokenpath, 0644)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fulljsonpath, metadata, 0644)
+	if err != nil {
+		return err
+	}
+	err = os.Chmod(fulljsonpath, 0644)
+	return err
 }

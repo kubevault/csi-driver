@@ -13,4 +13,7 @@ spec:
   volumes:
     - name: my-vault-volume
       persistentVolumeClaim:
-        claimName: csi-pvc 
+        claimName: csi-pvc
+
+
+

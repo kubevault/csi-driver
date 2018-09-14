@@ -38,33 +38,21 @@ type Driver struct {
 }
 
 func NewDriver(ep, token string) (*Driver, error) {
-	config := vaultapi.DefaultConfig()
-	config.Address = ep
-	if err := config.ReadEnvironment(); err != nil {
-		return nil, fmt.Errorf("Cannot get config from env: %v", err)
-	}
-
-	// By default this added the system's CAs
-	err := config.ConfigureTLS(&vaultapi.TLSConfig{Insecure: false})
-	if err != nil {
-		return nil, fmt.Errorf("Failed to configureTLS: %v", err)
-	}
-
 	// Create the client
-	client, err := vaultapi.NewClient(config)
+	client, err := NewVaultClient(ep, &vaultapi.TLSConfig{Insecure: false})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vault client: %s", err)
 	}
-	client.SetToken(token)
+	client.vc.SetToken(token)
 
 	// The generator token is periodic so we can set the increment to 0
 	// and it will default to the period.
-	if _, err = client.Auth().Token().RenewSelf(0); err != nil {
+	if _, err = client.vc.Auth().Token().RenewSelf(0); err != nil {
 		return nil, fmt.Errorf("Couldn't renew generator token: %v", err)
 	}
 	return &Driver{
 		endpoint:    ep,
-		vaultClient: client,
+		vaultClient: client.vc,
 	}, nil
 
 }
