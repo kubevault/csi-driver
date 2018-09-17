@@ -73,16 +73,25 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 
 // NodeUnstageVolume unstages the volume from the staging path
 func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
+	d.log.WithFields(logrus.Fields{
+		"method": "node_unstage_volume",
+	}).Info("node unstage volume called")
 	return nil, nil
 }
 
 // NodePublishVolume mounts the volume mounted to the staging path to the target path
 func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
+	d.log.WithFields(logrus.Fields{
+		"method": "node_publish_volume",
+	}).Info("node publish volume called")
 	return nil, nil
 }
 
 // NodeUnpublishVolume unmounts the volume from the target path
 func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
+	d.log.WithFields(logrus.Fields{
+		"method": "node_unpublish_volume",
+	}).Info("node unpublish volume called")
 	return nil, nil
 }
 
@@ -91,12 +100,32 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 // workload. The result of this function will be used by the CO in
 // ControllerPublishVolume.
 func (d *Driver) NodeGetId(ctx context.Context, req *csi.NodeGetIdRequest) (*csi.NodeGetIdResponse, error) {
-	return nil, nil
+	d.log.WithField("method", "node_get_id").Info("node get id called")
+	return &csi.NodeGetIdResponse{
+		NodeId: d.nodeId,
+	}, nil
 }
 
 // NodeGetCapabilities returns the supported capabilities of the node server
 func (d *Driver) NodeGetCapabilities(ctx context.Context, req *csi.NodeGetCapabilitiesRequest) (*csi.NodeGetCapabilitiesResponse, error) {
-	return nil, nil
+	// currently there is a single NodeServer capability according to the spec
+	nscap := &csi.NodeServiceCapability{
+		Type: &csi.NodeServiceCapability_Rpc{
+			Rpc: &csi.NodeServiceCapability_RPC{
+				Type: csi.NodeServiceCapability_RPC_STAGE_UNSTAGE_VOLUME,
+			},
+		},
+	}
+
+	d.log.WithFields(logrus.Fields{
+		"node_capabilities": nscap,
+		"method":            "node_get_capabilities",
+	}).Info("node get capabilities called")
+	return &csi.NodeGetCapabilitiesResponse{
+		Capabilities: []*csi.NodeServiceCapability{
+			nscap,
+		},
+	}, nil
 }
 
 func (d *Driver) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (*csi.NodeGetInfoResponse, error) {

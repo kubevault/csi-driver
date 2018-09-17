@@ -29,7 +29,7 @@ const (
 type Driver struct {
 	endpoint string
 	nodeId   string
-	region   string
+	url      string
 
 	srv         *grpc.Server
 	vaultClient *vaultapi.Client
@@ -37,9 +37,9 @@ type Driver struct {
 	log         *logrus.Entry
 }
 
-func NewDriver(ep, token string) (*Driver, error) {
+func NewDriver(ep, url, node, token string) (*Driver, error) {
 	// Create the client
-	client, err := NewVaultClient(ep, &vaultapi.TLSConfig{Insecure: false})
+	client, err := NewVaultClient(url, &vaultapi.TLSConfig{Insecure: false})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vault client: %s", err)
 	}
@@ -47,12 +47,18 @@ func NewDriver(ep, token string) (*Driver, error) {
 
 	// The generator token is periodic so we can set the increment to 0
 	// and it will default to the period.
-	if _, err = client.vc.Auth().Token().RenewSelf(0); err != nil {
+	/*if _, err = client.vc.Auth().Token().RenewSelf(0); err != nil {
 		return nil, fmt.Errorf("Couldn't renew generator token: %v", err)
-	}
+	}*/
 	return &Driver{
 		endpoint:    ep,
+		url:         url,
 		vaultClient: client.vc,
+		mounter:     &mounter{},
+		nodeId:      node,
+		log: logrus.New().WithFields(logrus.Fields{
+			"node-id": node,
+		}),
 	}, nil
 
 }

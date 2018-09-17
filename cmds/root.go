@@ -20,7 +20,7 @@ func NewRootCmd(version string) *cobra.Command {
 	// ref: https://github.com/kubernetes/kubernetes/issues/17162#issuecomment-225596212
 	flag.CommandLine.Parse([]string{})
 
-	//rootCmd.AddCommand(NewCmdInit())
+	rootCmd.AddCommand(NewCmdInit())
 
 	rootCmd.AddCommand(v.NewCmdVersion())
 

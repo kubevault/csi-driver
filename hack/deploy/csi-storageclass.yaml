@@ -4,4 +4,6 @@ metadata:
   name: vault-block-storage
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
-provisioner: com.vault.csi.vaultbs
+provisioner: com.vault.csi.vaultdbs
+parameters:
+  fsType: tmpfs
