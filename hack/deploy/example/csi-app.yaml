@@ -14,6 +14,10 @@ spec:
     - name: my-vault-volume
       persistentVolumeClaim:
         claimName: csi-pvc
+        readOnly: true
+      secret:
+        secretName: "xy"
+
 
 
 

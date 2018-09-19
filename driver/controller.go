@@ -82,6 +82,7 @@ func (d *Driver) ControllerUnpublishVolume(ctx context.Context, req *csi.Control
 // are supported.
 func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {
 	d.log.WithFields(logrus.Fields{
+		"request": req,
 		"method": "validate_volume_capabilities",
 	}).Info("validate volume capabilities called")
 	var vcaps []*csi.VolumeCapability_AccessMode
@@ -133,9 +134,19 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 // ListVolumes returns a list of all requested volumes
 func (d *Driver) ListVolumes(ctx context.Context, req *csi.ListVolumesRequest) (*csi.ListVolumesResponse, error) {
 	d.log.WithFields(logrus.Fields{
+		"request": req,
 		"method": "list_volume",
 	}).Info("list volume called")
-	return nil, errors.New("Not implemented")
+	var entries []*csi.ListVolumesResponse_Entry
+	entries = append(entries, &csi.ListVolumesResponse_Entry{
+		Volume: &csi.Volume{
+			Id:            "123456",
+			CapacityBytes: int64(1 * MB),
+		},
+	})
+	return &csi.ListVolumesResponse{
+
+	}, nil
 }
 
 // GetCapacity returns the capacity of the storage pool
@@ -163,7 +174,7 @@ func (d *Driver) ControllerGetCapabilities(ctx context.Context, req *csi.Control
 	var caps []*csi.ControllerServiceCapability
 	for _, cap := range []csi.ControllerServiceCapability_RPC_Type{
 		csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME,
-		csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
+		//csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
 	} {
 		caps = append(caps, newCap(cap))
 	}

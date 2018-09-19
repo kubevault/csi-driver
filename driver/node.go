@@ -17,7 +17,10 @@ var (
 // volume to a staging path. Once mounted, NodePublishVolume will make sure to
 // mount it to the appropriate path
 func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
-	d.log.Info("node stage volume called")
+	d.log.WithFields(logrus.Fields{
+		"request": req,
+		"method": "node_stage_volume",
+	}).Info("node stage volume called")
 	mnt := req.VolumeCapability.GetMount()
 	options := mnt.MountFlags
 
@@ -36,7 +39,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"method":        "node_stage_volume",
 	})
 
-	/*
+
 		formatted, err := d.mounter.IsFormatted(source)
 		if err != nil {
 			return nil, err
@@ -65,7 +68,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		} else {
 			ll.Info("source device is already mounted to the target path")
 		}
-	*/
+
 	ll.Info("formatting and mounting stage volume is finished")
 	return &csi.NodeStageVolumeResponse{}, nil
 	return nil, nil
@@ -74,6 +77,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 // NodeUnstageVolume unstages the volume from the staging path
 func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
 	d.log.WithFields(logrus.Fields{
+		"request": req,
 		"method": "node_unstage_volume",
 	}).Info("node unstage volume called")
 	return nil, nil
@@ -82,6 +86,7 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 // NodePublishVolume mounts the volume mounted to the staging path to the target path
 func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
 	d.log.WithFields(logrus.Fields{
+		"request": req,
 		"method": "node_publish_volume",
 	}).Info("node publish volume called")
 	return nil, nil
@@ -90,6 +95,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 // NodeUnpublishVolume unmounts the volume from the target path
 func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
 	d.log.WithFields(logrus.Fields{
+		"request": req,
 		"method": "node_unpublish_volume",
 	}).Info("node unpublish volume called")
 	return nil, nil

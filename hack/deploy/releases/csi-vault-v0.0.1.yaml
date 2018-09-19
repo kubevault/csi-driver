@@ -27,6 +27,8 @@ metadata:
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: com.vault.csi.vaultdbs
+parameters:
+  fsType: tmpfs
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -87,11 +89,14 @@ spec:
       port: 12345
 ---
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: csi-attacher-vaultplugin
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      app: csi-attacher-vaultplugin
   serviceName: "csi-attacher-vaultplugin"
   replicas: 1
   template:
@@ -135,7 +140,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: vault
-                  key: token
+                  key: toke n
           imagePullPolicy: "Always"
           volumeMounts:
             - name: socket-dir
@@ -203,11 +208,14 @@ spec:
       port: 12345
 ---
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: csi-provisioner-vaultplugin
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      app: csi-provisioner-vaultplugin
   serviceName: "csi-provisioner-vaultplugin"
   replicas: 1
   template:
@@ -305,7 +313,7 @@ roleRef:
 
 ---
 kind: DaemonSet
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 metadata:
   name: csi-vaultplugin
   namespace: kube-system

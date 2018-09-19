@@ -7,3 +7,4 @@ metadata:
 provisioner: com.vault.csi.vaultdbs
 parameters:
   fsType: tmpfs
+  policy: nginx
