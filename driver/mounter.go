@@ -9,6 +9,7 @@ import (
 
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/juju/errors"
+	"fmt"
 )
 
 // Mounter is responsible for formatting and mounting volumes
@@ -17,7 +18,7 @@ type Mounter interface {
 	Format(source, fsType string) error
 
 	// Mount mounts source to target with the given fstype and options.
-	Mount(source, target, fsType string, options map[string]string) error
+	Mount(target, fsType string, options map[string]string) error
 
 	// Unmount unmounts the given target
 	Unmount(target string) error
@@ -33,7 +34,10 @@ type Mounter interface {
 	IsMounted(source, target string) (bool, error)
 }
 
-type mounter struct{}
+type mounter struct{
+	vaultUrl string
+	token string
+}
 
 func (m *mounter) Format(source, fsType string) error {
 
@@ -41,8 +45,8 @@ func (m *mounter) Format(source, fsType string) error {
 }
 
 //https://medium.com/@gmaliar/dynamic-secrets-on-kubernetes-pods-using-vault-35d9094d169
-func (m *mounter) Mount(source, target, fsType string, opts map[string]string) error {
-	stringPolicies, ok := opts["vault/policies"]
+func (m *mounter) Mount(target, fsType string, opts map[string]string) error {
+	stringPolicies, ok := opts["policy"]
 	if !ok {
 		return errors.Errorf("Missing policies")
 	}
@@ -52,12 +56,14 @@ func (m *mounter) Mount(source, target, fsType string, opts map[string]string) e
 	}
 
 	poduidreg := regexp.MustCompile("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{8}")
-	poduid := poduidreg.FindString(source)
+	poduid := poduidreg.FindString(target)
+	fmt.Println(poduid)
 	if poduid == "" {
-		return errors.Errorf("Couldn't extract poduid from path %v", source)
+		//poduid = "poduid123456"
+		return errors.Errorf("Couldn't extract poduid from path %v", target)
 	}
 
-	client, err := NewVaultClient("", &vaultapi.TLSConfig{Insecure: true})
+	client, err := NewVaultClient(m.vaultUrl, m.token, &vaultapi.TLSConfig{Insecure: true})
 	if err != nil {
 		return err
 	}
@@ -73,7 +79,7 @@ func (m *mounter) Mount(source, target, fsType string, opts map[string]string) e
 }
 
 func (m *mounter) Unmount(target string) error {
-	return nil
+	return cleanup(target)
 }
 
 func (m *mounter) IsFormatted(source string) (bool, error) {
@@ -108,4 +114,13 @@ func writeTokenData(token string, metadata []byte, dir, tokenfilename string) er
 	}
 	err = os.Chmod(fulljsonpath, 0644)
 	return err
+}
+
+func cleanup(dir string) error {
+	// Good Guy RemoveAll does nothing is path doesn't exist and returns nil error :)
+	err := os.RemoveAll(dir)
+	if err != nil {
+		return errors.Errorf("Failed to remove the directory %v: %v", dir, err)
+	}
+	return nil
 }

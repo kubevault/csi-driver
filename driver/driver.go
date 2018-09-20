@@ -39,11 +39,11 @@ type Driver struct {
 
 func NewDriver(ep, url, node, token string) (*Driver, error) {
 	// Create the client
-	client, err := NewVaultClient(url, &vaultapi.TLSConfig{Insecure: false})
+	client, err := NewVaultClient(url, token, &vaultapi.TLSConfig{Insecure: false})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vault client: %s", err)
 	}
-	client.vc.SetToken(token)
+	//client.vc.SetToken(token)
 
 	// The generator token is periodic so we can set the increment to 0
 	// and it will default to the period.
@@ -54,7 +54,7 @@ func NewDriver(ep, url, node, token string) (*Driver, error) {
 		endpoint:    ep,
 		url:         url,
 		vaultClient: client.vc,
-		mounter:     &mounter{},
+		mounter:     &mounter{url, token},
 		nodeId:      node,
 		log: logrus.New().WithFields(logrus.Fields{
 			"node-id": node,

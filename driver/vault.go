@@ -12,17 +12,19 @@ type Client struct {
 	role string
 }
 
-const defaultRoleName = "applications"
+const defaultRoleName = "nginx"
 
-func NewVaultClient(url string, tlsConfig *vaultapi.TLSConfig) (*Client, error) {
+func NewVaultClient(url, token string, tlsConfig *vaultapi.TLSConfig) (*Client, error) {
 	cfg := vaultapi.DefaultConfig()
 	if url != "" {
 		cfg.Address = url
 	}
 	cfg.ConfigureTLS(tlsConfig)
 	vc, err := vaultapi.NewClient(cfg)
+	vc.SetToken(token)
+
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	return &Client{vc: vc, role: defaultRoleName}, nil
 }
@@ -74,7 +76,7 @@ func (c *Client) getTokenForPolicy(policies []string, poduid string) (*vaultapi.
 		Metadata: metadata,
 	}
 
-	secret, err := c.vc.Auth().Token().CreateWithRole(&req, c.role)
+	secret, err := c.vc.Auth().Token().Create(&req)
 	if err != nil {
 		return nil, errors.Errorf("Couldn't create scoped token for policies %v : %v", req.Policies, err)
 	}

@@ -26,7 +26,6 @@ const (
 	RetryInterval         = 5 * time.Second
 	RetryTimeout          = 10 * time.Minute
 
-	createdByDO = "Created by Linode CSI driver"
 )
 
 // CreateVolume creates a new volume from the given request. The function is
@@ -45,6 +44,7 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
 			Id: req.Name,
+			Attributes: req.Parameters,
 			//	CapacityBytes: *req.CapacityRange,
 		},
 	}
@@ -98,6 +98,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 		"volume_id":              req.VolumeId,
 		"volume_capabilities":    req.VolumeCapabilities,
 		"supported_capabilities": vcaps,
+		"vollume_attributes" : req.VolumeAttributes,
 		"method":                 "validate_volume_capabilities",
 	})
 	ll.Info("validate volume capabilities called")
@@ -174,7 +175,7 @@ func (d *Driver) ControllerGetCapabilities(ctx context.Context, req *csi.Control
 	var caps []*csi.ControllerServiceCapability
 	for _, cap := range []csi.ControllerServiceCapability_RPC_Type{
 		csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME,
-		//csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
+		csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
 	} {
 		caps = append(caps, newCap(cap))
 	}

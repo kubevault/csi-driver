@@ -6,6 +6,8 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -21,12 +23,13 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"request": req,
 		"method": "node_stage_volume",
 	}).Info("node stage volume called")
-	mnt := req.VolumeCapability.GetMount()
-	options := mnt.MountFlags
+	//mnt := req.VolumeCapability.GetMount()
+	//options := mnt.MountFlags
+	options := req.VolumeAttributes
 
 	fsType := "tmpfs"
-	if mnt.FsType != "" {
-		fsType = mnt.FsType
+	if v, ok := options["fsType"]; ok {
+		fsType = v
 	}
 
 	ll := d.log.WithFields(logrus.Fields{
@@ -39,35 +42,9 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"method":        "node_stage_volume",
 	})
 
-
-		formatted, err := d.mounter.IsFormatted(source)
-		if err != nil {
-			return nil, err
-		}
-
-		if !formatted {
-			ll.Info("formatting the volume for staging")
-			if err := d.mounter.Format(source, fsType); err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-		} else {
-			ll.Info("source device is already formatted")
-		}
-
-		ll.Info("mounting the volume for staging")
-
-		mounted, err := d.mounter.IsMounted(source, target)
-		if err != nil {
-			return nil, err
-		}
-
-		if !mounted {
-			if err := d.mounter.Mount(source, target, fsType, options...); err != nil {
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-		} else {
-			ll.Info("source device is already mounted to the target path")
-		}
+	if err := d.mounter.Mount(req.StagingTargetPath, fsType, options); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	ll.Info("formatting and mounting stage volume is finished")
 	return &csi.NodeStageVolumeResponse{}, nil
@@ -80,7 +57,7 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		"request": req,
 		"method": "node_unstage_volume",
 	}).Info("node unstage volume called")
-	return nil, nil
+	return &csi.NodeUnstageVolumeResponse{}, nil
 }
 
 // NodePublishVolume mounts the volume mounted to the staging path to the target path
@@ -89,7 +66,10 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		"request": req,
 		"method": "node_publish_volume",
 	}).Info("node publish volume called")
-	return nil, nil
+	if err := d.mounter.Unmount(req.TargetPath); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &csi.NodePublishVolumeResponse{}, nil
 }
 
 // NodeUnpublishVolume unmounts the volume from the target path
@@ -98,7 +78,7 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 		"request": req,
 		"method": "node_unpublish_volume",
 	}).Info("node unpublish volume called")
-	return nil, nil
+	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
 // NodeGetId returns the unique id of the node. This should eventually return
