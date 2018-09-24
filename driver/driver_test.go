@@ -1,29 +1,87 @@
 package driver
 
-import
-(
+import (
 	"testing"
-	//core "k8s.io/api/core/v1"
-	"fmt"
-	vaultapi "github.com/hashicorp/vault/api"
-	//"k8s.io/kubernetes/pkg/apis/core"
+	"github.com/kubernetes-csi/csi-test/pkg/sanity"
+
+	"math/rand"
+	"time"
+	"os"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
 )
 
-func Test_PVC(t *testing.T) {
-	//pvc := core.PersistentVolumeClaim{
-
-	//}
-	//fmt.Println(pvc)
-	//pod := core.Pod{}
-	//fmt.Println(pod)
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
-func Test_Vault(t *testing.T) {
-	vc, err:= NewVaultClient("", "root",  &vaultapi.TLSConfig{Insecure: false})
-	fmt.Println(err, vc.vc.Token())
 
-	//vc.vc.Auth().Token().Lookup()
+func TestDriverSuite(t *testing.T) {
+	socket := "/tmp/csi.sock"
+	endpoint := "unix://" + socket
+	if err := os.Remove(socket); err != nil && !os.IsNotExist(err) {
+		t.Fatalf("failed to remove unix domain socket file %s, error: %s", socket, err)
+	}
 
-	sec, err := vc.getTokenForPolicy([]string{"nginx"}, "localtest")
-	fmt.Println(sec, err)
+
+
+	driver := &Driver{
+		endpoint:     endpoint,
+		nodeId:       "1234567879",
+		vaultClient:  nil,
+		mounter:      &fakeMounter{},
+		log:          logrus.New().WithField("test_enabed", true),
+	}
+	defer driver.Stop()
+
+	go driver.Run()
+
+	mntDir, err := ioutil.TempDir("", "mnt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(mntDir)
+
+	mntStageDir, err := ioutil.TempDir("", "mnt-stage")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(mntStageDir)
+
+	cfg := &sanity.Config{
+		StagingPath: mntStageDir,
+		TargetPath:  mntDir,
+		Address:     endpoint,
+	}
+
+	sanity.Test(t, cfg)
+}
+
+type fakeMounter struct{}
+
+func (f *fakeMounter) Format(source string, fsType string) error {
+	return nil
+}
+
+func (f *fakeMounter) VaultMount(target string, fsType string, options map[string]string) error  {
+	return nil
+}
+
+func (f *fakeMounter) Mount(source string, target string, fsType string, options ...string) error {
+	return nil
+}
+
+func (f *fakeMounter) VaultUnmount(target string) error {
+	return nil
+}
+
+func (f *fakeMounter) Unmount(target string) error {
+	return nil
+}
+
+func (f *fakeMounter) IsFormatted(source string) (bool, error) {
+	return true, nil
+}
+func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
+	return true, nil
 }

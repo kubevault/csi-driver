@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"fmt"
 )
 
 var (
@@ -42,7 +43,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"method":        "node_stage_volume",
 	})
 
-	if err := d.mounter.Mount(req.StagingTargetPath, fsType, options); err != nil {
+	if err := d.mounter.VaultMount(req.StagingTargetPath, fsType, options); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -57,6 +58,9 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		"request": req,
 		"method": "node_unstage_volume",
 	}).Info("node unstage volume called")
+	err:= d.mounter.VaultUnmount(req.StagingTargetPath)
+	fmt.Println(err)
+
 	return &csi.NodeUnstageVolumeResponse{}, nil
 }
 
@@ -66,9 +70,57 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		"request": req,
 		"method": "node_publish_volume",
 	}).Info("node publish volume called")
-	if err := d.mounter.Unmount(req.TargetPath); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	if req.StagingTargetPath == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Staging Target Path must be provided")
 	}
+
+	if req.TargetPath == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Target Path must be provided")
+	}
+
+	source := req.StagingTargetPath
+	target := req.TargetPath
+
+	mnt := req.VolumeCapability.GetMount()
+	options := mnt.MountFlags
+
+	// TODO(arslan): linode we need bind here? check it out
+	// Perform a bind mount to the full path to allow duplicate mounts of the same PD.
+	options = append(options, "bind")
+	if req.Readonly {
+		options = append(options, "ro")
+	}
+
+	fsType := "tmpfs"
+	if mnt.FsType != "" {
+		fsType = mnt.FsType
+	}
+
+	ll := d.log.WithFields(logrus.Fields{
+		"volume_id":     req.VolumeId,
+		"source":        source,
+		"target":        target,
+		"fsType":        fsType,
+		"mount_options": options,
+		"method":        "node_publish_volume",
+	})
+
+
+	mounted, err := d.mounter.IsMounted(source, target)
+	if err != nil {
+		return nil, err
+	}
+
+	if !mounted {
+		ll.Info("mounting the volume")
+		if err := d.mounter.Mount(source, target, fsType, options...); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	} else {
+		ll.Info("volume is already mounedt")
+	}
+
+	ll.Info("bind mounting the volume is finished")
 	return &csi.NodePublishVolumeResponse{}, nil
 }
 
@@ -78,6 +130,33 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 		"request": req,
 		"method": "node_unpublish_volume",
 	}).Info("node unpublish volume called")
+	if req.TargetPath == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeUnpublishVolume Target Path must be provided")
+	}
+
+	ll := d.log.WithFields(logrus.Fields{
+		"volume_id":   req.VolumeId,
+		"target_path": req.TargetPath,
+		"method":      "node_unpublish_volume",
+	})
+	ll.Info("node unpublish volume called")
+
+	mounted, err := d.mounter.IsMounted("", req.TargetPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if mounted {
+		ll.Info("unmounting the target path")
+		err := d.mounter.Unmount(req.TargetPath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		ll.Info("target path is already unmounted")
+	}
+
+	ll.Info("unmounting volume is finished")
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
