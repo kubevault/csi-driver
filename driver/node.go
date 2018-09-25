@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"fmt"
+	"strings"
+	"github.com/kubevault/csi-driver/vault"
 )
 
 var (
@@ -42,6 +44,25 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"mount_options": options,
 		"method":        "node_stage_volume",
 	})
+
+	stringPolicies, ok := options["policy"]
+	if !ok {
+		return nil, errors.Errorf("Missing policies")
+	}
+	policies := strings.Split(strings.Replace(stringPolicies, " ", "", -1), ",")
+	if len(policies) == 0 {
+		return nil, errors.Errorf("Empty policies")
+	}
+	token, err := d.vaultClient.GetPolicyToken(policies, true)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// login with policy token
+
+	client, err := vault.NewVaultClient(d.url, token, nil)
+
+	fmt.Println(client)
 
 	if err := d.mounter.VaultMount(req.StagingTargetPath, fsType, options); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -197,6 +218,6 @@ func (d *Driver) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (
 	d.log.WithField("method", "node_get_info").Info("node get info called")
 	return &csi.NodeGetInfoResponse{
 		NodeId:            d.nodeId,
-		MaxVolumesPerNode: 5,
+		MaxVolumesPerNode: 10,
 	}, nil
 }

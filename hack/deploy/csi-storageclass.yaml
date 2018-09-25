@@ -1,10 +1,12 @@
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: vault-block-storage
+  name: vault-kv-storage
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: com.vault.csi.vaultdbs
 parameters:
   fsType: tmpfs
   policy: nginx
+  secretEngine: KV1
+  secretName: nginx-config

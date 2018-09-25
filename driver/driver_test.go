@@ -9,6 +9,9 @@ import (
 	"os"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"github.com/kubevault/csi-driver/vault"
+	"fmt"
+	vaultapi "github.com/hashicorp/vault/api"
 )
 
 func init() {
@@ -84,4 +87,21 @@ func (f *fakeMounter) IsFormatted(source string) (bool, error) {
 }
 func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 	return true, nil
+}
+
+func TestKVPolicy(t *testing.T) {
+	client, err := vault.NewVaultClient("http://159.65.253.198:30001", "root", nil)
+	fmt.Println(client, err)
+	token, err := client.GetPolicyToken([]string{"nginx"}, true)
+	fmt.Println(err)
+	fmt.Println(token)
+
+	c, err := vault.NewVaultClient("http://159.65.253.198:30001", "root", nil)
+
+	path := fmt.Sprintf("/v1/kv/%s", "my-secret")
+	req := c.Vc.NewRequest("GET", path)
+	resp, err := c.Vc.RawRequest(req)
+	fmt.Println(err)
+	secret, err := vaultapi.ParseSecret(resp.Body)
+	fmt.Println(secret.Data["my-value"])
 }

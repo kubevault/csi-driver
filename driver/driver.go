@@ -13,6 +13,7 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"github.com/kubevault/csi-driver/vault"
 )
 
 const (
@@ -32,14 +33,14 @@ type Driver struct {
 	url      string
 
 	srv         *grpc.Server
-	vaultClient *vaultapi.Client
+	vaultClient *vault.Client
 	mounter     Mounter
 	log         *logrus.Entry
 }
 
 func NewDriver(ep, url, node, token string) (*Driver, error) {
 	// Create the client
-	client, err := NewVaultClient(url, token, &vaultapi.TLSConfig{Insecure: false})
+	client, err := vault.NewVaultClient(url, token, &vaultapi.TLSConfig{Insecure: false})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vault client: %s", err)
 	}
@@ -53,7 +54,7 @@ func NewDriver(ep, url, node, token string) (*Driver, error) {
 	return &Driver{
 		endpoint:    ep,
 		url:         url,
-		vaultClient: client.vc,
+		vaultClient: client,
 		mounter:     &mounter{url, token},
 		nodeId:      node,
 		log: logrus.New().WithFields(logrus.Fields{
@@ -109,7 +110,6 @@ func (d *Driver) Run() error {
 
 	d.log.WithField("addr", addr).Info("server started")
 	return d.srv.Serve(listener)
-	return nil
 }
 
 // Stop stops the plugin
