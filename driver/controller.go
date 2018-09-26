@@ -25,7 +25,6 @@ const (
 	defaultVolumeSizeInGB = 10 * GB
 	RetryInterval         = 5 * time.Second
 	RetryTimeout          = 10 * time.Minute
-
 )
 
 // CreateVolume creates a new volume from the given request. The function is
@@ -43,7 +42,7 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 	}
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
-			Id: req.Name,
+			Id:         req.Name,
 			Attributes: req.Parameters,
 			//	CapacityBytes: *req.CapacityRange,
 		},
@@ -83,7 +82,7 @@ func (d *Driver) ControllerUnpublishVolume(ctx context.Context, req *csi.Control
 func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {
 	d.log.WithFields(logrus.Fields{
 		"request": req,
-		"method": "validate_volume_capabilities",
+		"method":  "validate_volume_capabilities",
 	}).Info("validate volume capabilities called")
 	var vcaps []*csi.VolumeCapability_AccessMode
 	for _, mode := range []csi.VolumeCapability_AccessMode_Mode{
@@ -98,7 +97,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 		"volume_id":              req.VolumeId,
 		"volume_capabilities":    req.VolumeCapabilities,
 		"supported_capabilities": vcaps,
-		"vollume_attributes" : req.VolumeAttributes,
+		"vollume_attributes":     req.VolumeAttributes,
 		"method":                 "validate_volume_capabilities",
 	})
 	ll.Info("validate volume capabilities called")
@@ -136,7 +135,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 func (d *Driver) ListVolumes(ctx context.Context, req *csi.ListVolumesRequest) (*csi.ListVolumesResponse, error) {
 	d.log.WithFields(logrus.Fields{
 		"request": req,
-		"method": "list_volume",
+		"method":  "list_volume",
 	}).Info("list volume called")
 	var entries []*csi.ListVolumesResponse_Entry
 	entries = append(entries, &csi.ListVolumesResponse_Entry{
@@ -145,9 +144,7 @@ func (d *Driver) ListVolumes(ctx context.Context, req *csi.ListVolumesRequest) (
 			CapacityBytes: int64(1 * MB),
 		},
 	})
-	return &csi.ListVolumesResponse{
-
-	}, nil
+	return &csi.ListVolumesResponse{}, nil
 }
 
 // GetCapacity returns the capacity of the storage pool

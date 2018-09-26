@@ -8,7 +8,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: vault-block-storage
+  storageClassName: vault-kv-storage
   volumeMode: DirectoryOrCreate
 
 

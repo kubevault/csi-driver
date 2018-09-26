@@ -24,18 +24,18 @@ var (
 title: Reference
 description: csi-vault CLI Reference
 menu:
-  product_pharmer_{{ .Version }}:
+  product_csi_vault_{{ .Version }}:
     identifier: reference
     name: Reference
     weight: 1000
-menu_name: product_pharmer_{{ .Version }}
+menu_name: product_csi_vault_{{ .Version }}
 ---
 `))
 
 	_ = template.Must(tplFrontMatter.New("cmd").Parse(`---
 title: {{ .Name }}
 menu:
-  product_pharmer_{{ .Version }}:
+  product_csi_vault_{{ .Version }}:
     identifier: {{ .ID }}
     name: {{ .Name }}
     parent: reference
@@ -43,7 +43,7 @@ menu:
     weight: 0
 {{ end }}
 product_name: pharmer
-menu_name: product_pharmer_{{ .Version }}
+menu_name: product_csi_vault_{{ .Version }}
 section_menu_id: reference
 {{- if .RootCmd }}
 aliases:

@@ -3,14 +3,16 @@ package driver
 import (
 	"context"
 
+	"fmt"
+	"strings"
+
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	"github.com/kubevault/csi-driver/vault"
+	"github.com/kubevault/csi-driver/vault/engines"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"fmt"
-	"strings"
-	"github.com/kubevault/csi-driver/vault"
 )
 
 var (
@@ -22,13 +24,32 @@ var (
 // volume to a staging path. Once mounted, NodePublishVolume will make sure to
 // mount it to the appropriate path
 func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeStageVolume Volume ID must be provided")
+	}
+
+	if req.StagingTargetPath == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeStageVolume Staging Target Path must be provided")
+	}
+
+	if req.VolumeCapability == nil {
+		return nil, status.Error(codes.InvalidArgument, "NodeStageVolume Volume Capability must be provided")
+	}
+
 	d.log.WithFields(logrus.Fields{
 		"request": req,
-		"method": "node_stage_volume",
+		"method":  "node_stage_volume",
 	}).Info("node stage volume called")
 	//mnt := req.VolumeCapability.GetMount()
 	//options := mnt.MountFlags
 	options := req.VolumeAttributes
+
+	if _, ok := options["secretEngine"]; !ok {
+		return nil, errors.Errorf("Missing engine name (secretEngine)")
+	}
+	if _, ok := options["secretName"]; !ok {
+		return nil, errors.Errorf("Misssing secret name (secretName)")
+	}
 
 	fsType := "tmpfs"
 	if v, ok := options["fsType"]; ok {
@@ -44,6 +65,20 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"mount_options": options,
 		"method":        "node_stage_volume",
 	})
+
+	formatted, err := d.mounter.IsFormatted(req.StagingTargetPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !formatted {
+		ll.Info("formatting the volume for staging")
+		if err := d.mounter.Format(req.StagingTargetPath, fsType); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	} else {
+		ll.Info("source device is already formatted")
+	}
 
 	stringPolicies, ok := options["policy"]
 	if !ok {
@@ -62,11 +97,14 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 
 	client, err := vault.NewVaultClient(d.url, token, nil)
 
-	fmt.Println(client)
-
-	if err := d.mounter.VaultMount(req.StagingTargetPath, fsType, options); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	kv := engines.NewKVEngine(client.Vc, options["secretName"], req.StagingTargetPath)
+	if err = kv.ReadData(); err != nil {
+		return nil, err
 	}
+
+	/*if err := d.mounter.VaultMount(req.StagingTargetPath, fsType, options); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}*/
 
 	ll.Info("formatting and mounting stage volume is finished")
 	return &csi.NodeStageVolumeResponse{}, nil
@@ -75,11 +113,18 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 
 // NodeUnstageVolume unstages the volume from the staging path
 func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeUnstageVolume Volume ID must be provided")
+	}
+
+	if req.StagingTargetPath == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeUnstageVolume Staging Target Path must be provided")
+	}
 	d.log.WithFields(logrus.Fields{
 		"request": req,
-		"method": "node_unstage_volume",
+		"method":  "node_unstage_volume",
 	}).Info("node unstage volume called")
-	err:= d.mounter.VaultUnmount(req.StagingTargetPath)
+	err := d.mounter.VaultUnmount(req.StagingTargetPath)
 	fmt.Println(err)
 
 	return &csi.NodeUnstageVolumeResponse{}, nil
@@ -89,7 +134,7 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
 	d.log.WithFields(logrus.Fields{
 		"request": req,
-		"method": "node_publish_volume",
+		"method":  "node_publish_volume",
 	}).Info("node publish volume called")
 	if req.StagingTargetPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Staging Target Path must be provided")
@@ -126,7 +171,6 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		"method":        "node_publish_volume",
 	})
 
-
 	mounted, err := d.mounter.IsMounted(source, target)
 	if err != nil {
 		return nil, err
@@ -149,7 +193,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
 	d.log.WithFields(logrus.Fields{
 		"request": req,
-		"method": "node_unpublish_volume",
+		"method":  "node_unpublish_volume",
 	}).Info("node unpublish volume called")
 	if req.TargetPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "NodeUnpublishVolume Target Path must be provided")

@@ -47,6 +47,7 @@ func (c *Client) GetPolicyToken(policies []string, unwrap bool) (string, error) 
 	req := vaultapi.TokenCreateRequest{
 		Policies: policies,
 		Metadata: metadata,
+		Period: "24h",
 	}
 
 	secret, err := c.Vc.Auth().Token().Create(&req)
@@ -67,6 +68,10 @@ func (c *Client) GetPolicyToken(policies []string, unwrap bool) (string, error) 
 	return secret.WrapInfo.Token, nil
 }
 
+
+func GetEngine(name string) {
+
+}
 
 func writeData(key, value, dir string) error {
 	err := os.MkdirAll(dir, 0755)

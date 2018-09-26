@@ -19,17 +19,17 @@
 # example usage: kubectl create -f <this_file>
 
 ---
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: vault-block-storage
-  namespace: kube-system
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-provisioner: com.vault.csi.vaultdbs
-parameters:
-  fsType: tmpfs
-  policy: nginx
+#kind: StorageClass
+#apiVersion: storage.k8s.io/v1
+#metadata:
+#  name: vault-block-storage
+#  namespace: kube-system
+#  annotations:
+#    storageclass.kubernetes.io/is-default-class: "true"
+#provisioner: com.vault.csi.vaultdbs
+#parameters:
+#  fsType: tmpfs
+#  policy: nginx
 ---
 apiVersion: v1
 kind: ServiceAccount

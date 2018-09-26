@@ -1,16 +1,13 @@
 package driver
 
 import (
-	"io/ioutil"
 	"os"
-	"path"
-	"regexp"
 	"strings"
 
-	vaultapi "github.com/hashicorp/vault/api"
-	"github.com/juju/errors"
 	"fmt"
 	"os/exec"
+
+	"github.com/juju/errors"
 )
 
 // Mounter is responsible for formatting and mounting volumes
@@ -18,7 +15,7 @@ type Mounter interface {
 	// Format formats the source with the given filesystem type
 	Format(source, fsType string) error
 
-	VaultMount(target, fsType string, options map[string]string ) error
+	//VaultMount(target, fsType string, options map[string]string ) error
 	// Mount mounts source to target with the given fstype and options.
 	Mount(source, target, fsType string, options ...string) error
 
@@ -37,52 +34,48 @@ type Mounter interface {
 	IsMounted(source, target string) (bool, error)
 }
 
-type mounter struct{
+type mounter struct {
 	vaultUrl string
-	token string
+	token    string
 }
 
 func (m *mounter) Format(source, fsType string) error {
+	mkfsCmd := fmt.Sprintf("mkfs.%s", fsType)
 
+	_, err := exec.LookPath(mkfsCmd)
+	if err != nil {
+		if err == exec.ErrNotFound {
+			return fmt.Errorf("%q executable not found in $PATH", mkfsCmd)
+		}
+		return err
+	}
+
+	mkfsArgs := []string{}
+
+	if fsType == "" {
+		return errors.New("fs type is not specified for formatting the volume")
+	}
+
+	if source == "" {
+		return errors.New("source is not specified for formatting the volume")
+	}
+
+	mkfsArgs = append(mkfsArgs, source)
+	if fsType == "ext4" || fsType == "ext3" {
+		mkfsArgs = []string{"-F", source}
+	}
+
+	out, err := exec.Command(mkfsCmd, mkfsArgs...).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("formatting disk failed: %v cmd: '%s %s' output: %q",
+			err, mkfsCmd, strings.Join(mkfsArgs, " "), string(out))
+	}
 	return nil
 }
 
 //https://medium.com/@gmaliar/dynamic-secrets-on-kubernetes-pods-using-vault-35d9094d169
 
-func (m *mounter) VaultMount(target, fsType string, opts map[string]string) error {
-	stringPolicies, ok := opts["policy"]
-	if !ok {
-		return errors.Errorf("Missing policies")
-	}
-	policies := strings.Split(strings.Replace(stringPolicies, " ", "", -1), ",")
-	if len(policies) == 0 {
-		return errors.Errorf("Empty policies")
-	}
-
-	poduidreg := regexp.MustCompile("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{8}")
-	poduid := poduidreg.FindString(target)
-	fmt.Println(poduid)
-	if poduid == "" {
-		//poduid = "poduid123456"
-		return errors.Errorf("Couldn't extract poduid from path %v", target)
-	}
-
-	client, err := NewVaultClient(m.vaultUrl, m.token, &vaultapi.TLSConfig{Insecure: true})
-	if err != nil {
-		return err
-	}
-	token, metadata, err := client.GetTokenData(policies, poduid, true)
-	if err != nil {
-		return err
-	}
-	err = writeTokenData(token, metadata, target, "vault-token")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *mounter) Mount(source, target, fsType string, opts ...string) error  {
+func (m *mounter) Mount(source, target, fsType string, opts ...string) error {
 	mountCmd := "mount"
 	mountArgs := []string{}
 
@@ -121,7 +114,6 @@ func (m *mounter) Mount(source, target, fsType string, opts ...string) error  {
 
 	return nil
 }
-
 
 func (m *mounter) VaultUnmount(target string) error {
 	return cleanup(target)
@@ -200,32 +192,6 @@ func (m *mounter) IsMounted(source, target string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func writeTokenData(token string, metadata []byte, dir, tokenfilename string) error {
-	err := os.MkdirAll(dir, 0755)
-	if err != nil {
-		return errors.Errorf("Failed to mkdir %v: %v", dir, err)
-	}
-
-	tokenpath := path.Join(dir, tokenfilename)
-	fulljsonpath := path.Join(dir, strings.Join([]string{tokenfilename, ".json"}, ""))
-
-	err = ioutil.WriteFile(tokenpath, []byte(strings.TrimSpace(token)), 0644)
-	if err != nil {
-		return err
-	}
-	err = os.Chmod(tokenpath, 0644)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(fulljsonpath, metadata, 0644)
-	if err != nil {
-		return err
-	}
-	err = os.Chmod(fulljsonpath, 0644)
-	return err
 }
 
 func cleanup(dir string) error {

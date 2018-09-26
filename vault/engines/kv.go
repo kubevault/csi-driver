@@ -12,9 +12,14 @@ import (
 type kv struct{
 	client *vaultapi.Client
 	secretName string
+	dir string
 }
 
 //var _ Vault = kv{}
+
+func NewKVEngine(client *vaultapi.Client, secretName, dir string) *kv   {
+	return &kv{client:client, secretName:secretName, dir:dir}
+}
 
 func (r *kv) ReadData() error  {
 	path := fmt.Sprintf("/v1/kv/%s", r.secretName)
@@ -28,7 +33,9 @@ func (r *kv) ReadData() error  {
 		return err
 	}
 	for key, val := range secret.Data {
-		writeData(key, val.(string), "")
+		if err := writeData(key, val.(string), r.dir); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -11,9 +11,9 @@ import (
 
 	csi "github.com/container-storage-interface/spec/lib/go/csi/v0"
 	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"github.com/kubevault/csi-driver/vault"
 )
 
 const (
