@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"os"
+
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/kubevault/csi-driver/vault/engines"
@@ -52,9 +54,6 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	}
 
 	fsType := "tmpfs"
-	if v, ok := options["fsType"]; ok {
-		fsType = v
-	}
 
 	ll := d.log.WithFields(logrus.Fields{
 		"volume_id": req.VolumeId,
@@ -79,26 +78,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	} else {
 		ll.Info("source device is already formatted")
 	}
-
-	stringPolicies, ok := options["policy"]
-	if !ok {
-		return nil, errors.Errorf("Missing policies")
-	}
-	policies := strings.Split(strings.Replace(stringPolicies, " ", "", -1), ",")
-	if len(policies) == 0 {
-		return nil, errors.Errorf("Empty policies")
-	}
-	token, err := d.vaultClient.GetPolicyToken(policies, true)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// login with policy token
-
-	client, err := vault.NewVaultClient(d.url, token, nil)
-
-	kv := engines.NewKVEngine(client.Vc, options["secretName"], req.StagingTargetPath)
-	if err = kv.ReadData(); err != nil {
+	if err := os.MkdirAll(req.StagingTargetPath, 0755); err != nil {
 		return nil, err
 	}
 
@@ -146,43 +126,66 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	source := req.StagingTargetPath
 	target := req.TargetPath
-
-	mnt := req.VolumeCapability.GetMount()
-	options := mnt.MountFlags
-
-	// TODO(arslan): linode we need bind here? check it out
-	// Perform a bind mount to the full path to allow duplicate mounts of the same PD.
-	options = append(options, "bind")
-	if req.Readonly {
-		options = append(options, "ro")
-	}
-
 	fsType := "tmpfs"
-	if mnt.FsType != "" {
-		fsType = mnt.FsType
-	}
+	//mnt := req.VolumeCapability.GetMount()
 
 	ll := d.log.WithFields(logrus.Fields{
-		"volume_id":     req.VolumeId,
-		"source":        source,
-		"target":        target,
-		"fsType":        fsType,
-		"mount_options": options,
-		"method":        "node_publish_volume",
+		"volume_id": req.VolumeId,
+		"source":    source,
+		"target":    target,
+		"method":    "node_publish_volume",
 	})
-
+	opts := []string{"rw"}
 	mounted, err := d.mounter.IsMounted(source, target)
 	if err != nil {
 		return nil, err
 	}
-
 	if !mounted {
 		ll.Info("mounting the volume")
-		if err := d.mounter.Mount(source, target, fsType, options...); err != nil {
+		if err := d.mounter.Mount("tmpfs", target, fsType, opts...); err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	} else {
 		ll.Info("volume is already mounedt")
+	}
+
+	options := req.VolumeAttributes
+
+	stringPolicies, ok := options["policy"]
+	if !ok {
+		return nil, errors.Errorf("Missing policies")
+	}
+	policies := strings.Split(strings.Replace(stringPolicies, " ", "", -1), ",")
+	if len(policies) == 0 {
+		return nil, errors.Errorf("Empty policies")
+	}
+	token, err := d.vaultClient.GetPolicyToken(policies, true)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// login with policy token
+
+	client, err := vault.NewVaultClient(d.url, token, nil)
+	var engine string
+	if engine, ok = options["secretEngine"]; !ok {
+		return nil, errors.Errorf("Empty engine name")
+	}
+
+	switch engine {
+	case "KV":
+		kv := engines.NewKVEngine(client.Vc, options["secretName"], target)
+		if err = kv.ReadData(); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, errors.Errorf("engine not supported")
+
+	}
+
+	ll.Info("mounting the volume with ro")
+	if err := d.mounter.Mount("tmpfs", target, fsType, []string{"remount,ro"}...); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	ll.Info("bind mounting the volume is finished")

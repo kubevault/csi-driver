@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"os"
-
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -37,9 +35,7 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 		"request": req,
 		"method":  "create_volume",
 	}).Info("create volume called")
-	if _, err := os.Stat(req.Name); os.IsNotExist(err) {
-		os.MkdirAll(req.Name, 0777)
-	}
+
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
 			Id:         req.Name,
@@ -88,7 +84,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 	for _, mode := range []csi.VolumeCapability_AccessMode_Mode{
 		// DO currently only support a single node to be attached to a single
 		// node in read/write mode
-		csi.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+		csi.VolumeCapability_AccessMode_SINGLE_NODE_READER_ONLY,
 	} {
 		vcaps = append(vcaps, &csi.VolumeCapability_AccessMode{Mode: mode})
 	}
@@ -137,13 +133,6 @@ func (d *Driver) ListVolumes(ctx context.Context, req *csi.ListVolumesRequest) (
 		"request": req,
 		"method":  "list_volume",
 	}).Info("list volume called")
-	var entries []*csi.ListVolumesResponse_Entry
-	entries = append(entries, &csi.ListVolumesResponse_Entry{
-		Volume: &csi.Volume{
-			Id:            "123456",
-			CapacityBytes: int64(1 * MB),
-		},
-	})
 	return &csi.ListVolumesResponse{}, nil
 }
 
@@ -172,7 +161,7 @@ func (d *Driver) ControllerGetCapabilities(ctx context.Context, req *csi.Control
 	var caps []*csi.ControllerServiceCapability
 	for _, cap := range []csi.ControllerServiceCapability_RPC_Type{
 		csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME,
-		csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
+		//csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
 	} {
 		caps = append(caps, newCap(cap))
 	}

@@ -40,36 +40,6 @@ type mounter struct {
 }
 
 func (m *mounter) Format(source, fsType string) error {
-	mkfsCmd := fmt.Sprintf("mkfs.%s", fsType)
-
-	_, err := exec.LookPath(mkfsCmd)
-	if err != nil {
-		if err == exec.ErrNotFound {
-			return fmt.Errorf("%q executable not found in $PATH", mkfsCmd)
-		}
-		return err
-	}
-
-	mkfsArgs := []string{}
-
-	if fsType == "" {
-		return errors.New("fs type is not specified for formatting the volume")
-	}
-
-	if source == "" {
-		return errors.New("source is not specified for formatting the volume")
-	}
-
-	mkfsArgs = append(mkfsArgs, source)
-	if fsType == "ext4" || fsType == "ext3" {
-		mkfsArgs = []string{"-F", source}
-	}
-
-	out, err := exec.Command(mkfsCmd, mkfsArgs...).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("formatting disk failed: %v cmd: '%s %s' output: %q",
-			err, mkfsCmd, strings.Join(mkfsArgs, " "), string(out))
-	}
 	return nil
 }
 
@@ -91,24 +61,26 @@ func (m *mounter) Mount(source, target, fsType string, opts ...string) error {
 		return errors.New("target is not specified for mounting the volume")
 	}
 
+	// create target, os.Mkdirall is noop if it exists
+
+	err := os.MkdirAll(target, 0755)
+	if err != nil {
+		return err
+	}
+
 	mountArgs = append(mountArgs, "-t", fsType)
 
 	if len(opts) > 0 {
 		mountArgs = append(mountArgs, "-o", strings.Join(opts, ","))
 	}
+	mountArgs = append(mountArgs, source, target)
 
-	mountArgs = append(mountArgs, source)
-	mountArgs = append(mountArgs, target)
+	//mountArgs = append(mountArgs, target)
 
-	// create target, os.Mkdirall is noop if it exists
-	err := os.MkdirAll(target, 0750)
-	if err != nil {
-		return err
-	}
-
+	fmt.Println(mountArgs)
 	out, err := exec.Command(mountCmd, mountArgs...).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("mounting failed: %v cmd: '%s %s' output: %q",
+		return errors.Errorf("mounting failed: %v cmd: '%s %s' output: %q",
 			err, mountCmd, strings.Join(mountArgs, " "), string(out))
 	}
 
@@ -127,7 +99,7 @@ func (m *mounter) Unmount(target string) error {
 
 	out, err := exec.Command("umount", target).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("unmounting failed: %v cmd: '%s %s' output: %q",
+		return errors.Errorf("unmounting failed: %v cmd: '%s %s' output: %q",
 			err, umountCmd, target, string(out))
 	}
 
@@ -143,14 +115,14 @@ func (m *mounter) IsFormatted(source string) (bool, error) {
 	_, err := exec.LookPath(blkidCmd)
 	if err != nil {
 		if err == exec.ErrNotFound {
-			return false, fmt.Errorf("%q executable not found in $PATH", blkidCmd)
+			return false, errors.Errorf("%q executable not found in $PATH", blkidCmd)
 		}
 		return false, err
 	}
 
 	out, err := exec.Command(blkidCmd, source).CombinedOutput()
 	if err != nil {
-		return false, fmt.Errorf("checking formatting failed: %v cmd: %q output: %q",
+		return false, errors.Errorf("checking formatting failed: %v cmd: %q output: %q",
 			err, blkidCmd, string(out))
 	}
 
@@ -166,7 +138,7 @@ func (m *mounter) IsMounted(source, target string) (bool, error) {
 	_, err := exec.LookPath(findmntCmd)
 	if err != nil {
 		if err == exec.ErrNotFound {
-			return false, fmt.Errorf("%q executable not found in $PATH", findmntCmd)
+			return false, errors.Errorf("%q executable not found in $PATH", findmntCmd)
 		}
 		return false, err
 	}
@@ -183,7 +155,7 @@ func (m *mounter) IsMounted(source, target string) (bool, error) {
 			return false, nil
 		}
 
-		return false, fmt.Errorf("checking mounted failed: %v cmd: %q output: %q",
+		return false, errors.Errorf("checking mounted failed: %v cmd: %q output: %q",
 			err, findmntCmd, string(out))
 	}
 

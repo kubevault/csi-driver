@@ -11,6 +11,9 @@ import (
 	"os"
 	"time"
 
+	"os/exec"
+	"path/filepath"
+
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
@@ -104,4 +107,22 @@ func TestKVPolicy(t *testing.T) {
 	fmt.Println(err)
 	secret, err := vaultapi.ParseSecret(resp.Body)
 	fmt.Println(secret.Data["my-value"])
+}
+
+func TestPath(t *testing.T) {
+	path := "/var/www"
+	fmt.Println(filepath.Join(path, "*"))
+
+	//fmt.Println(os.Link("/home/sanjid/test/a", "/home/sanjid/test/b"))
+	//return
+
+	args := []string{
+		"-s",
+		"/home/sanjid/test/a/*",
+		"/home/sanjid/test/b",
+		"-v",
+	}
+	fmt.Println(args)
+	err := exec.Command("ln", args...).Run()
+	fmt.Println(err)
 }

@@ -2,16 +2,16 @@ package driver
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 
-	csi "github.com/container-storage-interface/spec/lib/go/csi/v0"
+	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -42,14 +42,14 @@ func NewDriver(ep, url, node, token string) (*Driver, error) {
 	// Create the client
 	client, err := vault.NewVaultClient(url, token, &vaultapi.TLSConfig{Insecure: false})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create vault client: %s", err)
+		return nil, errors.Errorf("failed to create vault client: %s", err)
 	}
 	//client.vc.SetToken(token)
 
 	// The generator token is periodic so we can set the increment to 0
 	// and it will default to the period.
 	/*if _, err = client.vc.Auth().Token().RenewSelf(0); err != nil {
-		return nil, fmt.Errorf("Couldn't renew generator token: %v", err)
+		return nil, errors.Errorf("Couldn't renew generator token: %v", err)
 	}*/
 	return &Driver{
 		endpoint:    ep,
@@ -68,7 +68,7 @@ func NewDriver(ep, url, node, token string) (*Driver, error) {
 func (d *Driver) Run() error {
 	u, err := url.Parse(d.endpoint)
 	if err != nil {
-		return fmt.Errorf("unable to parse address: %q", err)
+		return errors.Errorf("unable to parse address: %q", err)
 	}
 
 	addr := path.Join(u.Host, filepath.FromSlash(u.Path))
@@ -78,20 +78,20 @@ func (d *Driver) Run() error {
 
 	// CSI plugins talk only over UNIX sockets currently
 	if u.Scheme != "unix" {
-		return fmt.Errorf("currently only unix domain sockets are supported, have: %s", u.Scheme)
+		return errors.Errorf("currently only unix domain sockets are supported, have: %s", u.Scheme)
 	} else {
 		// remove the socket if it's already there. This can happen if we
 		// deploy a new version and the socket was created from the old running
 		// plugin.
 		d.log.WithField("socket", addr).Info("removing socket")
 		if err := os.Remove(addr); err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("failed to remove unix domain socket file %s, error: %s", addr, err)
+			return errors.Errorf("failed to remove unix domain socket file %s, error: %s", addr, err)
 		}
 	}
 
 	listener, err := net.Listen(u.Scheme, addr)
 	if err != nil {
-		return fmt.Errorf("failed to listen: %v", err)
+		return errors.Errorf("failed to listen: %v", err)
 	}
 
 	// log response errors for better observability
