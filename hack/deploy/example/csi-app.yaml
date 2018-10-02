@@ -1,16 +1,20 @@
-kind: Pod
 apiVersion: v1
+kind: Pod
 metadata:
-  name: my-csi-app
+  name: mypod
 spec:
   containers:
-    - name: my-frontend
-      image: busybox
-      volumeMounts:
-      - mountPath: "/data"
-        name: my-vault-volume
-      command: [ "sleep", "1000000" ]
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: my-vault-volume
+      mountPath: "/etc/foo"
+      readOnly: true
   volumes:
     - name: my-vault-volume
       persistentVolumeClaim:
-        claimName: csi-pvc 
+        claimName: csi-pvc
+
+
+
+
