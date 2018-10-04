@@ -18,7 +18,7 @@ import (
 
 const (
 	driverName    = "com.vault.csi.vaultdbs"
-	vendorVersion = "0.0.1"
+	vendorVersion = "0.1.1"
 )
 
 // Driver implements the following CSI interfaces:
