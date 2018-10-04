@@ -19,14 +19,17 @@
 # example usage: kubectl create -f <this_file>
 
 ---
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: vault-block-storage
-  namespace: kube-system
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-provisioner: com.vault.csi.vaultbs
+#kind: StorageClass
+#apiVersion: storage.k8s.io/v1
+#metadata:
+#  name: vault-block-storage
+#  namespace: kube-system
+#  annotations:
+#    storageclass.kubernetes.io/is-default-class: "true"
+#provisioner: com.vault.csi.vaultdbs
+#parameters:
+#  fsType: tmpfs
+#  policy: nginx
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -87,11 +90,14 @@ spec:
       port: 12345
 ---
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: csi-attacher-vaultplugin
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      app: csi-attacher-vaultplugin
   serviceName: "csi-attacher-vaultplugin"
   replicas: 1
   template:
@@ -114,10 +120,9 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: vault-csi-plugin
-          image: kubevault/csi-driver:v0.1.1
+          image: pharmer/csi-vault:vault
           args :
             - init
-            - "--region=$(VAULT_REGION)"
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(VAULT_ACCESS_TOKEN)"
             - "--url=$(VAULT_API_URL)"
@@ -127,7 +132,7 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: VAULT_API_URL
-              value: https://api.vault.com/
+              value: http://159.65.253.198:30001
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -137,11 +142,6 @@ spec:
                 secretKeyRef:
                   name: vault
                   key: token
-            - name: VAULT_REGION
-              valueFrom:
-                secretKeyRef:
-                  name: vault
-                  key: region
           imagePullPolicy: "Always"
           volumeMounts:
             - name: socket-dir
@@ -209,11 +209,14 @@ spec:
       port: 12345
 ---
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: csi-provisioner-vaultplugin
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      app: csi-provisioner-vaultplugin
   serviceName: "csi-provisioner-vaultplugin"
   replicas: 1
   template:
@@ -226,7 +229,7 @@ spec:
         - name: csi-provisioner
           image: quay.io/k8scsi/csi-provisioner:v0.2.0
           args:
-            - "--provisioner=com.vault.csi.vaultbs"
+            - "--provisioner=com.vault.csi.vaultdbs"
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
           env:
@@ -237,10 +240,9 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: vault-csi-plugin
-          image: kubevault/csi-driver:v0.1.1
+          image: pharmer/csi-vault:vault
           args :
             - init
-            - "--region=$(VAULT_REGION)"
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(VAULT_ACCESS_TOKEN)"
             - "--url=$(VAULT_API_URL)"
@@ -250,7 +252,7 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: VAULT_API_URL
-              value: https://api.vault.com/
+              value: http://159.65.253.198:30001
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -260,11 +262,6 @@ spec:
                 secretKeyRef:
                   name: vault
                   key: token
-            - name: VAULT_REGION
-              valueFrom:
-                secretKeyRef:
-                  name: vault
-                  key: region
           imagePullPolicy: "Always"
           volumeMounts:
             - name: socket-dir
@@ -317,7 +314,7 @@ roleRef:
 
 ---
 kind: DaemonSet
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 metadata:
   name: csi-vaultplugin
   namespace: kube-system
@@ -357,10 +354,9 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: kubevault/csi-driver:v0.1.1
+          image: pharmer/csi-vault:vault
           args :
             - init
-            - "--region=$(VAULT_REGION)"
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(VAULT_ACCESS_TOKEN)"
             - "--url=$(VAULT_API_URL)"
@@ -370,7 +366,7 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
             - name: VAULT_API_URL
-              value: https://api.vault.com/
+              value: http://159.65.253.198:30001
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -380,11 +376,6 @@ spec:
                 secretKeyRef:
                   name: vault
                   key: token
-            - name: VAULT_REGION
-              valueFrom:
-                secretKeyRef:
-                  name: vault
-                  key: region
           imagePullPolicy: "Always"
           volumeMounts:
             - name: plugin-dir
@@ -404,7 +395,7 @@ spec:
         #    type: DirectoryOrCreate
         - name: plugin-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/com.vault.csi.vaultbs
+            path: /var/lib/kubelet/plugins/com.vault.csi.vaultdbs
             type: DirectoryOrCreate
         - name: pods-mount-dir
           hostPath:
