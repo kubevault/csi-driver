@@ -7,7 +7,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 1M
+      storage: 1Gi
   storageClassName: vault-kv-storage
   volumeMode: DirectoryOrCreate
 

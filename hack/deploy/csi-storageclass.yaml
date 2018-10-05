@@ -9,3 +9,4 @@ parameters:
   policy: nginx
   secretEngine: KV
   secretName: nginx-config
+

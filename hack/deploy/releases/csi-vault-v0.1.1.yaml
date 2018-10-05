@@ -58,7 +58,9 @@ rules:
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
     verbs: ["get", "list", "watch", "update", "create"]
-
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csidrivers", "csinodeinfos"]
+    verbs: ["get", "watch", "list", "update", "patch", "create"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -177,6 +179,9 @@ rules:
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csidrivers", "csinodeinfos"]
+    verbs: ["get", "watch", "list", "update", "patch", "create"]
 
 ---
 kind: ClusterRoleBinding
@@ -227,7 +232,7 @@ spec:
       serviceAccount: csi-provisioner
       containers:
         - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v0.2.0
+          image: quay.io/k8scsi/csi-provisioner:v0.2.1
           args:
             - "--provisioner=com.vault.csi.vaultdbs"
             - "--csi-address=$(ADDRESS)"
@@ -297,6 +302,9 @@ rules:
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
     verbs: ["get", "list", "watch", "update", "create"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csidrivers", "csinodeinfos"]
+    verbs: ["get", "watch", "list", "update", "patch", "create"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -331,7 +339,7 @@ spec:
       hostNetwork: true
       containers:
         - name: driver-registrar
-          image: quay.io/k8scsi/driver-registrar:v0.2.0
+          image: quay.io/k8scsi/driver-registrar:v0.3.0
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -387,10 +395,6 @@ spec:
               # needed so that any mounts setup inside this container are
               # propagated back to the host machine.
               mountPropagation: "Bidirectional"
-            - name: registration-dir
-              hostPath:
-                path: /var/lib/kubelet/plugins/
-                type: Directory
             - mountPath: /dev
               name: device-dir
       volumes:
@@ -406,6 +410,10 @@ spec:
         - name: pods-mount-dir
           hostPath:
             path: /var/lib/kubelet
+            type: Directory
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/
             type: Directory
         - name: device-dir
           hostPath:
