@@ -6,7 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
-  policy: nginx
+  authRole: testrole
   secretEngine: KV
-  secretName: nginx-config
+  secretName: my-secret
 

@@ -9,9 +9,7 @@ import (
 	"strings"
 )
 
-type Vault interface {
-	ReadData()
-}
+
 type Client struct {
 	Vc *vaultapi.Client
 }

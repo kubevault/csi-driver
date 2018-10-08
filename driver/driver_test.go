@@ -17,6 +17,8 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
+	"context"
+	"encoding/json"
 )
 
 func init() {
@@ -92,9 +94,39 @@ func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 }
 
 func TestKVPolicy(t *testing.T) {
-	return
-	client, err := vault.NewVaultClient("http://159.65.253.198:30001", "root", nil)
+
+	client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 	fmt.Println(client, err)
+
+	path := "v1/auth/kubernetes"
+	req := fmt.Sprintf("%s/login", path)
+
+	r := client.Vc.NewRequest("POST", req)
+	body := map[string]interface{}{
+		"role": "testrole",
+		"jwt":  "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InBvc3RncmVzLXZhdWx0LXRva2VuLXg5djRyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InBvc3RncmVzLXZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOTVjM2FmNzAtY2FiZS0xMWU4LWExMzQtYTZmNTM5NDhkMzQ0Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6cG9zdGdyZXMtdmF1bHQifQ.Q9xGPbPt_cNwRrzlX-kFJsN7eJPceAYP7P7rkU8VZPeEuIip2jFoSbF8LZsL6TfB7XhUnvQT4NTXry-XVQA_Rvfrs61IPtvw0HOwkCxtd0PglW1p53B_onH6NknofRT0ZThoC9Jhs8NYa4FkTyyK1Wo46_aZQ2XbCny9UZzOjBxYo8iv_OL3crIytQV6UjrA2q-XkJuGCRc_vvXpPS4KO3ke7dsjrCwOTTz8QRGiljyscHzCJmN733VxvGSDuDoonxty894DhqsL6iRHKS5X8UVaq3MGNyndfQBSJfUnT75dFYD12Cr_BZRONBF66iGSXbaa-_Ft-eTgCEq0o_j2Nw",
+	}
+	d, e := json.Marshal(body)
+	fmt.Println(string(d), e)
+		if err := r.SetJSONBody(body); err != nil {
+		fmt.Println(err)
+	}
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	resp, err := client.Vc.RawRequestWithContext(ctx, r)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println(resp.Body)
+	secret, err :=  vaultapi.ParseSecret(resp.Body)
+	fmt.Println(secret, err)
+	/*return
+
+
+
 	token, err := client.GetPolicyToken([]string{"nginx"}, true)
 	fmt.Println(err)
 	fmt.Println(token)
@@ -106,7 +138,7 @@ func TestKVPolicy(t *testing.T) {
 	resp, err := c.Vc.RawRequest(req)
 	fmt.Println(err)
 	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data["my-value"])
+	fmt.Println(secret.Data["my-value"])*/
 }
 
 func TestPath(t *testing.T) {
