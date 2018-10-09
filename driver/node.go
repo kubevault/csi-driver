@@ -8,12 +8,12 @@ import (
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/kubevault/csi-driver/vault"
-	"github.com/kubevault/csi-driver/vault/engines"
+	"github.com/kubevault/csi-driver/vault/auth"
+	"github.com/kubevault/csi-driver/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"github.com/kubevault/csi-driver/vault/auth"
 )
 
 var (
@@ -158,19 +158,19 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	authType, ok := req.VolumeAttributes["AuthType"]
 	if !ok {
-		authType =authTypeKubernetes
+		authType = authTypeKubernetes
 	}
-	client, err := auth.GetAuthMethod(authType, podInfo, d.vaultClient.Vc)
-	if err != nil{
+	client, err := auth.GetAuthMethod(authType, podInfo, d.vaultClient)
+	if err != nil {
 		return nil, err
 	}
 	client.SetRole(role)
+	client.SetVaultUrl(d.url)
 	authClientToken, err := client.GetLoginToken()
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	//VAULT_K8S_LOGIN=$(curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "testrole"}' http://142.93.77.58:30001/v1/auth/kubernetes/login
 	ll := d.log.WithFields(logrus.Fields{
 		"volume_id": req.VolumeId,
 		"source":    source,
@@ -188,11 +188,10 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	} else {
-		ll.Info("volume is already mounedt")
+		ll.Info("volume is already mounted")
 	}
 
 	options := req.VolumeAttributes
-
 
 	// login with policy token
 
@@ -201,20 +200,19 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, err
 	}
 
-	var engine string
-	if engine, ok = options["secretEngine"]; !ok {
+	var engineName string
+	if engineName, ok = options["secretEngine"]; !ok {
 		return nil, errors.Errorf("Empty engine name")
 	}
 
-	switch engine {
-	case "KV":
-		kv := engines.NewKVEngine(authClient.Vc, options["secretName"], target)
-		if err = kv.ReadData(); err != nil {
-			return nil, err
-		}
-	default:
-		return nil, errors.Errorf("engine not supported")
+	engine, err := secret.GetSecretEngine(engineName, context.Background())
+	if err != nil {
+		return nil, err
+	}
+	engine.InitializeEngine(authClient, options["secretName"], target)
 
+	if err = engine.ReadSecret(); err != nil {
+		return nil, err
 	}
 
 	ll.Info("mounting the volume with ro")

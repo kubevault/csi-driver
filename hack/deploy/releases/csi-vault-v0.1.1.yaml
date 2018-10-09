@@ -312,6 +312,9 @@ rules:
   - apiGroups: ["csi.storage.k8s.io"]
     resources: ["csidrivers", "csinodeinfos"]
     verbs: ["get", "watch", "list", "update", "patch", "create"]
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

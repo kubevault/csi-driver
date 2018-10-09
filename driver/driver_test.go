@@ -14,11 +14,14 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"bytes"
+	"context"
+	"encoding/json"
+	"net/http"
+
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
-	"context"
-	"encoding/json"
 )
 
 func init() {
@@ -96,21 +99,22 @@ func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 func TestKVPolicy(t *testing.T) {
 
 	client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
-	fmt.Println(client, err)
+	fmt.Println(client.Vc.Headers(), err)
 
-	path := "v1/auth/kubernetes"
-	req := fmt.Sprintf("%s/login", path)
+	p := "v1/auth/kubernetes/login"
 
-	r := client.Vc.NewRequest("POST", req)
+	r := client.Vc.NewRequest("POST", p)
 	body := map[string]interface{}{
 		"role": "testrole",
 		"jwt":  "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InBvc3RncmVzLXZhdWx0LXRva2VuLXg5djRyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InBvc3RncmVzLXZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOTVjM2FmNzAtY2FiZS0xMWU4LWExMzQtYTZmNTM5NDhkMzQ0Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6cG9zdGdyZXMtdmF1bHQifQ.Q9xGPbPt_cNwRrzlX-kFJsN7eJPceAYP7P7rkU8VZPeEuIip2jFoSbF8LZsL6TfB7XhUnvQT4NTXry-XVQA_Rvfrs61IPtvw0HOwkCxtd0PglW1p53B_onH6NknofRT0ZThoC9Jhs8NYa4FkTyyK1Wo46_aZQ2XbCny9UZzOjBxYo8iv_OL3crIytQV6UjrA2q-XkJuGCRc_vvXpPS4KO3ke7dsjrCwOTTz8QRGiljyscHzCJmN733VxvGSDuDoonxty894DhqsL6iRHKS5X8UVaq3MGNyndfQBSJfUnT75dFYD12Cr_BZRONBF66iGSXbaa-_Ft-eTgCEq0o_j2Nw",
 	}
 	d, e := json.Marshal(body)
 	fmt.Println(string(d), e)
-		if err := r.SetJSONBody(body); err != nil {
-		fmt.Println(err)
+	if err := r.SetJSONBody(body); err != nil {
+		fmt.Println(err, "***************")
 	}
+	r.Headers = make(map[string][]string)
+	r.Headers.Set("Content-Type", "application/json")
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
@@ -121,8 +125,8 @@ func TestKVPolicy(t *testing.T) {
 	defer resp.Body.Close()
 
 	fmt.Println(resp.Body)
-	secret, err :=  vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret, err)
+	//secret, err :=  vaultapi.ParseSecret(resp.Body)
+	//fmt.Println(secret, err)
 	/*return
 
 
@@ -139,6 +143,45 @@ func TestKVPolicy(t *testing.T) {
 	fmt.Println(err)
 	secret, err := vaultapi.ParseSecret(resp.Body)
 	fmt.Println(secret.Data["my-value"])*/
+}
+
+func TestVault(t *testing.T) {
+	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+
+	path := fmt.Sprintf("/v1/kv/%s", "my-secret")
+	req := c.Vc.NewRequest("GET", path)
+	resp, err := c.Vc.RawRequest(req)
+	fmt.Println(err)
+	secret, err := vaultapi.ParseSecret(resp.Body)
+	fmt.Println(secret.Data)
+}
+
+func TestHttp(t *testing.T) {
+	url := "http://:30001/v1/auth/kubernetes/login"
+	body := map[string]interface{}{
+		"role": "testrole",
+		"jwt":  "eyJ",
+	}
+	d, e := json.Marshal(body)
+
+	fmt.Println(e)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(d))
+	fmt.Println(err)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	bdy, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(bdy))
+
 }
 
 func TestPath(t *testing.T) {
