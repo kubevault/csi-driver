@@ -2,21 +2,11 @@ package vault
 
 import (
 	vaultapi "github.com/hashicorp/vault/api"
-	"os"
-	"github.com/pkg/errors"
-	"path"
-	"io/ioutil"
-	"strings"
 )
 
-type Vault interface {
-	ReadData()
-}
-type Client struct {
-	Vc *vaultapi.Client
-}
 
-func NewVaultClient(url, token string, tlsConfig *vaultapi.TLSConfig) (*Client, error) {
+
+func NewVaultClient(url, token string, tlsConfig *vaultapi.TLSConfig) (*vaultapi.Client, error) {
 	cfg := vaultapi.DefaultConfig()
 	if url != "" {
 		cfg.Address = url
@@ -31,9 +21,10 @@ func NewVaultClient(url, token string, tlsConfig *vaultapi.TLSConfig) (*Client, 
 	if err != nil {
 		return nil, err
 	}
-	return &Client{Vc: vc}, nil
+	return vc, nil
 }
 
+/*
 func (c *Client) GetPolicyToken(policies []string, unwrap bool) (string, error)  {
 
 	if unwrap {
@@ -67,24 +58,4 @@ func (c *Client) GetPolicyToken(policies []string, unwrap bool) (string, error) 
 
 	return secret.WrapInfo.Token, nil
 }
-
-
-func GetEngine(name string) {
-
-}
-
-func writeData(key, value, dir string) error {
-	err := os.MkdirAll(dir, 0755)
-	if err != nil {
-		return errors.Errorf("Failed to mkdir %v: %v", dir, err)
-	}
-
-	keyPath := path.Join(dir, key)
-
-	err = ioutil.WriteFile(keyPath, []byte(strings.TrimSpace(value)), 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
+*/

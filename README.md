@@ -26,6 +26,7 @@ The CSI plugin allows you to use `Vault` with your preferred Container Orchestra
 * `--allow-privileged` flag must be set to true for both the API server and the kubelet
 * (if you use Docker) the Docker daemon of the cluster nodes must allow shared mounts
 * Pre-installed `vault`. To install vault on kubernetes, follow [this](docs/vault-install.md)
+* pass `--feature-gates=CSIDriverRegistry=true,CSINodeInfo=true` to kubelet and kube-apiserver
 
 
 
