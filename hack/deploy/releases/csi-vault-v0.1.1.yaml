@@ -141,7 +141,10 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: VAULT_API_URL
-              value: http://142.93.77.58:30001
+              valueFrom:
+                secretKeyRef:
+                  key: url
+                  name: vault
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -264,7 +267,10 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
             - name: VAULT_API_URL
-              value: http://142.93.77.58:30001
+              valueFrom:
+                secretKeyRef:
+                  key: url
+                  name: vault
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -386,7 +392,10 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
             - name: VAULT_API_URL
-              value: http://142.93.77.58:30001
+              valueFrom:
+                secretKeyRef:
+                  key: url
+                  name: vault
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

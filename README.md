@@ -22,7 +22,7 @@ The CSI plugin allows you to use `Vault` with your preferred Container Orchestra
 
 **Requirements:**
 
-* Kubernetes v1.10 minimum
+* Kubernetes v1.12 minimum
 * `--allow-privileged` flag must be set to true for both the API server and the kubelet
 * (if you use Docker) the Docker daemon of the cluster nodes must allow shared mounts
 * Pre-installed `vault`. To install vault on kubernetes, follow [this](docs/vault-install.md)
@@ -30,7 +30,10 @@ The CSI plugin allows you to use `Vault` with your preferred Container Orchestra
 
 
 
-### 1. Create a secret with your Vault root token
+
+
+
+### 1. Create a secret with your Vault root token and address
 
 Replace the placeholder string with your own token and save it as `secret.yaml`
 
@@ -42,6 +45,7 @@ metadata:
   namespace: kube-system
 stringData:
   token: "___REPLACE_ME___"
+  url: "http://REPLACE_ME__"
 ```
 
 and create the secret using `kubectl` :
