@@ -16,3 +16,8 @@ path "auth/token/roles" {
 path "kv/*" {
   capabilities = ["read"]
 }
+
+# capability to get aws cred
+path "aws/*" {
+  capabilities = ["read"]
+}
