@@ -33,8 +33,10 @@ func (se *EngineInfo) ReadSecret() error {
 	}
 
 	for key, val := range secret.Data {
-		if err := writeData(key, val.(string), se.secretDir); err != nil {
-			return err
+		if val != nil {
+			if err := writeData(key, val.(string), se.secretDir); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

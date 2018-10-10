@@ -146,7 +146,7 @@ func TestKVPolicy(t *testing.T) {
 }
 
 func TestVault(t *testing.T) {
-	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	c, err := vault.NewVaultClient("http://:30001", "root", nil)
 
 	path := fmt.Sprintf("/v1/aws/creds/%s", "my-role")
 	req := c.NewRequest("GET", path)
