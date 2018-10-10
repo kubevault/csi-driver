@@ -4,13 +4,12 @@ import (
 	"context"
 
 	"fmt"
-	"strings"
-
 	"os"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/kubevault/csi-driver/vault"
-	"github.com/kubevault/csi-driver/vault/engines"
+	"github.com/kubevault/csi-driver/vault/auth"
+	"github.com/kubevault/csi-driver/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -124,10 +123,53 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Target Path must be provided")
 	}
 
+	if len(req.VolumeAttributes) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Volume attributes are not provided")
+	}
+
+	podInfo := auth.PodInfo{}
+	var ok bool
+	podInfo.Name, ok = req.VolumeAttributes[podName]
+	if !ok {
+		return nil, errors.Errorf("Pod name not found")
+	}
+	podInfo.Namespace, ok = req.VolumeAttributes[podNamespace]
+	if !ok {
+		return nil, errors.Errorf("Pod namespace not found")
+	}
+	podInfo.UID, ok = req.VolumeAttributes[podUID]
+	if !ok {
+		return nil, errors.Errorf("Pod UID not found")
+	}
+	podInfo.ServiceAccount, ok = req.VolumeAttributes[podServiceAccount]
+	if !ok {
+		return nil, errors.Errorf("Pod service account not found")
+	}
+
+	role, ok := req.VolumeAttributes["authRole"]
+	if !ok {
+		return nil, errors.Errorf("Auth role not found")
+	}
+
 	source := req.StagingTargetPath
 	target := req.TargetPath
 	fsType := "tmpfs"
 	//mnt := req.VolumeCapability.GetMount()
+
+	authType, ok := req.VolumeAttributes["AuthType"]
+	if !ok {
+		authType = authTypeKubernetes
+	}
+	client, err := auth.GetAuthMethod(authType, podInfo, d.vaultClient)
+	if err != nil {
+		return nil, err
+	}
+	client.SetRole(role)
+	client.SetVaultUrl(d.url)
+	authClientToken, err := client.GetLoginToken()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	ll := d.log.WithFields(logrus.Fields{
 		"volume_id": req.VolumeId,
@@ -146,41 +188,31 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	} else {
-		ll.Info("volume is already mounedt")
+		ll.Info("volume is already mounted")
 	}
 
 	options := req.VolumeAttributes
 
-	stringPolicies, ok := options["policy"]
-	if !ok {
-		return nil, errors.Errorf("Missing policies")
-	}
-	policies := strings.Split(strings.Replace(stringPolicies, " ", "", -1), ",")
-	if len(policies) == 0 {
-		return nil, errors.Errorf("Empty policies")
-	}
-	token, err := d.vaultClient.GetPolicyToken(policies, true)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
 	// login with policy token
 
-	client, err := vault.NewVaultClient(d.url, token, nil)
-	var engine string
-	if engine, ok = options["secretEngine"]; !ok {
+	authClient, err := vault.NewVaultClient(d.url, authClientToken, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var engineName string
+	if engineName, ok = options["secretEngine"]; !ok {
 		return nil, errors.Errorf("Empty engine name")
 	}
 
-	switch engine {
-	case "KV":
-		kv := engines.NewKVEngine(client.Vc, options["secretName"], target)
-		if err = kv.ReadData(); err != nil {
-			return nil, err
-		}
-	default:
-		return nil, errors.Errorf("engine not supported")
+	engine, err := secret.GetSecretEngine(engineName, context.Background())
+	if err != nil {
+		return nil, err
+	}
+	engine.InitializeEngine(authClient, options["secretName"], target)
 
+	if err = engine.ReadSecret(); err != nil {
+		return nil, err
 	}
 
 	ll.Info("mounting the volume with ro")

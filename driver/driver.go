@@ -11,14 +11,22 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault"
+	_ "github.com/kubevault/csi-driver/vault/auth/kubernetes"
+	_ "github.com/kubevault/csi-driver/vault/secret/engines"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
 const (
-	driverName    = "com.vault.csi.vaultdbs"
-	vendorVersion = "0.0.1"
+	driverName        = "com.vault.csi.vaultdbs"
+	vendorVersion     = "0.1.1"
+	podName           = "csi.storage.k8s.io/pod.name"
+	podNamespace      = "csi.storage.k8s.io/pod.namespace"
+	podUID            = "csi.storage.k8s.io/pod.uid"
+	podServiceAccount = "csi.storage.k8s.io/serviceAccount.name"
+
+	authTypeKubernetes = "kubernetes"
 )
 
 // Driver implements the following CSI interfaces:
@@ -33,7 +41,7 @@ type Driver struct {
 	url      string
 
 	srv         *grpc.Server
-	vaultClient *vault.Client
+	vaultClient *vaultapi.Client
 	mounter     Mounter
 	log         *logrus.Entry
 }

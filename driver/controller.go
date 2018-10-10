@@ -38,9 +38,9 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
-			Id:         req.Name,
-			Attributes: req.Parameters,
-			//	CapacityBytes: *req.CapacityRange,
+			Id:            req.Name,
+			Attributes:    req.Parameters,
+			CapacityBytes: req.CapacityRange.RequiredBytes,
 		},
 	}
 	return resp, nil

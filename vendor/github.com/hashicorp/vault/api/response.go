@@ -41,13 +41,14 @@ func (r *Response) Error() error {
 
 	r.Body.Close()
 	r.Body = ioutil.NopCloser(bodyBuf)
-
+	fmt.Println(r.Body)
 	// Decode the error response if we can. Note that we wrap the bodyBuf
 	// in a bytes.Reader here so that the JSON decoder doesn't move the
 	// read pointer for the original buffer.
 	var resp ErrorResponse
 	if err := jsonutil.DecodeJSON(bodyBuf.Bytes(), &resp); err != nil {
 		// Ignore the decoding error and just drop the raw response
+		fmt.Println(err, "<><")
 		return fmt.Errorf(
 			"Error making API request.\n\n"+
 				"URL: %s %s\n"+
