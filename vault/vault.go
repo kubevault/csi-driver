@@ -4,8 +4,6 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 )
 
-
-
 func NewVaultClient(url, token string, tlsConfig *vaultapi.TLSConfig) (*vaultapi.Client, error) {
 	cfg := vaultapi.DefaultConfig()
 	if url != "" {

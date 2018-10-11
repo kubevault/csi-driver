@@ -1,31 +1,30 @@
 package pki
 
 import (
-	vaultapi "github.com/hashicorp/vault/api"
+	"context"
+	"encoding/json"
 	"fmt"
-	"os"
+	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault/helper/parseutil"
 	"github.com/pkg/errors"
-	"path"
 	"io/ioutil"
+	"os"
+	"path"
 	"strings"
 	"time"
-	"encoding/json"
-	"context"
-	"github.com/hashicorp/vault/helper/parseutil"
 )
 
 type certificate struct {
-	CommonName string `json:"common_name,omitempty"`
-	AltName string `json:"alt_name,omitempty"`
-	IpSans string `json:"ip_sans,omitempty"`
-	UriSans string `json:"uri_sans,omitempty"`
-	OtherSans string `json:"other_sans,omitempty"`
-	Ttl string `json:"ttl,omitempty"`
-	Format string `json:"format,omitempty"`
-	PrivateKeyFormat string `json:"private_key_format,omitempty"`
-	ExcludeCnFromSans bool `json:"exclude_cn_from_sans,omitempty"`
+	CommonName        string `json:"common_name,omitempty"`
+	AltName           string `json:"alt_name,omitempty"`
+	IpSans            string `json:"ip_sans,omitempty"`
+	UriSans           string `json:"uri_sans,omitempty"`
+	OtherSans         string `json:"other_sans,omitempty"`
+	Ttl               string `json:"ttl,omitempty"`
+	Format            string `json:"format,omitempty"`
+	PrivateKeyFormat  string `json:"private_key_format,omitempty"`
+	ExcludeCnFromSans bool   `json:"exclude_cn_from_sans,omitempty"`
 }
-
 
 func (se *EngineInfo) InitializeEngine(vc *vaultapi.Client, opts map[string]string) error {
 	se.vc = vc
@@ -49,14 +48,13 @@ func (se *EngineInfo) InitializeEngine(vc *vaultapi.Client, opts map[string]stri
 		}
 	} else {
 		if se.renewTime, err = se.getRoleTTL(); err != nil {
-			return  err
+			return err
 		}
 	}
 	se.renewTime = se.renewTime - time.Minute
 
 	return nil
 }
-
 
 func (se *EngineInfo) ReadSecret() error {
 	path := fmt.Sprintf("/v1/pki/issue/%s", se.secretName)
@@ -70,7 +68,7 @@ func (se *EngineInfo) ReadSecret() error {
 	defer cancelFunc()
 	resp, err := se.vc.RawRequestWithContext(ctx, r)
 	if err != nil {
-		return  err
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -113,7 +111,7 @@ func (se *EngineInfo) RenewSecret(vol string) error {
 	}
 }
 
-func (se *EngineInfo) StopSync()  {
+func (se *EngineInfo) StopSync() {
 	close(se.stopCh)
 }
 
@@ -132,7 +130,7 @@ func (se *EngineInfo) getRoleTTL() (time.Duration, error) {
 	if err != nil {
 		return 0, err
 	}
-	if ttl == 0{
+	if ttl == 0 {
 		return parseutil.ParseDurationSecond(secret.Data["max_ttl"])
 	}
 	return ttl, nil

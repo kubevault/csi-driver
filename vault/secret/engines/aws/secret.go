@@ -1,21 +1,21 @@
 package aws
 
 import (
-	vaultapi "github.com/hashicorp/vault/api"
 	"fmt"
-	"os"
+	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
-	"path"
 	"io/ioutil"
+	"os"
+	"path"
 	"strings"
 )
+
 func (se *EngineInfo) InitializeEngine(vc *vaultapi.Client, opts map[string]string) error {
 	se.vc = vc
 	se.secretName = opts["secretName"]
 	se.secretDir = opts["targetDir"]
 	return nil
 }
-
 
 func (se *EngineInfo) ReadSecret() error {
 	path := fmt.Sprintf("/v1/aws/creds/%s", se.secretName)
@@ -48,10 +48,10 @@ func writeData(key, value, dir string) error {
 	return ioutil.WriteFile(keyPath, []byte(strings.TrimSpace(value)), 0644)
 }
 
-func (se *EngineInfo) RenewSecret(vol string) error  {
+func (se *EngineInfo) RenewSecret(vol string) error {
 	return nil
 }
 
-func (se *EngineInfo) StopSync()  {
+func (se *EngineInfo) StopSync() {
 
 }

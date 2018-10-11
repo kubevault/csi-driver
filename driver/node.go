@@ -86,7 +86,6 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 
 	ll.Info("formatting and mounting stage volume is finished")
 	return &csi.NodeStageVolumeResponse{}, nil
-	return nil, nil
 }
 
 // NodeUnstageVolume unstages the volume from the staging path

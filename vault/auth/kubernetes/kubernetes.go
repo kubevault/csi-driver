@@ -1,19 +1,18 @@
 package kubernetes
 
 import (
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/pkg/errors"
 	"fmt"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
-func GetJWT(serviceAccountName, namespace string) (string, error)  {
-	kubeClient, err :=getKubeClient()
+func GetJWT(serviceAccountName, namespace string) (string, error) {
+	kubeClient, err := getKubeClient()
 	if err != nil {
 		return "", err
 	}
-
 
 	serviceAccount, err := kubeClient.CoreV1().ServiceAccounts(namespace).Get(serviceAccountName, metav1.GetOptions{})
 	if err != nil {
@@ -37,7 +36,6 @@ func GetJWT(serviceAccountName, namespace string) (string, error)  {
 
 	return string(tokenData), nil
 }
-
 
 func getKubeClient() (*kubernetes.Clientset, error) {
 	config, err := rest.InClusterConfig()
