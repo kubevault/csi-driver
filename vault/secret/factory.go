@@ -9,8 +9,10 @@ import (
 )
 
 type SecretEngine interface {
-	InitializeEngine(vc *vaultapi.Client, secretName, secretDir string)
+	InitializeEngine(vc *vaultapi.Client, opts map[string]string) error
 	ReadSecret() error
+	RenewSecret(vol string) error
+	StopSync()
 
 }
 

@@ -104,9 +104,8 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		"method":  "node_unstage_volume",
 	}).Info("node unstage volume called")
 	err := d.mounter.VaultUnmount(req.StagingTargetPath)
-	fmt.Println(err)
 
-	return &csi.NodeUnstageVolumeResponse{}, nil
+	return &csi.NodeUnstageVolumeResponse{}, err
 }
 
 // NodePublishVolume mounts the volume mounted to the staging path to the target path
@@ -205,11 +204,12 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, errors.Errorf("Empty engine name")
 	}
 
-	engine, err := secret.GetSecretEngine(engineName, context.Background())
+	engine, err := secret.GetSecretEngine(engineName, ctx)
 	if err != nil {
 		return nil, err
 	}
-	engine.InitializeEngine(authClient, options["secretName"], target)
+	options["targetDir"] = target
+	engine.InitializeEngine(authClient, options)
 
 	if err = engine.ReadSecret(); err != nil {
 		return nil, err
@@ -218,6 +218,11 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	ll.Info("mounting the volume with ro")
 	if err := d.mounter.Mount("tmpfs", target, fsType, []string{"remount,ro"}...); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if _, found := d.ch[req.VolumeId]; !found {
+		d.ch[req.VolumeId] = engine
+		go engine.RenewSecret(req.VolumeId)
 	}
 
 	ll.Info("bind mounting the volume is finished")
@@ -254,6 +259,10 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 		}
 	} else {
 		ll.Info("target path is already unmounted")
+	}
+
+	if _, found := d.ch[req.VolumeId]; found {
+		d.ch[req.VolumeId].StopSync()
 	}
 
 	ll.Info("unmounting volume is finished")

@@ -21,3 +21,8 @@ path "kv/*" {
 path "aws/*" {
   capabilities = ["read"]
 }
+
+# capability to get pki cred
+path "pki/*" {
+  capabilities = ["read", "create", "update", "delete"]
+}

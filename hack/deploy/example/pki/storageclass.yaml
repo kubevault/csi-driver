@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: vault-pki-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: com.vault.csi.vaultdbs
+parameters:
+  authRole: pki-cred-role
+  secretEngine: PKI
+  secretName: my-pki-role
+  common_name: www.my-website.com

@@ -4,6 +4,7 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 	"sync"
 	"github.com/golang/glog"
+	"github.com/pkg/errors"
 )
 
 type PodInfo struct {
@@ -43,7 +44,7 @@ func GetAuthMethod(name string, info PodInfo, client *vaultapi.Client) (Authenti
 	defer authMutex.Unlock()
 	f, found := authMethods[name]
 	if !found{
-		return nil, nil
+		return nil, errors.Errorf("%s auth engine not found", name)
 	}
 	return f(info, client)
 }
