@@ -4,6 +4,7 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 	. "github.com/kubevault/csi-driver/vault/secret"
 	"context"
+	"time"
 )
 type EngineInfo struct {
 	ctx context.Context
@@ -12,7 +13,9 @@ type EngineInfo struct {
 	secretName string
 	secretDir string
 
+	certificate *certificate
 	stopCh chan struct{}
+	renewTime time.Duration
 }
 
 var _ SecretEngine = &EngineInfo{}

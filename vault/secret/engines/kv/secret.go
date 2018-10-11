@@ -9,10 +9,11 @@ import (
 	"io/ioutil"
 	"strings"
 )
-func (se *EngineInfo) InitializeEngine(vc *vaultapi.Client, secretName, secretDir string) {
+func (se *EngineInfo) InitializeEngine(vc *vaultapi.Client, opts map[string]string)error {
 	se.vc = vc
-	se.secretName = secretName
-	se.secretDir = secretDir
+	se.secretName = opts["secretName"]
+	se.secretDir = opts["targetDir"]
+	return nil
 }
 
 
@@ -43,4 +44,12 @@ func (se *EngineInfo) ReadSecret() error {
 func writeData(key, value, dir string) error {
 	keyPath := path.Join(dir, key)
 	return ioutil.WriteFile(keyPath, []byte(strings.TrimSpace(value)), 0644)
+}
+
+func (se *EngineInfo) RenewSecret(vol string) error {
+	return nil
+}
+
+func (se *EngineInfo) StopSync()  {
+
 }
