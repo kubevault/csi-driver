@@ -3,7 +3,6 @@ package driver
 import (
 	"context"
 
-	"fmt"
 	"os"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
