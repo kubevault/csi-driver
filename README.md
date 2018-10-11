@@ -22,15 +22,23 @@ The CSI plugin allows you to use `Vault` with your preferred Container Orchestra
 
 **Requirements:**
 
-* Kubernetes v1.10 minimum
+* Kubernetes v1.12 minimum
 * `--allow-privileged` flag must be set to true for both the API server and the kubelet
 * (if you use Docker) the Docker daemon of the cluster nodes must allow shared mounts
 * Pre-installed `vault`. To install vault on kubernetes, follow [this](docs/vault-install.md)
-* pass `--feature-gates=CSIDriverRegistry=true,CSINodeInfo=true` to kubelet and kube-apiserver
+* Pass `--feature-gates=CSIDriverRegistry=true,CSINodeInfo=true` to kubelet and kube-apiserver
 
 
+#### 1. Install CSI driver on cluster
 
-### 1. Create a secret with your Vault root token
+To install `csidriver` and `csinodeinfo` crds, apply this [file](hack/deploy/csi-crd.yaml) by running
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/csi-crd.yaml
+```
+
+
+#### 2. Create a secret with your Vault root token and address
 
 Replace the placeholder string with your own token and save it as `secret.yaml`
 
@@ -42,6 +50,7 @@ metadata:
   namespace: kube-system
 stringData:
   token: "___REPLACE_ME___"
+  url: "http://REPLACE_ME__"
 ```
 
 and create the secret using `kubectl` :
@@ -61,17 +70,16 @@ vault                 Opaque                                1         18h
 ```
 
 
-#### 2. Deploy the CSI plugin and sidecars:
+#### 3. Deploy the CSI plugin and sidecars:
 
 Before you continue, be sure to checkout to a [tagged release](https://github.com/kubevault/csi-driver/releases). For
-example, to use the version `v0.0.1` you can execute the following command:
+example, to use the version `v0.1.1` you can execute the following command:
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.0.1.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.1.1.yaml
 ```
 
-
-#### 3. Deploy storage class of your choice
+#### 4. Create policy and role for service account
 
 create a policy on `vault` using following capabilities:
 ```hcl
@@ -93,7 +101,74 @@ path "auth/token/roles" {
 path "kv/*" {
   capabilities = ["read"]
 }
+
+# capability to get aws credentials
+path "aws/*" {
+  capabilities = ["read"]
+}
+
 ```
+run
+
+```bash
+$ vault policy write test-policy policy.hcl
+```
+then create a file `serviceaccount.yaml` with following contents
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: role-tokenreview-binding
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: postgres-vault
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres-vault
+```
+
+After that run `kubectl apply -f serviceaccount.yaml` to create service account.
+
+To enable Kubernetes auth backend by extracting the token reviewer JWT, Kubernetes CA certificate and Kubernetes host,
+
+```bash
+$ export VAULT_SA_NAME=$(kubectl get sa postgres-vault -o jsonpath="{.secrets[*]['name']}")
+
+$ export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data.token}" | base64 --decode; echo)
+
+$ export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)
+
+$ export K8S_HOST=$(kubectl exec consul-consul-0 -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
+$ export K8s_PORT=6443
+```
+
+Next we can enable the kubernetes authentication backend and create vault role that is attached to service account
+
+```bash
+$ vault auth enable kubernetes
+$ vault write auth/kubernetes/config \
+    token_reviewer_jwt="$SA_JWT_TOKEN" \
+    kubernetes_host="https://$K8S_HOST:$k8s_PORT" \
+    kubernetes_ca_cert="$SA_CA_CRT"
+
+$ vault write auth/kubernetes/role/testrole \
+      bound_service_account_names=postgres-vault \
+      bound_service_account_namespaces=default \
+      policies=test-policy \
+      ttl=24h
+```
+
+#### 4. Deploy storage class of your choice
+
 
 If you have a KV secrets on your vault and you also have certain policy to access that secrets, you have to create a `storage-class.yaml` file and put the following data
 
@@ -106,8 +181,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
-  fsType: tmpfs
-  policy: nginx #policy name which exists on vault
+  authRole: testrole #vault role for authentication
   secretEngine: KV # vault engine name
   secretName: my-secret # secret name on vault which you want get access
 
@@ -117,7 +191,7 @@ parameters:
 then create the storage class using `kubectl`.
 
 
-#### 4. Test and verify
+#### 5. Test and verify
 
 Create secret on vault with following command:
 
@@ -138,7 +212,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
   storageClassName: vault-kv-storage
   volumeMode: DirectoryOrCreate
 
@@ -147,19 +221,19 @@ spec:
 After that create a Pod that refers to this volume. When the Pod is created, the volume will be attached, formatted and mounted to the specified Container
 
 ```yaml
-kind: Pod
 apiVersion: v1
+kind: Pod
 metadata:
-  name: my-vault-app
+  name: mypod
 spec:
   containers:
-    - name: my-frontend
-      image: busybox
-      volumeMounts:
-      - mountPath: "/testdata"
-        name: my-vault-volume
-        readOnly: true
-      command: [ "sleep", "1000000" ]
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: my-vault-volume
+      mountPath: "/etc/foo"
+      readOnly: true
+  serviceAccountName: postgres-vault
   volumes:
     - name: my-vault-volume
       persistentVolumeClaim:
@@ -169,16 +243,19 @@ spec:
 Check if the pod is running successfully:
 
 ```sh
-kubectl describe pods/my-csi-app
+kubectl describe pods/my-pod
 ```
 
 
 Check inside the app container:
 
 ```sh
-$ kubectl exec -ti my-csi-app /bin/sh
-/ # ls /testdata/
+$ kubectl exec -ti mypod /bin/sh
+/ # ls /etc/foo
 my-value
-/ # cat /testdata/my-value
+/ # cat /etc/foo/my-value
 s3cr3t
 ```
+
+
+To setup AWS secret engine on vault click [here](docs/engines/aws.md)

@@ -99,11 +99,11 @@ func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 func TestKVPolicy(t *testing.T) {
 
 	client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
-	fmt.Println(client.Vc.Headers(), err)
+	fmt.Println(client.Headers(), err)
 
 	p := "v1/auth/kubernetes/login"
 
-	r := client.Vc.NewRequest("POST", p)
+	r := client.NewRequest("POST", p)
 	body := map[string]interface{}{
 		"role": "testrole",
 		"jwt":  "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InBvc3RncmVzLXZhdWx0LXRva2VuLXg5djRyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InBvc3RncmVzLXZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOTVjM2FmNzAtY2FiZS0xMWU4LWExMzQtYTZmNTM5NDhkMzQ0Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6cG9zdGdyZXMtdmF1bHQifQ.Q9xGPbPt_cNwRrzlX-kFJsN7eJPceAYP7P7rkU8VZPeEuIip2jFoSbF8LZsL6TfB7XhUnvQT4NTXry-XVQA_Rvfrs61IPtvw0HOwkCxtd0PglW1p53B_onH6NknofRT0ZThoC9Jhs8NYa4FkTyyK1Wo46_aZQ2XbCny9UZzOjBxYo8iv_OL3crIytQV6UjrA2q-XkJuGCRc_vvXpPS4KO3ke7dsjrCwOTTz8QRGiljyscHzCJmN733VxvGSDuDoonxty894DhqsL6iRHKS5X8UVaq3MGNyndfQBSJfUnT75dFYD12Cr_BZRONBF66iGSXbaa-_Ft-eTgCEq0o_j2Nw",
@@ -118,7 +118,7 @@ func TestKVPolicy(t *testing.T) {
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
-	resp, err := client.Vc.RawRequestWithContext(ctx, r)
+	resp, err := client.RawRequestWithContext(ctx, r)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -146,11 +146,11 @@ func TestKVPolicy(t *testing.T) {
 }
 
 func TestVault(t *testing.T) {
-	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	c, err := vault.NewVaultClient("http://:30001", "root", nil)
 
-	path := fmt.Sprintf("/v1/kv/%s", "my-secret")
-	req := c.Vc.NewRequest("GET", path)
-	resp, err := c.Vc.RawRequest(req)
+	path := fmt.Sprintf("/v1/aws/creds/%s", "my-role")
+	req := c.NewRequest("GET", path)
+	resp, err := c.RawRequest(req)
 	fmt.Println(err)
 	secret, err := vaultapi.ParseSecret(resp.Body)
 	fmt.Println(secret.Data)
