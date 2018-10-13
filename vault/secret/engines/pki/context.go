@@ -1,9 +1,10 @@
-package aws
+package pki
 
 import (
 	"context"
 	vaultapi "github.com/hashicorp/vault/api"
 	. "github.com/kubevault/csi-driver/vault/secret"
+	"time"
 )
 
 type EngineInfo struct {
@@ -12,12 +13,16 @@ type EngineInfo struct {
 
 	secretName string
 	secretDir  string
+
+	certificate *certificate
+	stopCh      chan struct{}
+	renewTime   time.Duration
 }
 
 var _ SecretEngine = &EngineInfo{}
 
 const (
-	UID = "AWS"
+	UID = "PKI"
 )
 
 func init() {

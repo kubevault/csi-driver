@@ -12,6 +12,7 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault"
 	_ "github.com/kubevault/csi-driver/vault/auth/kubernetes"
+	"github.com/kubevault/csi-driver/vault/secret"
 	_ "github.com/kubevault/csi-driver/vault/secret/engines"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -44,6 +45,8 @@ type Driver struct {
 	vaultClient *vaultapi.Client
 	mounter     Mounter
 	log         *logrus.Entry
+
+	ch map[string]secret.SecretEngine
 }
 
 func NewDriver(ep, url, node, token string) (*Driver, error) {
@@ -68,6 +71,7 @@ func NewDriver(ep, url, node, token string) (*Driver, error) {
 		log: logrus.New().WithFields(logrus.Fields{
 			"node-id": node,
 		}),
+		ch: make(map[string]secret.SecretEngine),
 	}, nil
 
 }

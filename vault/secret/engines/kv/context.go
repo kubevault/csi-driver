@@ -1,32 +1,31 @@
 package kv
 
 import (
+	"context"
 	vaultapi "github.com/hashicorp/vault/api"
 	. "github.com/kubevault/csi-driver/vault/secret"
-	"context"
 )
+
 type EngineInfo struct {
 	ctx context.Context
 	vc  *vaultapi.Client
 
 	secretName string
-	secretDir string
-
+	secretDir  string
 }
 
 var _ SecretEngine = &EngineInfo{}
 
-const(
+const (
 	UID = "KV"
 )
-func init()  {
+
+func init() {
 	RegisterSecretEngine(UID, func(ctx context.Context) (SecretEngine, error) {
 		return New(ctx), nil
 	})
 }
 
-func New(ctx context.Context) SecretEngine  {
-	return &EngineInfo{ctx:ctx}
+func New(ctx context.Context) SecretEngine {
+	return &EngineInfo{ctx: ctx}
 }
-
-
