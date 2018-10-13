@@ -1,11 +1,10 @@
 package driver
 
 import (
-	"os"
-	"strings"
-
 	"fmt"
+	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/juju/errors"
 )

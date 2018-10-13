@@ -1,25 +1,21 @@
 package driver
 
 import (
-	"testing"
-
-	"github.com/kubernetes-csi/csi-test/pkg/sanity"
-
-	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"time"
-
-	"os/exec"
-	"path/filepath"
-
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"testing"
+	"time"
 
 	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/kubernetes-csi/csi-test/pkg/sanity"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 )
