@@ -258,4 +258,5 @@ s3cr3t
 ```
 
 
-To setup AWS secret engine on vault click [here](docs/engines/aws.md)
+* To setup AWS secret engine on vault click [here](docs/engines/aws.md)
+* To setup PKI secret engine on vault click [here](docs/engines/pki.md)

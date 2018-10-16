@@ -1,37 +1,37 @@
 package kubernetes
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	vaultapi "github.com/hashicorp/vault/api"
 	. "github.com/kubevault/csi-driver/vault/auth"
 	"github.com/pkg/errors"
-	"fmt"
-	"encoding/json"
 	"net/http"
-	"bytes"
 )
+
 type AuthInfo struct {
 	vaultClient *vaultapi.Client
-	pod PodInfo
-	authRole string
-	vaultUrl string
+	pod         PodInfo
+	authRole    string
+	vaultUrl    string
 }
 
 var _ Authentication = &AuthInfo{}
 
-const(
-	UID = "kubernetes"
+const (
+	UID  = "kubernetes"
 	path = "v1/auth/kubernetes"
 )
-func init()  {
+
+func init() {
 	RegisterAuthMethod(UID, func(info PodInfo, client *vaultapi.Client) (Authentication, error) {
 		return &AuthInfo{
-			vaultClient:client,
-			pod:info,
+			vaultClient: client,
+			pod:         info,
 		}, nil
 	})
 }
-
-
 
 func (ai *AuthInfo) GetLoginToken() (string, error) {
 	url := fmt.Sprintf("%s/%s/login", ai.vaultUrl, path)
@@ -43,7 +43,7 @@ func (ai *AuthInfo) GetLoginToken() (string, error) {
 
 	body := map[string]interface{}{
 		"role": ai.authRole,
-		"jwt": jwt,
+		"jwt":  jwt,
 	}
 	data, err := json.Marshal(body)
 	if err != nil {
@@ -62,15 +62,15 @@ func (ai *AuthInfo) GetLoginToken() (string, error) {
 	return secret.Auth.ClientToken, nil
 }
 
-func (ai *AuthInfo) SetRole(role string)  {
+func (ai *AuthInfo) SetRole(role string) {
 	ai.authRole = role
 }
 
-func (ai *AuthInfo) SetVaultUrl(url string)  {
+func (ai *AuthInfo) SetVaultUrl(url string) {
 	ai.vaultUrl = url
 }
 
-func (ai *AuthInfo) GetSecret(p string) (*vaultapi.Secret, error)  {
+func (ai *AuthInfo) GetSecret(p string) (*vaultapi.Secret, error) {
 	req := ai.vaultClient.NewRequest("GET", p)
 	resp, err := ai.vaultClient.RawRequest(req)
 	if err != nil {

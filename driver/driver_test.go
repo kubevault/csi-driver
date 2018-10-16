@@ -1,25 +1,21 @@
 package driver
 
 import (
-	"testing"
-
-	"github.com/kubernetes-csi/csi-test/pkg/sanity"
-
-	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"time"
-
-	"os/exec"
-	"path/filepath"
-
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"testing"
+	"time"
 
 	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/kubernetes-csi/csi-test/pkg/sanity"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 )
@@ -146,9 +142,9 @@ func TestKVPolicy(t *testing.T) {
 }
 
 func TestVault(t *testing.T) {
-	c, err := vault.NewVaultClient("http://:30001", "root", nil)
+	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 
-	path := fmt.Sprintf("/v1/aws/creds/%s", "my-role")
+	path := fmt.Sprintf("/v1/pki/roles/%s", "my-pki-role")
 	req := c.NewRequest("GET", path)
 	resp, err := c.RawRequest(req)
 	fmt.Println(err)
@@ -156,11 +152,40 @@ func TestVault(t *testing.T) {
 	fmt.Println(secret.Data)
 }
 
+func TestAT(t *testing.T) {
+	l := map[string]interface{}{
+		"max_ttl": 259200,
+	}
+	fmt.Println(l["max_ttl"].(int))
+
+}
+
+func TestPKI(t *testing.T) {
+	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+
+	r := c.NewRequest("POST", "/v1/pki/issue/my-pki-role")
+	if err := r.SetJSONBody(map[string]string{
+		"common_name": "www.my-website.com",
+	}); err != nil {
+		fmt.Println(err, "**********")
+	}
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	resp, err := c.RawRequestWithContext(ctx, r)
+	if err != nil {
+		fmt.Println(err, ")))")
+	}
+	defer resp.Body.Close()
+
+	secret, err := vaultapi.ParseSecret(resp.Body)
+	fmt.Println(secret.Data)
+}
+
 func TestHttp(t *testing.T) {
-	url := "http://:30001/v1/auth/kubernetes/login"
+	url := "http://142.93.77.58:30001/v1/pki/issue/my-pki-role"
 	body := map[string]interface{}{
-		"role": "testrole",
-		"jwt":  "eyJ",
+		"common_name": "www.my-website.com",
 	}
 	d, e := json.Marshal(body)
 
@@ -181,7 +206,6 @@ func TestHttp(t *testing.T) {
 	fmt.Println("response Headers:", resp.Header)
 	bdy, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(bdy))
-
 }
 
 func TestPath(t *testing.T) {
@@ -201,3 +225,19 @@ func TestPath(t *testing.T) {
 	err := exec.Command("ln", args...).Run()
 	fmt.Println(err)
 }
+
+/*
+
+
+vault write pki/config/urls \
+    issuing_certificates="http://142.93.77.58:30001/v1/pki/ca" \
+    crl_distribution_points="http://142.93.77.58:30001/v1/pki/crl"
+
+vault write pki/roles/my-pki-role \
+    allowed_domains=my-website.com \
+    allow_subdomains=true \
+    max_ttl=72h
+
+vault write pki/issue/my-pki-role \
+    common_name=www.my-website.com
+*/

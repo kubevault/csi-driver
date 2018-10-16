@@ -78,7 +78,7 @@ def version():
 def fmt():
     libbuild.ungroup_go_imports('*.go', 'cloud', 'cmds')
     die(call('goimports -w *.go driver cmds'))
-    call('gofmt -s -w *.go driver cmds')
+    call('gofmt -s -w *.go driver cmds vault')
 
 
 def vet():
@@ -144,6 +144,10 @@ def test(type, *args):
         die(call('ginkgo -r --v --progress --trace -- --v=3'))
     else:
         print '{test unit|e2e}'
+
+
+def revendor():
+    libbuild.revendor()
 
 
 if __name__ == "__main__":
