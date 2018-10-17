@@ -15,9 +15,12 @@ import (
 	"time"
 
 	vaultapi "github.com/hashicorp/vault/api"
+	cr "github.com/kmodules/custom-resources/apis/appcatalog/v1alpha1"
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func init() {
@@ -241,3 +244,28 @@ vault write pki/roles/my-pki-role \
 vault write pki/issue/my-pki-role \
     common_name=www.my-website.com
 */
+
+func TestRaw(t *testing.T) {
+	data := `{
+      "apiVersion": "kubevault.com/v1alpha1",
+      "kind": "VaultServerConfiguration",
+      "usePodServiceAccountForCSIDriver": "true",
+      "authPath": "kubernetes"
+    }`
+	x, e := json.Marshal(data)
+	fmt.Println(e)
+	d := cr.AppBinding{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "appcatalog.appscode.com/v1alpha1",
+			Kind:       "AppBinding",
+		},
+		Spec: cr.AppBindingSpec{
+			Parameters: &runtime.RawExtension{
+				Raw: x,
+			},
+		},
+	}
+
+	y, e := json.Marshal(d)
+	fmt.Println(string(y), e)
+}

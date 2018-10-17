@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"strings"
+
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/kubevault/csi-driver/vault"
 	"github.com/kubevault/csi-driver/vault/auth"
@@ -142,17 +144,18 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, errors.Errorf("Pod service account not found")
 	}
 
-	role, ok := req.VolumeAttributes["authRole"]
+	ref, ok := req.VolumeAttributes["ref"]
 	if !ok {
 		return nil, errors.Errorf("Auth role not found")
 	}
+	data := strings.Split(ref, "/")
 
 	source := req.StagingTargetPath
 	target := req.TargetPath
 	fsType := "tmpfs"
 	//mnt := req.VolumeCapability.GetMount()
 
-	authType, ok := req.VolumeAttributes["AuthType"]
+	authType, ok := req.VolumeAttributes["authType"]
 	if !ok {
 		authType = authTypeKubernetes
 	}
@@ -160,8 +163,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	if err != nil {
 		return nil, err
 	}
-	client.SetRole(role)
-	client.SetVaultUrl(d.url)
+	client.SetRef(data[1], data[0])
 	authClientToken, err := client.GetLoginToken()
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

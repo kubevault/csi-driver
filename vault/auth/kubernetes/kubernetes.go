@@ -6,15 +6,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
+	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
-func GetJWT(serviceAccountName, namespace string) (string, error) {
-	kubeClient, err := getKubeClient()
-	if err != nil {
-		return "", err
-	}
-
-	serviceAccount, err := kubeClient.CoreV1().ServiceAccounts(namespace).Get(serviceAccountName, metav1.GetOptions{})
+func getServiceAccountSecret(kc *kubernetes.Clientset, svcName, svcNamespace string) (string, error) {
+	serviceAccount, err := kc.CoreV1().ServiceAccounts(svcNamespace).Get(svcName, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -25,16 +22,22 @@ func GetJWT(serviceAccountName, namespace string) (string, error) {
 	secretName := serviceAccount.Secrets[0].Name
 	fmt.Println(secretName)
 
-	secret, err := kubeClient.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
+	secret, err := kc.CoreV1().Secrets(svcNamespace).Get(secretName, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
-	tokenData, ok := secret.Data["token"]
-	if !ok {
-		return "", errors.New("No jwt token found")
-	}
+	return secret.Name, nil
+}
 
-	return string(tokenData), nil
+func getAppBinding(appName, appNamespace string) (*appcat.AppBinding, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	appClient, err := appcat_cs.NewForConfig(config)
+
+	app, err := appClient.AppBindings(appNamespace).Get(appName, metav1.GetOptions{})
+	return app, err
 }
 
 func getKubeClient() (*kubernetes.Clientset, error) {
