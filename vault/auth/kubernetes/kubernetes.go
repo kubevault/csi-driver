@@ -1,7 +1,6 @@
 package kubernetes
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -20,7 +19,6 @@ func getServiceAccountSecret(kc *kubernetes.Clientset, svcName, svcNamespace str
 		return "", errors.Errorf("No service account secret found")
 	}
 	secretName := serviceAccount.Secrets[0].Name
-	fmt.Println(secretName)
 
 	secret, err := kc.CoreV1().Secrets(svcNamespace).Get(secretName, metav1.GetOptions{})
 	if err != nil {

@@ -15,7 +15,7 @@ type PodInfo struct {
 }
 
 type Authentication interface {
-	GetLoginToken() (string, error)
+	GetClient() (*vaultapi.Client, error)
 	SetRef(name, namespace string)
 }
 

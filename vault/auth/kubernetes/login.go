@@ -4,6 +4,7 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 	. "github.com/kubevault/csi-driver/vault/auth"
 	vaultauth "github.com/kubevault/operator/pkg/vault/auth"
+	vaultutil "github.com/kubevault/operator/pkg/vault/util"
 )
 
 type AuthInfo struct {
@@ -47,6 +48,30 @@ func (ai *AuthInfo) GetLoginToken() (string, error) {
 
 	vAuth, err := vaultauth.NewAuth(kubeClient, binding)
 	return vAuth.Login()
+}
+
+func (ai *AuthInfo) GetClient() (*vaultapi.Client, error) {
+	token, err := ai.GetLoginToken()
+	if err != nil {
+		return nil, err
+	}
+
+	app, err := getAppBinding(ai.refName, ai.refNamespace)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, err := vaultutil.VaultConfigFromAppBinding(app)
+	if err != nil {
+		return nil, err
+	}
+
+	vc, err := vaultapi.NewClient(cfg)
+	if err != nil {
+		return nil, err
+	}
+	vc.SetToken(token)
+	return vc, nil
 }
 
 func (ai *AuthInfo) SetRef(name, namespace string) {
