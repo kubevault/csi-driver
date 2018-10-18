@@ -41,6 +41,7 @@ func (ai *AuthInfo) GetLoginToken() (string, error) {
 		return "", err
 	}
 	binding := app.DeepCopy()
+	binding.Namespace = ai.pod.Namespace
 	binding.Spec.Secret.Name, err = getServiceAccountSecret(kubeClient, ai.pod.ServiceAccount, ai.pod.Namespace)
 	if err != nil {
 		return "", err

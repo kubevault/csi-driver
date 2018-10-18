@@ -18,6 +18,9 @@ func getServiceAccountSecret(kc *kubernetes.Clientset, svcName, svcNamespace str
 	if len(serviceAccount.Secrets) == 0 {
 		return "", errors.Errorf("No service account secret found")
 	}
+	if len(serviceAccount.Secrets) == 0 {
+		return "", errors.Errorf("No secrets found for service account %v", svcName)
+	}
 	secretName := serviceAccount.Secrets[0].Name
 
 	secret, err := kc.CoreV1().Secrets(svcNamespace).Get(secretName, metav1.GetOptions{})
