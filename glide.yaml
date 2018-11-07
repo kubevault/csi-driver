@@ -52,6 +52,8 @@ import:
   repo: https://github.com/kmodules/offshoot-api.git
   vcs: git
   version: release-9.0
+- package: github.com/kubevault/operator
+  version: master
 testImport:
 - package: github.com/kubernetes-csi/csi-test
   version: v0.3.0-2
