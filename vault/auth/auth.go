@@ -15,9 +15,8 @@ type PodInfo struct {
 }
 
 type Authentication interface {
-	GetLoginToken() (string, error)
-	SetRole(role string)
-	SetVaultUrl(url string)
+	GetClient() (*vaultapi.Client, error)
+	SetRef(name, namespace string)
 }
 
 type Factory func(info PodInfo, client *vaultapi.Client) (Authentication, error)

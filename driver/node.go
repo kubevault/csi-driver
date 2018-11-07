@@ -3,9 +3,9 @@ package driver
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
-	"github.com/kubevault/csi-driver/vault"
 	"github.com/kubevault/csi-driver/vault/auth"
 	"github.com/kubevault/csi-driver/vault/secret"
 	"github.com/pkg/errors"
@@ -142,29 +142,20 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, errors.Errorf("Pod service account not found")
 	}
 
-	role, ok := req.VolumeAttributes["authRole"]
+	ref, ok := req.VolumeAttributes["ref"]
 	if !ok {
-		return nil, errors.Errorf("Auth role not found")
+		return nil, errors.Errorf("App reference not found")
 	}
+	data := strings.Split(ref, "/") //namespace/name
 
 	source := req.StagingTargetPath
 	target := req.TargetPath
 	fsType := "tmpfs"
 	//mnt := req.VolumeCapability.GetMount()
 
-	authType, ok := req.VolumeAttributes["AuthType"]
+	authType, ok := req.VolumeAttributes["authType"]
 	if !ok {
 		authType = authTypeKubernetes
-	}
-	client, err := auth.GetAuthMethod(authType, podInfo, d.vaultClient)
-	if err != nil {
-		return nil, err
-	}
-	client.SetRole(role)
-	client.SetVaultUrl(d.url)
-	authClientToken, err := client.GetLoginToken()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	ll := d.log.WithFields(logrus.Fields{
@@ -191,7 +182,13 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	// login with policy token
 
-	authClient, err := vault.NewVaultClient(d.url, authClientToken, nil)
+	vAuth, err := auth.GetAuthMethod(authType, podInfo, d.vaultClient)
+	if err != nil {
+		return nil, err
+	}
+	vAuth.SetRef(data[1], data[0])
+
+	authClient, err := vAuth.GetClient()
 	if err != nil {
 		return nil, err
 	}
