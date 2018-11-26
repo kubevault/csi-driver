@@ -6,7 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
-  authRole: testrole
+  ref: default/vaultapp
   secretEngine: KV
   secretName: my-secret
 
