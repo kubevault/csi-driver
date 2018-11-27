@@ -24,8 +24,6 @@ const (
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"
 	podUID            = "csi.storage.k8s.io/pod.uid"
 	podServiceAccount = "csi.storage.k8s.io/serviceAccount.name"
-
-	authTypeKubernetes = "kubernetes"
 )
 
 // Driver implements the following CSI interfaces:
