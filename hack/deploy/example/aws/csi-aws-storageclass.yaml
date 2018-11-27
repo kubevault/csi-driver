@@ -6,6 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
+  ref: default/vaultapp
   authRole: aws-cred-role
   secretEngine: AWS
   secretName: my-aws-role

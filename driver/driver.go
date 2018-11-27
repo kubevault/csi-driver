@@ -10,8 +10,6 @@ import (
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	vaultapi "github.com/hashicorp/vault/api"
-	"github.com/kubevault/csi-driver/vault"
-	_ "github.com/kubevault/csi-driver/vault/auth/kubernetes"
 	"github.com/kubevault/csi-driver/vault/secret"
 	_ "github.com/kubevault/csi-driver/vault/secret/engines"
 	"github.com/pkg/errors"
@@ -49,25 +47,11 @@ type Driver struct {
 	ch map[string]secret.SecretEngine
 }
 
-func NewDriver(ep, url, node, token string) (*Driver, error) {
-	// Create the client
-	client, err := vault.NewVaultClient(url, token, &vaultapi.TLSConfig{Insecure: false})
-	if err != nil {
-		return nil, errors.Errorf("failed to create vault client: %s", err)
-	}
-	//client.vc.SetToken(token)
-
-	// The generator token is periodic so we can set the increment to 0
-	// and it will default to the period.
-	/*if _, err = client.vc.Auth().Token().RenewSelf(0); err != nil {
-		return nil, errors.Errorf("Couldn't renew generator token: %v", err)
-	}*/
+func NewDriver(ep, node string) (*Driver, error) {
 	return &Driver{
-		endpoint:    ep,
-		url:         url,
-		vaultClient: client,
-		mounter:     &mounter{url, token},
-		nodeId:      node,
+		endpoint: ep,
+		mounter:  &mounter{},
+		nodeId:   node,
 		log: logrus.New().WithFields(logrus.Fields{
 			"node-id": node,
 		}),

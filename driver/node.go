@@ -3,10 +3,9 @@ package driver
 import (
 	"context"
 	"os"
-	"strings"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
-	"github.com/kubevault/csi-driver/vault/auth"
+	"github.com/kubevault/csi-driver/vault"
 	"github.com/kubevault/csi-driver/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -53,13 +52,11 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	fsType := "tmpfs"
 
 	ll := d.log.WithFields(logrus.Fields{
-		"volume_id": req.VolumeId,
-		//"volume_name":         vol.Label,
+		"volume_id":           req.VolumeId,
 		"staging_target_path": req.StagingTargetPath,
-		//	"source":              source,
-		"fsType":        fsType,
-		"mount_options": options,
-		"method":        "node_stage_volume",
+		"fsType":              fsType,
+		"mount_options":       options,
+		"method":              "node_stage_volume",
 	})
 
 	formatted, err := d.mounter.IsFormatted(req.StagingTargetPath)
@@ -123,40 +120,20 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Volume attributes are not provided")
 	}
 
-	podInfo := auth.PodInfo{}
-	var ok bool
-	podInfo.Name, ok = req.VolumeAttributes[podName]
-	if !ok {
-		return nil, errors.Errorf("Pod name not found")
-	}
-	podInfo.Namespace, ok = req.VolumeAttributes[podNamespace]
-	if !ok {
-		return nil, errors.Errorf("Pod namespace not found")
-	}
-	podInfo.UID, ok = req.VolumeAttributes[podUID]
-	if !ok {
-		return nil, errors.Errorf("Pod UID not found")
-	}
-	podInfo.ServiceAccount, ok = req.VolumeAttributes[podServiceAccount]
-	if !ok {
-		return nil, errors.Errorf("Pod service account not found")
+	podInfo, err := getPodInfo(req.VolumeAttributes)
+	if err != nil {
+		return nil, err
 	}
 
-	ref, ok := req.VolumeAttributes["ref"]
-	if !ok {
-		return nil, errors.Errorf("App reference not found")
+	podInfo.RefNamespace, podInfo.RefName, err = getAppBindingInfo(req.VolumeAttributes)
+	if err != nil {
+		return nil, err
 	}
-	data := strings.Split(ref, "/") //namespace/name
 
 	source := req.StagingTargetPath
 	target := req.TargetPath
 	fsType := "tmpfs"
 	//mnt := req.VolumeCapability.GetMount()
-
-	authType, ok := req.VolumeAttributes["authType"]
-	if !ok {
-		authType = authTypeKubernetes
-	}
 
 	ll := d.log.WithFields(logrus.Fields{
 		"volume_id": req.VolumeId,
@@ -182,18 +159,13 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	// login with policy token
 
-	vAuth, err := auth.GetAuthMethod(authType, podInfo, d.vaultClient)
-	if err != nil {
-		return nil, err
-	}
-	vAuth.SetRef(data[1], data[0])
-
-	authClient, err := vAuth.GetClient()
+	authClient, err := vault.GetAppBindingVaultClient(podInfo)
 	if err != nil {
 		return nil, err
 	}
 
 	var engineName string
+	var ok bool
 	if engineName, ok = options["secretEngine"]; !ok {
 		return nil, errors.Errorf("Empty engine name")
 	}

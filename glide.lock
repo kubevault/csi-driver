@@ -1,5 +1,5 @@
 hash: 21095534c6c3805d24bb375d482b9ef512682c5b185f1ca688175e2f23989161
-updated: 2018-11-07T03:53:36.60924693-08:00
+updated: 2018-11-26T16:33:46.420035717+06:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
@@ -15,7 +15,7 @@ imports:
 - name: github.com/appscode/jsonpatch
   version: 5af499cf01c842bfdd7761a433fc90525ccd6836
 - name: github.com/appscode/kutil
-  version: 3ea05651189cbff8994265360eb150d4c3513859
+  version: 5e4dc08e9e6e00fcf397b7186a3918dc4dcb9426
   subpackages:
   - apiextensions/v1beta1
   - meta
@@ -73,7 +73,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: 20b96f641a5ea98f2f8619ff4f3e061cff4833bd
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -101,11 +101,11 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
-  version: 3af367b6b30c263d47e8895973edcca9a49cf029
+  version: 2248b49eaa8e1c8c0963ee77b40841adbc19d4ca
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -138,7 +138,7 @@ imports:
 - name: github.com/hashicorp/go-plugin
   version: 54b6ff97d8180dbbd93d2010dd4a92c86f604bb8
 - name: github.com/hashicorp/go-retryablehttp
-  version: e651d75abec6fbd4f2c09508f72ae7af8a8b7171
+  version: 4502c0ecdaf0b50d857611af23831260f99be6bf
 - name: github.com/hashicorp/go-rootcerts
   version: 6bb64b370b90e7ef1fa532be9e591a81c3493e00
 - name: github.com/hashicorp/go-sockaddr
@@ -195,11 +195,11 @@ imports:
 - name: github.com/json-iterator/go
   version: 1624edc4454b8682399def8740d46db5e4362ba4
 - name: github.com/juju/errors
-  version: a4583d0a56eac4bdd939e38050d0c69abe0a9b41
+  version: 089d3ea4e4d597bd98acac068193d341983326a3
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/kubevault/operator
-  version: a8f8e5034e8553f6e222079d6785c05b6750be2d
+  version: 3078355df79d2fd7488c6952fcba8f94ba32ae6d
   subpackages:
   - apis
   - apis/config
@@ -207,6 +207,7 @@ imports:
   - apis/kubevault
   - apis/kubevault/v1alpha1
   - pkg/util
+  - pkg/vault
   - pkg/vault/auth
   - pkg/vault/auth/aws
   - pkg/vault/auth/cert
@@ -247,7 +248,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/russross/blackfriday
-  version: d3b5b032dc8e8927d31a5071b56e14c89f045135
+  version: 05f3235734ad95d0016f6a23902f06461fcf567a
 - name: github.com/ryanuber/go-glob
   version: 256dc444b735e061061cf46c809487313d5b0065
 - name: github.com/sergi/go-diff
@@ -260,8 +261,6 @@ imports:
   - crypto
   - jws
   - jwt
-- name: github.com/shurcooL/sanitized_anchor_name
-  version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
 - name: github.com/sirupsen/logrus
   version: ad15b42461921f1fb3529b058c6786c6a45d5162
 - name: github.com/spf13/cobra
@@ -523,7 +522,7 @@ imports:
   - pkg/common
   - pkg/util/proto
 - name: kmodules.xyz/custom-resources
-  version: ad163b0888db79656ef85ffea3c2661cad8c4f5e
+  version: 6d398bd2d81b1d6a811ad026c1dd24f1564a1f3c
   repo: https://github.com/kmodules/custom-resources.git
   vcs: git
   subpackages:
@@ -532,13 +531,13 @@ imports:
   - client/clientset/versioned/scheme
   - client/clientset/versioned/typed/appcatalog/v1alpha1
 - name: kmodules.xyz/monitoring-agent-api
-  version: 1153fe9fb110258b685ac5a718bc84c719a38b4a
+  version: c68fa034fbbaeb8c930c17d1ec0790a4ea46bad3
   repo: https://github.com/kmodules/monitoring-agent-api.git
   vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/offshoot-api
-  version: 5fe79fb4d96949b8d85410ca8af200226a676aac
+  version: 2ab6d9decb219e8465875d80be5d6bc754052bd9
   repo: https://github.com/kmodules/offshoot-api.git
   vcs: git
   subpackages:
