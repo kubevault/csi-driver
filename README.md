@@ -37,40 +37,7 @@ To install `csidriver` and `csinodeinfo` crds, apply this [file](hack/deploy/csi
 kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/csi-crd.yaml
 ```
 
-
-#### 2. Create a secret with your Vault root token and address
-
-Replace the placeholder string with your own token and save it as `secret.yaml`
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: vault
-  namespace: kube-system
-stringData:
-  token: "___REPLACE_ME___"
-  url: "http://REPLACE_ME__"
-```
-
-and create the secret using `kubectl` :
-
-```bash
-$ kubectl create -f ./secret.yaml
-secret "vault" created
-```
-
-You should now see the `vault` secret in the `kube-system` namespace along with other secrets
-
-```sh
-$ kubectl -n kube-system get secrets
-NAME                  TYPE                                  DATA      AGE
-default-token-jskxx   kubernetes.io/service-account-token   3         18h
-vault                 Opaque                                1         18h
-```
-
-
-#### 3. Deploy the CSI plugin and sidecars:
+#### 2. Deploy the CSI plugin and sidecars:
 
 Before you continue, be sure to checkout to a [tagged release](https://github.com/kubevault/csi-driver/releases). For
 example, to use the version `v0.1.1` you can execute the following command:
@@ -79,7 +46,7 @@ example, to use the version `v0.1.1` you can execute the following command:
 kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.1.1.yaml
 ```
 
-#### 4. Create policy and role for service account
+#### 3. Create policy and role for service account
 
 create a policy on `vault` using following capabilities:
 ```hcl
@@ -147,7 +114,7 @@ $ export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data.to
 
 $ export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)
 
-$ export K8S_HOST=$(kubectl exec consul-consul-0 -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
+$ export K8S_HOST=<host-ip>
 $ export K8s_PORT=6443
 ```
 
@@ -157,7 +124,7 @@ Next we can enable the kubernetes authentication backend and create vault role t
 $ vault auth enable kubernetes
 $ vault write auth/kubernetes/config \
     token_reviewer_jwt="$SA_JWT_TOKEN" \
-    kubernetes_host="https://$K8S_HOST:$k8s_PORT" \
+    kubernetes_host="https://$K8S_HOST:$K8s_PORT" \
     kubernetes_ca_cert="$SA_CA_CRT"
 
 $ vault write auth/kubernetes/role/testrole \
@@ -199,6 +166,26 @@ Create secret on vault with following command:
 $ vault kv put kv/my-secret my-value=s3cr3t
 ```
 
+Create a AppBinding with following
+
+```yaml
+apiVersion: appcatalog.appscode.com/v1alpha1
+kind: AppBinding
+metadata:
+  name: vaultapp
+  namespace: default
+spec:
+  clientConfig:
+    url: http://165.227.190.238:30001
+    insecureSkipTLSVerify: true
+  parameters:
+    apiVersion: "kubevault.com/v1alpha1"
+    kind: "VaultServerConfiguration"
+    usePodServiceAccountForCSIDriver: true
+    authPath: "kubernetes"
+    policyControllerRole: testrole
+
+```
 
 Create a PersistentVolumeClaim. This makes sure a volume is created and provisioned on your behalf:
 
