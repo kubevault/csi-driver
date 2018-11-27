@@ -1,59 +1,89 @@
 package vault
 
 import (
+	"encoding/json"
 	vaultapi "github.com/hashicorp/vault/api"
+	config "github.com/kubevault/operator/apis/config/v1alpha1"
+	vaultauth "github.com/kubevault/operator/pkg/vault"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
+	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
-func NewVaultClient(url, token string, tlsConfig *vaultapi.TLSConfig) (*vaultapi.Client, error) {
-	cfg := vaultapi.DefaultConfig()
-	if url != "" {
-		cfg.Address = url
-	}
-	if tlsConfig == nil {
-		tlsConfig = &vaultapi.TLSConfig{Insecure: false}
-	}
-	cfg.ConfigureTLS(tlsConfig)
-	vc, err := vaultapi.NewClient(cfg)
-	vc.SetToken(token)
+type PodInfo struct {
+	Name           string
+	Namespace      string
+	UID            string
+	ServiceAccount string
 
+	AuthRole string
+
+	RefName      string
+	RefNamespace string
+}
+
+func GetAppBindingVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
+
+	kubeClient, err := getKubeClient()
 	if err != nil {
 		return nil, err
 	}
-	return vc, nil
-}
 
-/*
-func (c *Client) GetPolicyToken(policies []string, unwrap bool) (string, error)  {
-
-	if unwrap {
-		// We override the default WrappingLookupFunction which honors the VAULT_WRAP_TTL env variable
-		c.Vc.SetWrappingLookupFunc(func(_, _ string) string { return "" })
-	}
-
-	metadata := map[string]string{
-		//"creator": "csi-driver",
-	}
-	req := vaultapi.TokenCreateRequest{
-		Policies: policies,
-		Metadata: metadata,
-		Period: "24h",
-	}
-
-	secret, err := c.Vc.Auth().Token().Create(&req)
+	app, err := getAppBinding(pi.RefName, pi.RefNamespace)
 	if err != nil {
-		return "", errors.Errorf("Couldn't create scoped token for policies %v : %v", req.Policies, err)
-	}
-	if secret == nil {
-		return "", errors.Errorf("Got nil secret when getting token")
+		return nil, err
 	}
 
-	if unwrap {
-		return secret.Auth.ClientToken, nil
-	}
-	if secret.WrapInfo == nil {
-		return "",  errors.Errorf("got unwrapped token ! Set VAULT_WRAP_TTL in kubelet environment")
+	var cf config.VaultServerConfiguration
+	err = json.Unmarshal(app.Spec.Parameters.Raw, &cf)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to unmarshal parameters")
 	}
 
-	return secret.WrapInfo.Token, nil
+	binding := app.DeepCopy()
+	binding.Namespace = pi.Namespace
+
+	if cf.UsePodServiceAccountForCSIDriver {
+		binding.Spec.Secret = nil
+		cf.ServiceAccountName = pi.ServiceAccount
+	}
+
+	rawData, err := json.Marshal(cf)
+	if err != nil {
+		return nil, err
+	}
+
+	binding.Spec.Parameters = &runtime.RawExtension{
+		Raw: rawData,
+	}
+
+	return vaultauth.NewClientWithAppBinding(kubeClient, binding)
+
 }
-*/
+
+func getAppBinding(appName, appNamespace string) (*appcat.AppBinding, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	appClient, err := appcat_cs.NewForConfig(config)
+
+	app, err := appClient.AppBindings(appNamespace).Get(appName, metav1.GetOptions{})
+	return app, err
+}
+
+func getKubeClient() (*kubernetes.Clientset, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	kubeClient, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	return kubeClient, nil
+}

@@ -14,7 +14,7 @@ func NewCmdInit() *cobra.Command {
 		Short:             "Initializes the driver.",
 		DisableAutoGenTag: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			drv, err := driver.NewDriver(cfg.Endpoint, cfg.Url, cfg.NodeName, cfg.Token)
+			drv, err := driver.NewDriver(cfg.Endpoint, cfg.NodeName)
 			if err != nil {
 				glog.Fatalln(err)
 			}

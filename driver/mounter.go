@@ -33,10 +33,7 @@ type Mounter interface {
 	IsMounted(source, target string) (bool, error)
 }
 
-type mounter struct {
-	vaultUrl string
-	token    string
-}
+type mounter struct{}
 
 func (m *mounter) Format(source, fsType string) error {
 	return nil
