@@ -1,5 +1,5 @@
-hash: 21095534c6c3805d24bb375d482b9ef512682c5b185f1ca688175e2f23989161
-updated: 2018-11-27T01:36:01.422508433-08:00
+hash: 4479aa17e7db9c59ab3d288fccc8c8d5369c977772af184958c244a9325412b4
+updated: 2018-11-27T02:04:06.672544123-08:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
@@ -121,6 +121,8 @@ imports:
   - OpenAPIv2
   - compiler
   - extensions
+- name: github.com/gorilla/websocket
+  version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/gregjones/httpcache
   version: 787624de3eb7bd915c329cba748687a3b22666a6
   subpackages:
@@ -268,7 +270,7 @@ imports:
   subpackages:
   - doc
 - name: github.com/spf13/pflag
-  version: 583c0c0531f06d5278b7d917446061adc344b5cd
+  version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/yudai/gojsondiff
   version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
   subpackages:
