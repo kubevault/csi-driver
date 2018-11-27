@@ -1,5 +1,5 @@
 hash: 21095534c6c3805d24bb375d482b9ef512682c5b185f1ca688175e2f23989161
-updated: 2018-11-26T16:33:46.420035717+06:00
+updated: 2018-11-27T11:08:27.318919622+06:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
@@ -138,7 +138,7 @@ imports:
 - name: github.com/hashicorp/go-plugin
   version: 54b6ff97d8180dbbd93d2010dd4a92c86f604bb8
 - name: github.com/hashicorp/go-retryablehttp
-  version: 4502c0ecdaf0b50d857611af23831260f99be6bf
+  version: dfbae6744eb4c188d26ef53f1d39444c0c68b60c
 - name: github.com/hashicorp/go-rootcerts
   version: 6bb64b370b90e7ef1fa532be9e591a81c3493e00
 - name: github.com/hashicorp/go-sockaddr
@@ -224,7 +224,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mitchellh/go-homedir
-  version: ae18d6b8b3205b561c79e8e5f69bff09736185f4
+  version: d682a8f0cf139663a984ff12528da460ca963de9
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -252,7 +252,8 @@ imports:
 - name: github.com/ryanuber/go-glob
   version: 256dc444b735e061061cf46c809487313d5b0065
 - name: github.com/sergi/go-diff
-  version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
+  version: 24e2351369ec4949b2ed0dc5c477afdd4c4034e8
+  repo: https://github.com/sergi/go-diff
   subpackages:
   - diffmatchpatch
 - name: github.com/SermoDigital/jose
@@ -270,11 +271,12 @@ imports:
 - name: github.com/spf13/pflag
   version: 583c0c0531f06d5278b7d917446061adc344b5cd
 - name: github.com/yudai/gojsondiff
-  version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
+  version: e21612694bdd50975f93cd5eaccb457477128e28
   subpackages:
   - formatter
 - name: github.com/yudai/golcs
   version: d1c525dea8ce39ea9a783d33cf08932305373f2c
+  repo: https://github.com/yudai/golcs
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -334,7 +336,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/base
@@ -378,7 +380,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 670d4cfef0544295bc27a114dbac37980d83185a
 - name: k8s.io/api
   version: fd83cbc87e7632ccd8bbab63d2b673d4e0c631cc
   subpackages:

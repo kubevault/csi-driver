@@ -10,6 +10,6 @@ spec:
   parameters:
     apiVersion: "kubevault.com/v1alpha1"
     kind: "VaultServerConfiguration"
-    usePodServiceAccountForCSIDriver: "true"
+    usePodServiceAccountForCSIDriver: true
     authPath: "kubernetes"
     policyControllerRole: testrole
