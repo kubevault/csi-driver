@@ -19,7 +19,7 @@ import (
 
 const (
 	driverName        = "com.vault.csi.vaultdbs"
-	vendorVersion     = "0.1.1"
+	vendorVersion     = "0.1.3"
 	podName           = "csi.storage.k8s.io/pod.name"
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"
 	podUID            = "csi.storage.k8s.io/pod.uid"

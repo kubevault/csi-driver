@@ -1,136 +1,326 @@
-# Copyright 2018 Digital Ocean
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Requires CSINodeInfo feature gate (alpha in 1.12)
+# xref: https://raw.githubusercontent.com/kubernetes/csi-api/master/pkg/crd/manifests/csidriver.yaml
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: csinodeinfos.csi.storage.k8s.io
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  group: csi.storage.k8s.io
+  version: v1alpha1
+  names:
+    kind: CSINodeInfo
+    plural: csinodeinfos
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: Specification of CSINodeInfo
+          properties:
+            drivers:
+              description: List of CSI drivers running on the node and their specs.
+              type: array
+              items:
+                properties:
+                  name:
+                    description: The CSI driver that this object refers to.
+                    type: string
+                  nodeID:
+                    description: The node from the driver point of view.
+                    type: string
+                  topologyKeys:
+                    description: List of keys supported by the driver.
+                    items:
+                      type: string
+                    type: array
+        status:
+          description: Status of CSINodeInfo
+          properties:
+            drivers:
+              description: List of CSI drivers running on the node and their statuses.
+              type: array
+              items:
+                properties:
+                  name:
+                    description: The CSI driver that this object refers to.
+                    type: string
+                  available:
+                    description: Whether the CSI driver is installed.
+                    type: boolean
+                  volumePluginMechanism:
+                    description: Indicates to external components the required mechanism
+                      to use for any in-tree plugins replaced by this driver.
+                    pattern: in-tree|csi
+                    type: string
 
-# Configuration to deploy release version of the CSI Linode
-# plugin (https://github.com/kubevault/csi-driver) compatible with
-# Kubernetes >=v1.10
-#
-# example usage: kubectl create -f <this_file>
+---
+# Requires CSIDriverRegistry feature gate (alpha in 1.12)
+# xref: https://raw.githubusercontent.com/kubernetes/csi-api/master/pkg/crd/manifests/csinodeinfo.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: csidrivers.csi.storage.k8s.io
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
 spec:
+  version: v1alpha1
   group: csi.storage.k8s.io
   names:
     kind: CSIDriver
     plural: csidrivers
   scope: Cluster
-  version: v1alpha1
-
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: Specification of the CSI Driver.
+          properties:
+            attachRequired:
+              description: Indicates this CSI volume driver requires an attach operation,
+                and that Kubernetes should call attach and wait for any attach operation
+                to complete before proceeding to mount.
+              type: boolean
+            podInfoOnMountVersion:
+              description: Indicates this CSI volume driver requires additional pod
+                information (like podName, podUID, etc.) during mount operations.
+              type: string
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: csinodeinfos.csi.storage.k8s.io
-spec:
-  group: csi.storage.k8s.io
-  names:
-    kind: CSINodeInfo
-    plural: csinodeinfos
-  scope: Cluster
-  version: v1alpha1
----
-apiVersion: csi.storage.k8s.io/v1alpha1
-kind: CSIDriver
-metadata:
-  name: com.vault.csi.vaultdbs
-spec:
-  attachRequired: false
-  podInfoOnMountVersion: v1
----
+##### Node Service Account, Roles, RoleBindings
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: csi-attacher
+  name: csi-node-sa
   namespace: kube-system
+
 ---
+
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: external-attacher-runner
+  name: driver-registrar-role
+  namespace: kube-system
+rules:
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: driver-registrar-binding
+  namespace: kube-system
+subjects:
+  - kind: ServiceAccount
+    name: csi-node-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: driver-registrar-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+##### Controller Service Account, Roles, Rolebindings
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-controller-sa
+  namespace: kube-system
+
+---
+# xref: https://github.com/kubernetes-csi/external-provisioner/blob/master/deploy/kubernetes/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: external-provisioner-role
   namespace: kube-system
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get", "list"]
   - apiGroups: [""]
-    resources: ["events"]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["get", "list"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents"]
+    verbs: ["get", "list"]
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-controller-provisioner-binding
+  namespace: kube-system
+subjects:
+  - kind: ServiceAccount
+    name: csi-controller-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: external-provisioner-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# xref: https://github.com/kubernetes-csi/external-attacher/blob/master/deploy/kubernetes/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: external-attacher-role
+  namespace: kube-system
+rules:
   - apiGroups: [""]
     resources: ["persistentvolumes"]
     verbs: ["get", "list", "watch", "update"]
   - apiGroups: [""]
     resources: ["nodes"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["csi.storage.k8s.io"]
+    resources: ["csinodeinfos"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update", "create"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csidrivers", "csinodeinfos"]
-    verbs: ["get", "watch", "list", "update", "patch", "create"]
-  - apiGroups: ["appcatalog.appscode.com"]
-    resources: ["*"]
-    verbs: ["*"]
+    verbs: ["get", "list", "watch", "update"]
+
 ---
+
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-attacher-role
+  name: csi-controller-attacher-binding
   namespace: kube-system
 subjects:
   - kind: ServiceAccount
-    name: csi-attacher
+    name: csi-controller-sa
     namespace: kube-system
 roleRef:
   kind: ClusterRole
-  name: external-attacher-runner
+  name: external-attacher-role
   apiGroup: rbac.authorization.k8s.io
+
 ---
-# needed for StatefulSet
+# xref: https://github.com/kubernetes-csi/external-snapshotter/blob/master/deploy/kubernetes/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-snapshotter-role
+  namespace: kube-system
+rules:
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshotclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshotcontents"]
+  verbs: ["create", "get", "list", "watch", "update", "delete"]
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshots"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "list", "watch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["list", "watch", "create", "update", "patch"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["watch", "get", "list"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations"]
+  verbs: ["create"]
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-controller-snapshotter-binding
+  namespace: kube-system
+subjects:
+  - kind: ServiceAccount
+    name: csi-controller-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: external-snapshotter-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: csi.storage.k8s.io/v1alpha1
+kind: CSIDriver
+metadata:
+  name: com.vault.csi.vaultdbs
+spec:
+  attachRequired: false
+  podInfoOnMountVersion: "v1"
+
+---
+# stateful sets needs a headless service to provide pod network indentity
 kind: Service
 apiVersion: v1
 metadata:
-  name: csi-attacher-vaultplugin
+  name: csi-vault-controller
   namespace: kube-system
   labels:
-    app: csi-attacher-vaultplugin
+    app: csi-vault-controller
 spec:
   selector:
-    app: csi-attacher-vaultplugin
+    app: csi-vault-controller
   ports:
     - name: dummy
       port: 12345
+
 ---
+
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
-  name: csi-attacher-vaultplugin
+  name: csi-vault-controller
   namespace: kube-system
 spec:
+  serviceName: "csi-vault"
+  replicas: 1
   selector:
     matchLabels:
-      app: csi-attacher-vaultplugin
-  serviceName: "csi-attacher-vaultplugin"
-  replicas: 1
+      app: csi-vault-controller
   template:
     metadata:
       labels:
-        app: csi-attacher-vaultplugin
+        app: csi-vault-controller
+        role: csi-vault
     spec:
-      serviceAccount: csi-attacher
+      serviceAccount: csi-controller-sa
+      hostNetwork: true
       containers:
+        - name: csi-provisioner
+          image: quay.io/k8scsi/csi-provisioner:v1.0.0
+          args:
+            - "--provisioner=com.vault.csi.vaultdbs"
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: "Always"
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-attacher
           image: quay.io/k8scsi/csi-attacher:v1.0.0
           args:
@@ -165,190 +355,22 @@ spec:
         - name: socket-dir
           emptyDir: {}
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: csi-provisioner
-  namespace: kube-system
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: external-provisioner-runner
-  namespace: kube-system
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "create", "delete"]
-  - apiGroups: [""]
-    resources: ["persistentvolumeclaims"]
-    verbs: ["get", "list", "watch", "update"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["list", "watch", "create", "update", "patch"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csidrivers", "csinodeinfos"]
-    verbs: ["get", "watch", "list", "update", "patch", "create"]
-  - apiGroups: ["appcatalog.appscode.com"]
-    resources: ["*"]
-    verbs: ["*"]
-
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: csi-provisioner-role
-  namespace: kube-system
-subjects:
-  - kind: ServiceAccount
-    name: csi-provisioner
-    namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: external-provisioner-runner
-  apiGroup: rbac.authorization.k8s.io
----
-# needed for StatefulSet
-kind: Service
-apiVersion: v1
-metadata:
-  name: csi-provisioner-vaultplugin
-  namespace: kube-system
-  labels:
-    app: csi-provisioner-vaultplugin
-spec:
-  selector:
-    app: csi-provisioner-vaultplugin
-  ports:
-    - name: dummy
-      port: 12345
----
-kind: StatefulSet
-apiVersion: apps/v1
-metadata:
-  name: csi-provisioner-vaultplugin
-  namespace: kube-system
-spec:
-  selector:
-    matchLabels:
-      app: csi-provisioner-vaultplugin
-  serviceName: "csi-provisioner-vaultplugin"
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: csi-provisioner-vaultplugin
-    spec:
-      serviceAccount: csi-provisioner
-      containers:
-        - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v1.0.0
-          args:
-            - "--provisioner=com.vault.csi.vaultdbs"
-            - "--csi-address=$(ADDRESS)"
-            - "--v=5"
-          env:
-            - name: ADDRESS
-              value: /var/lib/csi/sockets/pluginproxy/csi.sock
-          imagePullPolicy: "Always"
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
-        - name: vault-csi-plugin
-          image: pharmer/csi-vault:0.1.3
-          args :
-            - init
-            - "--endpoint=$(CSI_ENDPOINT)"
-            - "--node=$(NODE_NAME)"
-            - "--v=10"
-          env:
-            - name: CSI_ENDPOINT
-              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          imagePullPolicy: "Always"
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
-      volumes:
-        - name: socket-dir
-          emptyDir: {}
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: csi-vaultplugin
-  namespace: kube-system
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: csi-vaultplugin
-  namespace: kube-system
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["nodes"]
-    verbs: ["get", "list", "update"]
-  - apiGroups: [""]
-    resources: ["namespaces"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "update"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update", "create"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csidrivers", "csinodeinfos"]
-    verbs: ["get", "watch", "list", "update", "patch", "create"]
-  - apiGroups: [""]
-    resources: ["serviceaccounts"]
-    verbs: ["get", "list"]
-  - apiGroups: ["appcatalog.appscode.com"]
-    resources: ["*"]
-    verbs: ["*"]
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: csi-vaultplugin
-  namespace: kube-system
-subjects:
-  - kind: ServiceAccount
-    name: csi-vaultplugin
-    namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: csi-vaultplugin
-  apiGroup: rbac.authorization.k8s.io
-
----
 kind: DaemonSet
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 metadata:
-  name: csi-vaultplugin
+  name: csi-vault-node
   namespace: kube-system
 spec:
   selector:
     matchLabels:
-      app: csi-vaultplugin
+      app: csi-vault-node
   template:
     metadata:
       labels:
-        app: csi-vaultplugin
+        app: csi-vault-node
+        role: csi-vault
     spec:
-      serviceAccount: csi-vaultplugin
+      serviceAccount: csi-node-sa
       hostNetwork: true
       containers:
         - name: driver-registrar
@@ -356,6 +378,8 @@ spec:
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
+            - "--mode=node-register"
+            - "--pod-info-mount-version=\"v1\""
             - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
           env:
             - name: ADDRESS
@@ -370,13 +394,8 @@ spec:
             - name: plugin-dir
               mountPath: /csi/
             - name: registration-dir
-              mountPath: /registration
-        - name: csi-vaultplugin
-          securityContext:
-            privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
+              mountPath: /registration/
+        - name: csi-vault-plugin
           image: pharmer/csi-vault:0.1.3
           args :
             - init
@@ -391,6 +410,11 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           imagePullPolicy: "Always"
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
           volumeMounts:
             - name: plugin-dir
               mountPath: /csi
@@ -402,11 +426,14 @@ spec:
             - mountPath: /dev
               name: device-dir
       volumes:
-        # TODO(arslan): the registar is not implemented yet
-        #- name: registrar-socket-dir
-        #  hostPath:
-        #    path: /var/lib/kubelet/device-plugins/
-        #    type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: DirectoryOrCreate
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
         - name: plugin-dir
           hostPath:
             path: /var/lib/kubelet/plugins/com.vault.csi.vaultdbs
@@ -415,10 +442,24 @@ spec:
           hostPath:
             path: /var/lib/kubelet
             type: Directory
-        - name: registration-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins/
-            type: Directory
         - name: device-dir
           hostPath:
             path: /dev
+        # The following mounts are required to trigger host udevadm from container
+        - name: udev-rules-etc
+          hostPath:
+            path: /etc/udev
+            type: Directory
+        - name: udev-rules-lib
+          hostPath:
+            path: /lib/udev
+            type: Directory
+        - name: udev-socket
+          hostPath:
+            path: /run/udev
+            type: Directory
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+---

@@ -84,7 +84,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 	for _, mode := range []csi.VolumeCapability_AccessMode_Mode{
 		// DO currently only support a single node to be attached to a single
 		// node in read/write mode
-		csi.VolumeCapability_AccessMode_SINGLE_NODE_READER_ONLY,
+		csi.VolumeCapability_AccessMode_MULTI_NODE_READER_ONLY,
 	} {
 		vcaps = append(vcaps, &csi.VolumeCapability_AccessMode{Mode: mode})
 	}
@@ -99,14 +99,10 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 	ll.Info("validate volume capabilities called")
 
 	resp := &csi.ValidateVolumeCapabilitiesResponse{
-		Confirmed: &csi.ValidateVolumeCapabilitiesResponse_Confirmed{
-			VolumeContext:      req.VolumeContext,
-			VolumeCapabilities: req.VolumeCapabilities,
-			Parameters:         req.Parameters,
-		},
+		Message: "ValidateVolumeCapabilities is currently unimplemented for CSI v1.0.0",
 	}
 
-	ll.WithField("response", resp).Info("supported capabilities")
+		ll.WithField("response", resp).Info("supported capabilities")
 	return resp, nil
 
 }
