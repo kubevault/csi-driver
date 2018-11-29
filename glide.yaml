@@ -3,7 +3,7 @@ import:
 - package: github.com/appscode/go
   version: master
 - package: github.com/container-storage-interface/spec
-  version: v0.3.0
+  version: v1.0.0
 - package: github.com/golang/glog
 - package: github.com/hashicorp/vault
   version: v0.11.3
@@ -62,4 +62,4 @@ import:
   version: v1.4.0
 testImport:
 - package: github.com/kubernetes-csi/csi-test
-  version: v0.3.0-2
+  version: v1.0.0-1

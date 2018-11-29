@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	"github.com/container-storage-interface/spec/lib/go/csi"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault/secret"
 	_ "github.com/kubevault/csi-driver/vault/secret/engines"

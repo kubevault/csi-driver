@@ -1,5 +1,5 @@
-hash: 4479aa17e7db9c59ab3d288fccc8c8d5369c977772af184958c244a9325412b4
-updated: 2018-12-01T19:07:05.756786457-08:00
+hash: afd57266d613e88c819ee58136a87183fbafd0e37c14dd9cb6e2460548155315
+updated: 2018-11-29T12:25:01.132044371+06:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
@@ -56,9 +56,9 @@ imports:
   - private/protocol/xml/xmlutil
   - service/sts
 - name: github.com/container-storage-interface/spec
-  version: 2178fdeea87f1150a17a63252eee28d4d8141f72
+  version: ed0bb0e1557548aa028307f48728767cfe8f6345
   subpackages:
-  - lib/go/csi/v0
+  - lib/go/csi
 - name: github.com/cpuguy83/go-md2man
   version: 20f5889cbdc3c73dbd2862796665e7c465ade7d1
   subpackages:
@@ -78,7 +78,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: 20b96f641a5ea98f2f8619ff4f3e061cff4833bd
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -99,6 +99,7 @@ imports:
   subpackages:
   - jsonpb
   - proto
+  - protoc-gen-go/descriptor
   - ptypes
   - ptypes/any
   - ptypes/duration
@@ -106,7 +107,7 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
@@ -220,7 +221,7 @@ imports:
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
 - name: github.com/kubevault/operator
-  version: 1f0ee037897ce7d1c0e64e76dad545bbb1b30858
+  version: 17ecd2b8182b341050b3b13c23fff6d2a1cdc7fc
   subpackages:
   - apis
   - apis/catalog
@@ -250,7 +251,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mitchellh/go-homedir
-  version: ae18d6b8b3205b561c79e8e5f69bff09736185f4
+  version: d682a8f0cf139663a984ff12528da460ca963de9
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -278,7 +279,8 @@ imports:
 - name: github.com/ryanuber/go-glob
   version: 256dc444b735e061061cf46c809487313d5b0065
 - name: github.com/sergi/go-diff
-  version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
+  version: 24e2351369ec4949b2ed0dc5c477afdd4c4034e8
+  repo: https://github.com/sergi/go-diff
   subpackages:
   - diffmatchpatch
 - name: github.com/SermoDigital/jose
@@ -296,11 +298,12 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/yudai/gojsondiff
-  version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
+  version: e21612694bdd50975f93cd5eaccb457477128e28
   subpackages:
   - formatter
 - name: github.com/yudai/golcs
   version: d1c525dea8ce39ea9a783d33cf08932305373f2c
+  repo: https://github.com/yudai/golcs
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -360,7 +363,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/base
@@ -585,7 +588,7 @@ testImports:
   subpackages:
   - apis/appcatalog/v1alpha1
 - name: github.com/kubernetes-csi/csi-test
-  version: d6869a2704bb7e603ab294a42fbb893c18b8e46e
+  version: d8da31da5fc7842397a37934652487bf3e4f6ab0
   subpackages:
   - pkg/sanity
   - utils

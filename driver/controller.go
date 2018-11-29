@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -38,8 +38,8 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
-			Id:            req.Name,
-			Attributes:    req.Parameters,
+			VolumeId:      req.Name,
+			VolumeContext: req.Parameters,
 			CapacityBytes: req.CapacityRange.RequiredBytes,
 		},
 	}
@@ -93,33 +93,17 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 		"volume_id":              req.VolumeId,
 		"volume_capabilities":    req.VolumeCapabilities,
 		"supported_capabilities": vcaps,
-		"vollume_attributes":     req.VolumeAttributes,
+		"vollume_contexts":       req.VolumeContext,
 		"method":                 "validate_volume_capabilities",
 	})
 	ll.Info("validate volume capabilities called")
 
-	hasSupport := func(mode csi.VolumeCapability_AccessMode_Mode) bool {
-		for _, m := range vcaps {
-			if mode == m.Mode {
-				return true
-			}
-		}
-		return false
-	}
-
 	resp := &csi.ValidateVolumeCapabilitiesResponse{
-		Supported: false,
-	}
-
-	for _, cap := range req.VolumeCapabilities {
-		// cap.AccessMode.Mode
-		if hasSupport(cap.AccessMode.Mode) {
-			resp.Supported = true
-		} else {
-			// we need to make sure all capabilities are supported. Revert back
-			// in case we have a cap that is supported, but is invalidated now
-			resp.Supported = false
-		}
+		Confirmed: &csi.ValidateVolumeCapabilitiesResponse_Confirmed{
+			VolumeContext:      req.VolumeContext,
+			VolumeCapabilities: req.VolumeCapabilities,
+			Parameters:         req.Parameters,
+		},
 	}
 
 	ll.WithField("response", resp).Info("supported capabilities")

@@ -163,7 +163,14 @@ then create the storage class using `kubectl`.
 Create secret on vault with following command:
 
 ```bash
+$ vault secrets enable -version=1 kv
 $ vault kv put kv/my-secret my-value=s3cr3t
+```
+
+Install AppBinding CRD by running
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kmodules/custom-resources/master/api/crds/appbinding.yaml
 ```
 
 Create a AppBinding with following
