@@ -62,4 +62,4 @@ import:
   version: v1.4.0
 testImport:
 - package: github.com/kubernetes-csi/csi-test
-  version: v1.0.0-1
+  version: v1.0.0-2

@@ -4,7 +4,7 @@ metadata:
   name: vault-kv-storage
   annotations:
     storageclass.kubernetes.io/is-default-class: "false"
-provisioner: com.vault.csi.vaultdbs
+provisioner: vaultdbs.csi.vault.com
 parameters:
   ref: default/vaultapp
   secretEngine: KV

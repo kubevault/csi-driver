@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/kubevault/csi-driver/vault/secret"
 	_ "github.com/kubevault/csi-driver/vault/secret/engines"
 	"github.com/pkg/errors"
@@ -18,7 +17,7 @@ import (
 )
 
 const (
-	driverName        = "com.vault.csi.vaultdbs"
+	driverName        = "vaultdbs.csi.vault.com"
 	vendorVersion     = "0.1.3"
 	podName           = "csi.storage.k8s.io/pod.name"
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"
@@ -37,10 +36,9 @@ type Driver struct {
 	nodeId   string
 	url      string
 
-	srv         *grpc.Server
-	vaultClient *vaultapi.Client
-	mounter     Mounter
-	log         *logrus.Entry
+	srv     *grpc.Server
+	mounter Mounter
+	log     *logrus.Entry
 
 	ch map[string]secret.SecretEngine
 }

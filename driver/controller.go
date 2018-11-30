@@ -39,7 +39,7 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
 			VolumeId:      req.Name,
-			VolumeContext: req.Parameters,
+			VolumeContext: req.GetParameters(),
 			CapacityBytes: req.CapacityRange.RequiredBytes,
 		},
 	}
@@ -102,7 +102,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 		Message: "ValidateVolumeCapabilities is currently unimplemented for CSI v1.0.0",
 	}
 
-		ll.WithField("response", resp).Info("supported capabilities")
+	ll.WithField("response", resp).Info("supported capabilities")
 	return resp, nil
 
 }
