@@ -1,13 +1,16 @@
 hash: 4479aa17e7db9c59ab3d288fccc8c8d5369c977772af184958c244a9325412b4
-updated: 2018-11-27T02:04:06.672544123-08:00
+updated: 2018-12-01T19:07:05.756786457-08:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
   subpackages:
+  - analytics
   - context
   - encoding/json/types
+  - homedir
   - log
   - log/golog
+  - net
   - runtime
   - sets
   - types
@@ -15,10 +18,12 @@ imports:
 - name: github.com/appscode/jsonpatch
   version: 5af499cf01c842bfdd7761a433fc90525ccd6836
 - name: github.com/appscode/kutil
-  version: 5e4dc08e9e6e00fcf397b7186a3918dc4dcb9426
+  version: 239838b6231b8a27a66426e25678351ce50c4cfd
   subpackages:
   - apiextensions/v1beta1
   - meta
+  - tools/analytics
+  - tools/cli
 - name: github.com/armon/go-radix
   version: 1a2de0c21c94309923825da3df33a4381872c795
 - name: github.com/aws/aws-sdk-go
@@ -71,7 +76,7 @@ imports:
 - name: github.com/fatih/structs
   version: 878a968ab22548362a09bdb3322f98b00f470d46
 - name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-ini/ini
   version: 300e940a926eb277d3901b20bdfcc54928ad3642
 - name: github.com/go-openapi/jsonpointer
@@ -146,7 +151,7 @@ imports:
 - name: github.com/hashicorp/go-sockaddr
   version: 6d291a969b86c4b633730bfc6b8b9d64c3aafed9
 - name: github.com/hashicorp/go-uuid
-  version: de160f5c59f693fed329e73e291bb751fe4ea4dc
+  version: 4f571afc59f3043a65f8fe6bf46d887b10a01d43
 - name: github.com/hashicorp/go-version
   version: b5a281d3160aa11950a6182bd9a9dc2cb1e02d50
 - name: github.com/hashicorp/golang-lru
@@ -194,20 +199,39 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
   version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+- name: github.com/jpillora/go-ogle-analytics
+  version: 14b04e0594ef6a9fd943363b135656f0ec8c9d0e
 - name: github.com/json-iterator/go
   version: 1624edc4454b8682399def8740d46db5e4362ba4
 - name: github.com/juju/errors
   version: 089d3ea4e4d597bd98acac068193d341983326a3
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
-- name: github.com/kubevault/operator
-  version: 3078355df79d2fd7488c6952fcba8f94ba32ae6d
+- name: github.com/kubedb/apimachinery
+  version: 4cebffe1a7709b9b1ed48766040ea6072957be65
   subpackages:
   - apis
+  - apis/authorization
+  - apis/authorization/v1alpha1
+  - apis/catalog
+  - apis/catalog/v1alpha1
+  - apis/config/v1alpha1
+  - apis/kubedb
+  - apis/kubedb/v1alpha1
+  - client/clientset/versioned/scheme
+- name: github.com/kubevault/operator
+  version: 1f0ee037897ce7d1c0e64e76dad545bbb1b30858
+  subpackages:
+  - apis
+  - apis/catalog
+  - apis/catalog/v1alpha1
   - apis/config
   - apis/config/v1alpha1
   - apis/kubevault
   - apis/kubevault/v1alpha1
+  - apis/policy
+  - apis/policy/v1alpha1
+  - client/clientset/versioned/scheme
   - pkg/util
   - pkg/vault
   - pkg/vault/auth
@@ -348,6 +372,7 @@ imports:
 - name: google.golang.org/genproto
   version: 09f6ed296fc66555a25fe4ce95173148778dfa85
   subpackages:
+  - googleapis/api/annotations
   - googleapis/rpc/status
 - name: google.golang.org/grpc
   version: 7a6a684ca69eb4cae85ad0a484f2e531598c047b
@@ -523,6 +548,10 @@ imports:
   subpackages:
   - pkg/common
   - pkg/util/proto
+- name: k8s.io/kubernetes
+  version: 0ed33881dc4355495f623c6f22e7dd0b7632b7c0
+  subpackages:
+  - pkg/api/legacyscheme
 - name: kmodules.xyz/custom-resources
   version: 6d398bd2d81b1d6a811ad026c1dd24f1564a1f3c
   repo: https://github.com/kmodules/custom-resources.git
@@ -538,6 +567,12 @@ imports:
   vcs: git
   subpackages:
   - api/v1
+- name: kmodules.xyz/objectstore-api
+  version: ebe27c957a5bf41e0680776e3626b5507087f4c3
+  repo: https://github.com/kmodules/objectstore-api.git
+  vcs: git
+  subpackages:
+  - api/v1
 - name: kmodules.xyz/offshoot-api
   version: 2ab6d9decb219e8465875d80be5d6bc754052bd9
   repo: https://github.com/kmodules/offshoot-api.git
@@ -546,7 +581,7 @@ imports:
   - api/v1
 testImports:
 - name: github.com/kmodules/custom-resources
-  version: 6d398bd2d81b1d6a811ad026c1dd24f1564a1f3c
+  version: 10b24c8fd9028ab67a4b75cbf16d8f8e52cfe634
   subpackages:
   - apis/appcatalog/v1alpha1
 - name: github.com/kubernetes-csi/csi-test
