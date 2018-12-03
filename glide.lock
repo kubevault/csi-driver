@@ -1,5 +1,5 @@
 hash: 307323ff548372627bd217e0214dd4402ee6300d5e6ee1afd1186b01eba43f1f
-updated: 2018-12-03T15:29:06.04164502+06:00
+updated: 2018-12-03T19:10:00.129399687+06:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
@@ -78,7 +78,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-ini/ini
-  version: 20b96f641a5ea98f2f8619ff4f3e061cff4833bd
+  version: 300e940a926eb277d3901b20bdfcc54928ad3642
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -209,7 +209,7 @@ imports:
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/kubedb/apimachinery
-  version: 4cebffe1a7709b9b1ed48766040ea6072957be65
+  version: edf77e9609ff15a2ad16582deda49eef5a0b80f4
   subpackages:
   - apis
   - apis/authorization
