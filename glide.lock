@@ -1,5 +1,5 @@
-hash: afd57266d613e88c819ee58136a87183fbafd0e37c14dd9cb6e2460548155315
-updated: 2018-11-29T12:25:01.132044371+06:00
+hash: 307323ff548372627bd217e0214dd4402ee6300d5e6ee1afd1186b01eba43f1f
+updated: 2018-12-03T15:29:06.04164502+06:00
 imports:
 - name: github.com/appscode/go
   version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
@@ -221,7 +221,7 @@ imports:
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
 - name: github.com/kubevault/operator
-  version: 17ecd2b8182b341050b3b13c23fff6d2a1cdc7fc
+  version: 1f0ee037897ce7d1c0e64e76dad545bbb1b30858
   subpackages:
   - apis
   - apis/catalog
@@ -588,7 +588,7 @@ testImports:
   subpackages:
   - apis/appcatalog/v1alpha1
 - name: github.com/kubernetes-csi/csi-test
-  version: d8da31da5fc7842397a37934652487bf3e4f6ab0
+  version: 9e5a84c24142510456360c18eeeac1eddb9a5652
   subpackages:
   - pkg/sanity
   - utils

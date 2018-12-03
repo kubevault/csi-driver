@@ -1,0 +1,12 @@
+apiVersion: csi.storage.k8s.io/v1alpha1
+kind: CSINodeInfo
+metadata:
+  name: 2gb-pool-d63aut
+  ownerReferences:
+  - apiVersion: v1
+    kind: Node
+    name: 2gb-pool-d63aut
+    uid: 044ec206-f6ed-11e8-b19c-2e2ccc574f91
+csiDrivers:
+  - driver: vaultdbs.csi.vault.com
+    nodeID: 2gb-pool-d63aut

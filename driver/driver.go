@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/kubevault/csi-driver/vault/secret"
@@ -41,6 +42,11 @@ type Driver struct {
 	log     *logrus.Entry
 
 	ch map[string]secret.SecretEngine
+
+	// ready defines whether the driver is ready to function. This value will
+	// be used by the `Identity` service via the `Probe()` method.
+	readyMu sync.Mutex // protects ready
+	ready   bool
 }
 
 func NewDriver(ep, node string) (*Driver, error) {
@@ -100,12 +106,17 @@ func (d *Driver) Run() error {
 	csi.RegisterControllerServer(d.srv, d)
 	csi.RegisterNodeServer(d.srv, d)
 
+	d.ready = true
 	d.log.WithField("addr", addr).Info("server started")
 	return d.srv.Serve(listener)
 }
 
 // Stop stops the plugin
 func (d *Driver) Stop() {
+	d.readyMu.Lock()
+	d.ready = false
+	d.readyMu.Unlock()
+
 	d.log.Info("server stopped")
 	d.srv.Stop()
 }

@@ -266,5 +266,10 @@ func (d *Driver) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (
 	return &csi.NodeGetInfoResponse{
 		NodeId:            d.nodeId,
 		MaxVolumesPerNode: 10,
+		AccessibleTopology: &csi.Topology{
+			Segments: map[string]string{
+				driverName: d.nodeId,
+			},
+		},
 	}, nil
 }

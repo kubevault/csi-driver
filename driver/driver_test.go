@@ -2,7 +2,6 @@ package driver
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -14,10 +13,8 @@ import (
 	"testing"
 	"time"
 
-	vaultapi "github.com/hashicorp/vault/api"
 	cr "github.com/kmodules/custom-resources/apis/appcatalog/v1alpha1"
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
-	"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,11 +32,10 @@ func TestDriverSuite(t *testing.T) {
 	}
 
 	driver := &Driver{
-		endpoint:    endpoint,
-		nodeId:      "1234567879",
-		vaultClient: nil,
-		mounter:     &fakeMounter{},
-		log:         logrus.New().WithField("test_enabed", true),
+		endpoint: endpoint,
+		nodeId:   "1234567879",
+		mounter:  &fakeMounter{},
+		log:      logrus.New().WithField("test_enabed", true),
 	}
 	defer driver.Stop()
 
@@ -96,34 +92,34 @@ func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 }
 
 func TestKVPolicy(t *testing.T) {
+	/*
+		client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+		fmt.Println(client.Headers(), err)
 
-	client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
-	fmt.Println(client.Headers(), err)
+		p := "v1/auth/kubernetes/login"
 
-	p := "v1/auth/kubernetes/login"
+		r := client.NewRequest("POST", p)
+		body := map[string]interface{}{
+			"role": "testrole",
+			"jwt":  "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InBvc3RncmVzLXZhdWx0LXRva2VuLXg5djRyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InBvc3RncmVzLXZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOTVjM2FmNzAtY2FiZS0xMWU4LWExMzQtYTZmNTM5NDhkMzQ0Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6cG9zdGdyZXMtdmF1bHQifQ.Q9xGPbPt_cNwRrzlX-kFJsN7eJPceAYP7P7rkU8VZPeEuIip2jFoSbF8LZsL6TfB7XhUnvQT4NTXry-XVQA_Rvfrs61IPtvw0HOwkCxtd0PglW1p53B_onH6NknofRT0ZThoC9Jhs8NYa4FkTyyK1Wo46_aZQ2XbCny9UZzOjBxYo8iv_OL3crIytQV6UjrA2q-XkJuGCRc_vvXpPS4KO3ke7dsjrCwOTTz8QRGiljyscHzCJmN733VxvGSDuDoonxty894DhqsL6iRHKS5X8UVaq3MGNyndfQBSJfUnT75dFYD12Cr_BZRONBF66iGSXbaa-_Ft-eTgCEq0o_j2Nw",
+		}
+		d, e := json.Marshal(body)
+		fmt.Println(string(d), e)
+		if err := r.SetJSONBody(body); err != nil {
+			fmt.Println(err, "***************")
+		}
+		r.Headers = make(map[string][]string)
+		r.Headers.Set("Content-Type", "application/json")
 
-	r := client.NewRequest("POST", p)
-	body := map[string]interface{}{
-		"role": "testrole",
-		"jwt":  "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InBvc3RncmVzLXZhdWx0LXRva2VuLXg5djRyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InBvc3RncmVzLXZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOTVjM2FmNzAtY2FiZS0xMWU4LWExMzQtYTZmNTM5NDhkMzQ0Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6cG9zdGdyZXMtdmF1bHQifQ.Q9xGPbPt_cNwRrzlX-kFJsN7eJPceAYP7P7rkU8VZPeEuIip2jFoSbF8LZsL6TfB7XhUnvQT4NTXry-XVQA_Rvfrs61IPtvw0HOwkCxtd0PglW1p53B_onH6NknofRT0ZThoC9Jhs8NYa4FkTyyK1Wo46_aZQ2XbCny9UZzOjBxYo8iv_OL3crIytQV6UjrA2q-XkJuGCRc_vvXpPS4KO3ke7dsjrCwOTTz8QRGiljyscHzCJmN733VxvGSDuDoonxty894DhqsL6iRHKS5X8UVaq3MGNyndfQBSJfUnT75dFYD12Cr_BZRONBF66iGSXbaa-_Ft-eTgCEq0o_j2Nw",
-	}
-	d, e := json.Marshal(body)
-	fmt.Println(string(d), e)
-	if err := r.SetJSONBody(body); err != nil {
-		fmt.Println(err, "***************")
-	}
-	r.Headers = make(map[string][]string)
-	r.Headers.Set("Content-Type", "application/json")
+		ctx, cancelFunc := context.WithCancel(context.Background())
+		defer cancelFunc()
+		resp, err := client.RawRequestWithContext(ctx, r)
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer resp.Body.Close()
 
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
-	resp, err := client.RawRequestWithContext(ctx, r)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Println(resp.Body)
+		fmt.Println(resp.Body)*/
 	//secret, err :=  vaultapi.ParseSecret(resp.Body)
 	//fmt.Println(secret, err)
 	/*return
@@ -145,14 +141,14 @@ func TestKVPolicy(t *testing.T) {
 }
 
 func TestVault(t *testing.T) {
-	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	/*c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 
 	path := fmt.Sprintf("/v1/pki/roles/%s", "my-pki-role")
 	req := c.NewRequest("GET", path)
 	resp, err := c.RawRequest(req)
 	fmt.Println(err)
 	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data)
+	fmt.Println(secret.Data)*/
 }
 
 func TestAT(t *testing.T) {
@@ -164,7 +160,7 @@ func TestAT(t *testing.T) {
 }
 
 func TestPKI(t *testing.T) {
-	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	/*c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 
 	r := c.NewRequest("POST", "/v1/pki/issue/my-pki-role")
 	if err := r.SetJSONBody(map[string]string{
@@ -182,7 +178,7 @@ func TestPKI(t *testing.T) {
 	defer resp.Body.Close()
 
 	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data)
+	fmt.Println(secret.Data)*/
 }
 
 func TestHttp(t *testing.T) {
@@ -268,4 +264,19 @@ func TestRaw(t *testing.T) {
 
 	y, e := json.Marshal(d)
 	fmt.Println(string(y), e)
+}
+
+func TestNodeId(t *testing.T) {
+	an := map[string]string{
+		"vaultdbs.csi.vault.com": "2gb-pool-d63aut",
+	}
+	b, _ := json.Marshal(an)
+	a := map[string]string{
+		"csi.volume.kubernetes.io/nodeid": string(b),
+	}
+	fmt.Print(a)
+}
+
+func TestNI(t *testing.T) {
+
 }

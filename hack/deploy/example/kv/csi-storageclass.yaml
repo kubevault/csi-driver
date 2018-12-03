@@ -9,4 +9,3 @@ parameters:
   ref: default/vaultapp
   secretEngine: KV
   secretName: my-secret
-
