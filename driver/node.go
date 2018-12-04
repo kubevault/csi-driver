@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
-	"github.com/kubevault/csi-driver/vault"
+	"github.com/kubevault/csi-driver/util"
 	vs "github.com/kubevault/operator/pkg/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -162,7 +162,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	// login with policy token
 
-	authClient, err := vault.GetAppBindingVaultClient(podInfo)
+	authClient, err := util.GetAppBindingVaultClient(podInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, errors.Errorf("Empty engine name")
 	}
 
-	secretData, err := vault.ReadSecretData(engineName, authClient, options, target)
+	secretData, err := util.FetchSecret(engineName, authClient, options, target)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	}
 
 	if _, found := d.ch[req.VolumeId]; !found {
-		renewer, err := vault.SetRenewal(authClient, secretData)
+		renewer, err := util.SetRenewal(authClient, secretData)
 		if err != nil {
 			return nil, err
 		}
@@ -228,7 +228,7 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 	}
 
 	if _, found := d.ch[req.VolumeId]; found {
-		vault.StopRenew(d.ch[req.VolumeId])
+		util.StopRenew(d.ch[req.VolumeId])
 	}
 
 	ll.Info("unmounting volume is finished")

@@ -76,9 +76,9 @@ def version():
 
 
 def fmt():
-    libbuild.ungroup_go_imports('*.go', 'cmds', 'driver', 'vault')
-    die(call('goimports -w *.go driver cmds'))
-    call('gofmt -s -w *.go driver cmds vault')
+    libbuild.ungroup_go_imports('*.go', 'cmds', 'driver', 'util')
+    die(call('goimports -w *.go driver cmds util'))
+    call('gofmt -s -w *.go driver cmds util')
 
 
 def vet():

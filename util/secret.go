@@ -1,18 +1,19 @@
-package vault
+package util
 
 import (
-	vaultapi "github.com/hashicorp/vault/api"
-	vaultEng "github.com/kubevault/operator/pkg/vault/secret/engines"
-	"github.com/pkg/errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
+
+	vaultapi "github.com/hashicorp/vault/api"
+	vaultEng "github.com/kubevault/operator/pkg/vault/secret/engines"
+	"github.com/pkg/errors"
 )
 
-// ReasdSecretData writes the secret on specified targetPath
+// FetchSecret writes the secret on specified targetPath
 // Returns LeaseID and error
-func ReadSecretData(engineName string, vc *vaultapi.Client, opts map[string]string, targetPath string) (*vaultapi.Secret, error) {
+func FetchSecret(engineName string, vc *vaultapi.Client, opts map[string]string, targetPath string) (*vaultapi.Secret, error) {
 	engine, err := vaultEng.NewSecretManager(engineName)
 	if err != nil {
 		return nil, err
@@ -33,7 +34,7 @@ func ReadSecretData(engineName string, vc *vaultapi.Client, opts map[string]stri
 
 	for key, val := range secret.Data {
 		if val != nil {
-			if err := writeData(key, val.(string), targetPath); err != nil {
+			if err := writeData(targetPath, key, val); err != nil {
 				return secret, err
 			}
 		}
@@ -56,9 +57,9 @@ func StopRenew(renewer *vaultapi.Renewer) {
 	renewer.Stop()
 }
 
-func writeData(key, value, dir string) error {
+func writeData(dir, key string, value interface{}) error {
 	keyPath := path.Join(dir, key)
-	return ioutil.WriteFile(keyPath, []byte(strings.TrimSpace(value)), 0644)
+	return ioutil.WriteFile(keyPath, []byte(fmt.Sprintf("%v", value)), 0644)
 }
 
 func ensurePath(path string) error {

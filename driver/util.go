@@ -3,12 +3,12 @@ package driver
 import (
 	"strings"
 
-	"github.com/kubevault/csi-driver/vault"
+	"github.com/kubevault/csi-driver/util"
 	"github.com/pkg/errors"
 )
 
-func getPodInfo(attr map[string]string) (*vault.PodInfo, error) {
-	podInfo := &vault.PodInfo{}
+func getPodInfo(attr map[string]string) (*util.PodInfo, error) {
+	podInfo := &util.PodInfo{}
 	var ok bool
 	podInfo.Name, ok = attr[podName]
 	if !ok {
