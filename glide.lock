@@ -1,5 +1,5 @@
 hash: 4479aa17e7db9c59ab3d288fccc8c8d5369c977772af184958c244a9325412b4
-updated: 2018-12-04T13:04:20.607224506+06:00
+updated: 2018-12-04T15:46:43.671026218+06:00
 imports:
 - name: github.com/appscode/go
   version: aa0a55d74dac66f9b9bec9c0e7b67944115a3f44
@@ -220,7 +220,7 @@ imports:
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
 - name: github.com/kubevault/operator
-  version: 1f0ee037897ce7d1c0e64e76dad545bbb1b30858
+  version: 73aee8bd242347e5fee83c1874d48d9330be2613
   subpackages:
   - apis
   - apis/catalog

@@ -1,7 +1,6 @@
 package vault
 
 import (
-	"encoding/json"
 	vaultapi "github.com/hashicorp/vault/api"
 	vaultEng "github.com/kubevault/operator/pkg/vault/secret/engines"
 	"github.com/pkg/errors"
@@ -23,13 +22,8 @@ func ReadSecretData(engineName string, vc *vaultapi.Client, opts map[string]stri
 		return nil, err
 	}
 
-	data, err := engine.GetSecret()
+	secret, err := engine.GetSecret()
 	if err != nil {
-		return nil, err
-	}
-
-	secret := &vaultapi.Secret{}
-	if err = json.Unmarshal(data, secret); err != nil {
 		return nil, err
 	}
 
