@@ -7,6 +7,6 @@ metadata:
 provisioner: com.vault.csi.vaultdbs
 parameters:
   ref: default/vaultapp
-  authRole: aws-cred-role
-  secretEngine: AWS
-  secretName: my-aws-role
+  role: aws-cred-role
+  engine: AWS
+  path: aws

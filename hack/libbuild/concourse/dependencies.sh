@@ -26,13 +26,13 @@ mv onessl /usr/local/bin/
 # install pharmer
 if [[ "$ClusterProvider" != "cncf" && "$ClusterProvider" != "kubespray" && "$ClusterProvider" != "aws" ]]; then
   pushd /tmp
-  curl -LO https://cdn.appscode.com/binaries/pharmer/$PHARMER_VERSION/pharmer-linux-amd64
+  curl -LO https://cdn.appscode.com/binaries/kubevault/$PHARMER_VERSION/pharmer-linux-amd64
   chmod +x pharmer-linux-amd64
   mv pharmer-linux-amd64 /bin/pharmer
   popd
   #    mkdir -p "$GOPATH"/src/github.com/pharmer
   #    pushd "$GOPATH"/src/github.com/pharmer
-  #    git clone https://github.com/pharmer/pharmer
+  #    git clone https://github.com/kubevault/pharmer
   #    cd pharmer
   #    ./hack/builddeps.sh
   #    ./hack/make.py

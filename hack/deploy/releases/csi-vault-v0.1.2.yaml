@@ -144,7 +144,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: vault-csi-plugin
-          image: pharmer/csi-vault:0.1.2
+          image: kubevault/csi-vault:0.1.2
           args :
             - init
             - "--endpoint=$(CSI_ENDPOINT)"
@@ -261,7 +261,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: vault-csi-plugin
-          image: pharmer/csi-vault:0.1.2
+          image: kubevault/csi-vault:0.1.2
           args :
             - init
             - "--endpoint=$(CSI_ENDPOINT)"
@@ -377,7 +377,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: pharmer/csi-vault:0.1.2
+          image: kubevault/csi-vault:0.1.2
           args :
             - init
             - "--endpoint=$(CSI_ENDPOINT)"

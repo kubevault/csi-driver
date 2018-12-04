@@ -40,10 +40,10 @@ kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/h
 #### 2. Deploy the CSI plugin and sidecars:
 
 Before you continue, be sure to checkout to a [tagged release](https://github.com/kubevault/csi-driver/releases). For
-example, to use the version `v0.1.1` you can execute the following command:
+example, to use the version `v0.1.2` you can execute the following command:
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.1.1.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.1.2.yaml
 ```
 
 #### 3. Create policy and role for service account
@@ -148,9 +148,9 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
-  authRole: testrole #vault role for authentication
-  secretEngine: KV # vault engine name
-  secretName: my-secret # secret name on vault which you want get access
+  ref: default/vaultapp
+  engine: KV # vault engine name
+  secret: my-secret # secret name on vault which you want get access
 
 ```
 
@@ -163,7 +163,14 @@ then create the storage class using `kubectl`.
 Create secret on vault with following command:
 
 ```bash
+$ vault secrets enable -version=1 kv
 $ vault kv put kv/my-secret my-value=s3cr3t
+```
+
+Install AppBinding CRD by running
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kmodules/custom-resources/master/api/crds/appbinding.yaml
 ```
 
 Create a AppBinding with following
