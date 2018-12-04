@@ -26,3 +26,7 @@ path "aws/*" {
 path "pki/*" {
   capabilities = ["read", "create", "update", "delete"]
 }
+
+path "database/*" {
+  capabilities = ["read"]
+}
