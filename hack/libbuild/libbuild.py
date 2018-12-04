@@ -399,19 +399,19 @@ DEP_LIST = [
     },
     {
       "package": "k8s.io/apimachinery",
-      "repo": "https://github.com/pharmer/apimachinery.git",
+      "repo": "https://github.com/kubevault/apimachinery.git",
       "vcs": "git",
       "version": "release-1.11.3"
     },
     {
       "package": "k8s.io/apiserver",
-      "repo": "https://github.com/pharmer/apiserver.git",
+      "repo": "https://github.com/kubevault/apiserver.git",
       "vcs": "git",
       "version": "release-1.11.3"
     },
     {
       "package": "k8s.io/client-go",
-      "repo": "https://github.com/pharmer/client-go.git",
+      "repo": "https://github.com/kubevault/client-go.git",
       "vcs": "git",
       "version": "release-1.11.3"
     },

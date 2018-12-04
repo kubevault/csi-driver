@@ -1,7 +1,8 @@
-package vault
+package util
 
 import (
 	"encoding/json"
+
 	vaultapi "github.com/hashicorp/vault/api"
 	config "github.com/kubevault/operator/apis/config/v1alpha1"
 	vaultauth "github.com/kubevault/operator/pkg/vault"
@@ -19,8 +20,6 @@ type PodInfo struct {
 	Namespace      string
 	UID            string
 	ServiceAccount string
-
-	AuthRole string
 
 	RefName      string
 	RefNamespace string

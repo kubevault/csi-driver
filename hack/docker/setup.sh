@@ -10,7 +10,7 @@ BIN=$GOPATH/bin
 ROOT=$GOPATH
 REPO_ROOT=$GOPATH/src/github.com/kubevault/csi-driver
 
-source "$REPO_ROOT/hack/libbuild/common/pharmer_image.sh"
+source "$REPO_ROOT/hack/libbuild/common/kubevault_image.sh"
 
 APPSCODE_ENV=${APPSCODE_ENV:-dev}
 IMG=csi-vault
@@ -52,7 +52,7 @@ ADD csi-vault /usr/bin/csi-vault
 ENTRYPOINT ["csi-vault"]
 
 EOL
-  local cmd="docker build -t pharmer/$IMG:$TAG ."
+  local cmd="docker build -t kubevault/$IMG:$TAG ."
   echo $cmd
   $cmd
 

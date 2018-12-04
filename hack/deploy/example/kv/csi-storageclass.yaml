@@ -7,6 +7,7 @@ metadata:
 provisioner: com.vault.csi.vaultdbs
 parameters:
   ref: default/vaultapp
-  secretEngine: KV
-  secretName: my-secret
+  engine: KV
+  secret: my-secret
+  path: kv
 

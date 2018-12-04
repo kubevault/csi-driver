@@ -2,7 +2,6 @@ package driver
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -14,10 +13,11 @@ import (
 	"testing"
 	"time"
 
-	vaultapi "github.com/hashicorp/vault/api"
+	//vaultapi "github.com/hashicorp/vault/api"
 	cr "github.com/kmodules/custom-resources/apis/appcatalog/v1alpha1"
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
-	"github.com/kubevault/csi-driver/vault"
+
+	//"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -97,7 +97,7 @@ func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 
 func TestKVPolicy(t *testing.T) {
 
-	client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	/*client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 	fmt.Println(client.Headers(), err)
 
 	p := "v1/auth/kubernetes/login"
@@ -123,7 +123,7 @@ func TestKVPolicy(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println(resp.Body)
+	fmt.Println(resp.Body)*/
 	//secret, err :=  vaultapi.ParseSecret(resp.Body)
 	//fmt.Println(secret, err)
 	/*return
@@ -145,14 +145,14 @@ func TestKVPolicy(t *testing.T) {
 }
 
 func TestVault(t *testing.T) {
-	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	/*c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 
 	path := fmt.Sprintf("/v1/pki/roles/%s", "my-pki-role")
 	req := c.NewRequest("GET", path)
 	resp, err := c.RawRequest(req)
 	fmt.Println(err)
 	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data)
+	fmt.Println(secret.Data) */
 }
 
 func TestAT(t *testing.T) {
@@ -164,7 +164,7 @@ func TestAT(t *testing.T) {
 }
 
 func TestPKI(t *testing.T) {
-	c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
+	/*c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
 
 	r := c.NewRequest("POST", "/v1/pki/issue/my-pki-role")
 	if err := r.SetJSONBody(map[string]string{
@@ -182,7 +182,7 @@ func TestPKI(t *testing.T) {
 	defer resp.Body.Close()
 
 	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data)
+	fmt.Println(secret.Data)*/
 }
 
 func TestHttp(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
-	"github.com/kubevault/csi-driver/vault"
-	"github.com/kubevault/csi-driver/vault/secret"
+	"github.com/kubevault/csi-driver/util"
+	vs "github.com/kubevault/operator/pkg/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -15,6 +15,7 @@ import (
 
 var (
 	InstanceNotFound = errors.New("instance not found")
+	SecretEngineKey  = "engine"
 )
 
 // NodeStageVolume mounts the volume to a staging path on the node. This is
@@ -38,15 +39,21 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"request": req,
 		"method":  "node_stage_volume",
 	}).Info("node stage volume called")
-	//mnt := req.VolumeCapability.GetMount()
-	//options := mnt.MountFlags
+
 	options := req.VolumeAttributes
 
-	if _, ok := options["secretEngine"]; !ok {
-		return nil, errors.Errorf("Missing engine name (secretEngine)")
+	if _, ok := options[SecretEngineKey]; !ok {
+		return nil, errors.Errorf("Missing engine name field (%s)", SecretEngineKey)
 	}
-	if _, ok := options["secretName"]; !ok {
-		return nil, errors.Errorf("Misssing secret name (secretName)")
+
+	_, sKey := options[vs.SecretKey]
+	_, rKey := options[vs.RoleKey]
+	if !sKey && !rKey {
+		return nil, errors.Errorf("Misssing secret field (%s/%s)", vs.SecretKey, vs.RoleKey)
+	}
+
+	if _, ok := options[vs.PathKey]; !ok {
+		return nil, errors.Errorf("Misssing secret name field (%s)", vs.PathKey)
 	}
 
 	fsType := "tmpfs"
@@ -75,10 +82,6 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	if err := os.MkdirAll(req.StagingTargetPath, 0755); err != nil {
 		return nil, err
 	}
-
-	/*if err := d.mounter.VaultMount(req.StagingTargetPath, fsType, options); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}*/
 
 	ll.Info("formatting and mounting stage volume is finished")
 	return &csi.NodeStageVolumeResponse{}, nil
@@ -159,25 +162,18 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	// login with policy token
 
-	authClient, err := vault.GetAppBindingVaultClient(podInfo)
+	authClient, err := util.GetAppBindingVaultClient(podInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	var engineName string
-	var ok bool
-	if engineName, ok = options["secretEngine"]; !ok {
+	engineName, ok := options[SecretEngineKey]
+	if !ok {
 		return nil, errors.Errorf("Empty engine name")
 	}
 
-	engine, err := secret.GetSecretEngine(engineName, ctx)
+	secretData, err := util.FetchSecret(engineName, authClient, options, target)
 	if err != nil {
-		return nil, err
-	}
-	options["targetDir"] = target
-	engine.InitializeEngine(authClient, options)
-
-	if err = engine.ReadSecret(); err != nil {
 		return nil, err
 	}
 
@@ -187,8 +183,12 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	}
 
 	if _, found := d.ch[req.VolumeId]; !found {
-		d.ch[req.VolumeId] = engine
-		go engine.RenewSecret(req.VolumeId)
+		renewer, err := util.SetRenewal(authClient, secretData)
+		if err != nil {
+			return nil, err
+		}
+
+		d.ch[req.VolumeId] = renewer
 	}
 
 	ll.Info("bind mounting the volume is finished")
@@ -228,7 +228,7 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 	}
 
 	if _, found := d.ch[req.VolumeId]; found {
-		d.ch[req.VolumeId].StopSync()
+		util.StopRenew(d.ch[req.VolumeId])
 	}
 
 	ll.Info("unmounting volume is finished")

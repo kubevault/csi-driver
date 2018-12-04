@@ -10,8 +10,6 @@ import (
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	vaultapi "github.com/hashicorp/vault/api"
-	"github.com/kubevault/csi-driver/vault/secret"
-	_ "github.com/kubevault/csi-driver/vault/secret/engines"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -42,7 +40,7 @@ type Driver struct {
 	mounter     Mounter
 	log         *logrus.Entry
 
-	ch map[string]secret.SecretEngine
+	ch map[string]*vaultapi.Renewer
 }
 
 func NewDriver(ep, node string) (*Driver, error) {
@@ -53,7 +51,7 @@ func NewDriver(ep, node string) (*Driver, error) {
 		log: logrus.New().WithFields(logrus.Fields{
 			"node-id": node,
 		}),
-		ch: make(map[string]secret.SecretEngine),
+		ch: make(map[string]*vaultapi.Renewer),
 	}, nil
 
 }

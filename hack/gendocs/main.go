@@ -42,12 +42,12 @@ menu:
 {{- if .RootCmd }}
     weight: 0
 {{ end }}
-product_name: pharmer
+product_name: kubevault
 menu_name: product_csi_vault_{{ .Version }}
 section_menu_id: reference
 {{- if .RootCmd }}
 aliases:
-  - products/pharmer/{{ .Version }}/reference/
+  - products/kubevault/{{ .Version }}/reference/
 {{ end }}
 ---
 `))
