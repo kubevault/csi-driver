@@ -6,7 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
-  authRole: pki-cred-role
-  secretEngine: PKI
-  secretName: my-pki-role
+  engine: PKI
+  role: my-pki-role
+  path: pki
   common_name: www.my-website.com

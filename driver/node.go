@@ -45,9 +45,13 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	if _, ok := options[SecretEngineKey]; !ok {
 		return nil, errors.Errorf("Missing engine name field (%s)", SecretEngineKey)
 	}
-	if _, ok := options[vs.SecretKey]; !ok {
-		return nil, errors.Errorf("Misssing secret name field (%s)", vs.SecretKey)
+
+	_, sKey := options[vs.SecretKey]
+	_, rKey := options[vs.RoleKey]
+	if !sKey && !rKey {
+		return nil, errors.Errorf("Misssing secret field (%s/%s)", vs.SecretKey, vs.RoleKey)
 	}
+
 	if _, ok := options[vs.PathKey]; !ok {
 		return nil, errors.Errorf("Misssing secret name field (%s)", vs.PathKey)
 	}
@@ -78,10 +82,6 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	if err := os.MkdirAll(req.StagingTargetPath, 0755); err != nil {
 		return nil, err
 	}
-
-	/*if err := d.mounter.VaultMount(req.StagingTargetPath, fsType, options); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}*/
 
 	ll.Info("formatting and mounting stage volume is finished")
 	return &csi.NodeStageVolumeResponse{}, nil

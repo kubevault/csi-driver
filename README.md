@@ -148,9 +148,8 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
-  authRole: testrole #vault role for authentication
-  secretEngine: KV # vault engine name
-  secretName: my-secret # secret name on vault which you want get access
+  engine: KV # vault engine name
+  secret: my-secret # secret name on vault which you want get access
 
 ```
 
@@ -163,7 +162,14 @@ then create the storage class using `kubectl`.
 Create secret on vault with following command:
 
 ```bash
+$ vault secrets enable -version=1 kv
 $ vault kv put kv/my-secret my-value=s3cr3t
+```
+
+Install AppBinding CRD by running
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kmodules/custom-resources/master/api/crds/appbinding.yaml
 ```
 
 Create a AppBinding with following

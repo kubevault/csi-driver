@@ -11,7 +11,7 @@ product_name: pharmer
 menu_name: product_csi_vault_0.1.0-alpha.1
 section_menu_id: reference
 aliases:
-  - products/pharmer/0.1.0-alpha.1/reference/
+  - products/kubevault/0.1.0-alpha.1/reference/
 
 ---
 ## csi-vault
