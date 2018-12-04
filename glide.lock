@@ -1,8 +1,8 @@
 hash: 4479aa17e7db9c59ab3d288fccc8c8d5369c977772af184958c244a9325412b4
-updated: 2018-12-01T19:07:05.756786457-08:00
+updated: 2018-12-04T13:04:20.607224506+06:00
 imports:
 - name: github.com/appscode/go
-  version: a6d58457b39324ead2ffb1f24be7a0a638c9f112
+  version: aa0a55d74dac66f9b9bec9c0e7b67944115a3f44
   subpackages:
   - analytics
   - context
@@ -106,7 +106,7 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
@@ -208,7 +208,7 @@ imports:
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/kubedb/apimachinery
-  version: 4cebffe1a7709b9b1ed48766040ea6072957be65
+  version: edf77e9609ff15a2ad16582deda49eef5a0b80f4
   subpackages:
   - apis
   - apis/authorization
@@ -242,6 +242,12 @@ imports:
   - pkg/vault/auth/token
   - pkg/vault/auth/types
   - pkg/vault/auth/userpass
+  - pkg/vault/secret
+  - pkg/vault/secret/engines
+  - pkg/vault/secret/engines/aws
+  - pkg/vault/secret/engines/database
+  - pkg/vault/secret/engines/kv
+  - pkg/vault/secret/engines/pki
   - pkg/vault/util
 - name: github.com/mailru/easyjson
   version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
@@ -250,7 +256,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mitchellh/go-homedir
-  version: ae18d6b8b3205b561c79e8e5f69bff09736185f4
+  version: d682a8f0cf139663a984ff12528da460ca963de9
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -278,7 +284,8 @@ imports:
 - name: github.com/ryanuber/go-glob
   version: 256dc444b735e061061cf46c809487313d5b0065
 - name: github.com/sergi/go-diff
-  version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
+  version: 24e2351369ec4949b2ed0dc5c477afdd4c4034e8
+  repo: https://github.com/sergi/go-diff
   subpackages:
   - diffmatchpatch
 - name: github.com/SermoDigital/jose
@@ -296,11 +303,12 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/yudai/gojsondiff
-  version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
+  version: e21612694bdd50975f93cd5eaccb457477128e28
   subpackages:
   - formatter
 - name: github.com/yudai/golcs
   version: d1c525dea8ce39ea9a783d33cf08932305373f2c
+  repo: https://github.com/yudai/golcs
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -360,7 +368,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/base
