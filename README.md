@@ -40,10 +40,10 @@ kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/h
 #### 2. Deploy the CSI plugin and sidecars:
 
 Before you continue, be sure to checkout to a [tagged release](https://github.com/kubevault/csi-driver/releases). For
-example, to use the version `v0.1.1` you can execute the following command:
+example, to use the version `v0.1.2` you can execute the following command:
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.1.1.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubevault/csi-driver/master/hack/deploy/releases/csi-vault-v0.1.2.yaml
 ```
 
 #### 3. Create policy and role for service account
@@ -148,6 +148,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: com.vault.csi.vaultdbs
 parameters:
+  ref: default/vaultapp
   engine: KV # vault engine name
   secret: my-secret # secret name on vault which you want get access
 

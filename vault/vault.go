@@ -20,8 +20,6 @@ type PodInfo struct {
 	UID            string
 	ServiceAccount string
 
-	AuthRole string
-
 	RefName      string
 	RefNamespace string
 }

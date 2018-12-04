@@ -27,11 +27,6 @@ func getPodInfo(attr map[string]string) (*vault.PodInfo, error) {
 		return nil, errors.Errorf("Pod service account not found")
 	}
 
-	podInfo.AuthRole, ok = attr["authRole"]
-	if !ok {
-		return nil, errors.Errorf("auth role not found")
-	}
-
 	return podInfo, nil
 }
 
