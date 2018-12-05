@@ -1,37 +1,61 @@
 package driver
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"github.com/appscode/pat"
+	"k8s.io/client-go/kubernetes"
+
+	//"github.com/kubevault/operator/pkg/vault"
 	"io/ioutil"
+	//"k8s.io/client-go/kubernetes"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"testing"
 	"time"
 
-	//vaultapi "github.com/hashicorp/vault/api"
-	cr "github.com/kmodules/custom-resources/apis/appcatalog/v1alpha1"
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
+	cr "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 
 	//"github.com/kubevault/csi-driver/vault"
 	"github.com/sirupsen/logrus"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes/fake"
+	appFake "kmodules.xyz/custom-resources/client/clientset/versioned/fake"
+	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
+
+const testNamespace = "default"
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+	os.Setenv(TestEnvForCSIDriver, "")
 }
 
 func TestDriverSuite(t *testing.T) {
+	os.Setenv(TestEnvForCSIDriver, "true")
 	socket := "/tmp/csi.sock"
 	endpoint := "unix://" + socket
 	if err := os.Remove(socket); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("failed to remove unix domain socket file %s, error: %s", socket, err)
+	}
+
+	ts := NewFakeVaultServer()
+	defer ts.Close()
+
+	fakeAppClient, err := getAppBindingWithFakeClient(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fakeKubeClient := getFakeKubeClient()
+	if err = setupKubernetes(fakeKubeClient); err != nil {
+		t.Fatal(err)
 	}
 
 	driver := &Driver{
@@ -40,6 +64,9 @@ func TestDriverSuite(t *testing.T) {
 		vaultClient: nil,
 		mounter:     &fakeMounter{},
 		log:         logrus.New().WithField("test_enabed", true),
+
+		kubeClient: fakeKubeClient,
+		appClient:  fakeAppClient,
 	}
 	defer driver.Stop()
 
@@ -95,155 +122,136 @@ func (f *fakeMounter) IsMounted(source, target string) (bool, error) {
 	return true, nil
 }
 
-func TestKVPolicy(t *testing.T) {
+func NewFakeVaultServer() *httptest.Server {
+	authResp := `
+{
+  "auth": {
+    "client_token": "1234"
+  }
+}
+`
+	secResp := `
+{
+  "auth": null,
+  "data": {
+    "foo": "bar"
+  },
+  "lease_duration": 2764800,
+  "lease_id": "",
+  "renewable": false
+}`
+	m := pat.New()
+	m.Post("/v1/auth/kubernetes/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var v map[string]interface{}
+		defer r.Body.Close()
+		json.NewDecoder(r.Body).Decode(&v)
+		if val, ok := v["jwt"]; ok {
+			if val.(string) == "sanity-token" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(authResp))
+				return
+			}
+		}
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	m.Get("/v1/kv/:secret", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		if params, found := pat.FromContext(r.Context()); found {
+			if got, want := params.Get(":secret"), "my-key"; got == want {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(secResp))
+				return
+			}
+		}
 
-	/*client, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
-	fmt.Println(client.Headers(), err)
+		w.WriteHeader(http.StatusBadRequest)
+	}))
 
-	p := "v1/auth/kubernetes/login"
+	return httptest.NewServer(m)
+}
 
-	r := client.NewRequest("POST", p)
-	body := map[string]interface{}{
-		"role": "testrole",
-		"jwt":  "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InBvc3RncmVzLXZhdWx0LXRva2VuLXg5djRyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InBvc3RncmVzLXZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOTVjM2FmNzAtY2FiZS0xMWU4LWExMzQtYTZmNTM5NDhkMzQ0Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6cG9zdGdyZXMtdmF1bHQifQ.Q9xGPbPt_cNwRrzlX-kFJsN7eJPceAYP7P7rkU8VZPeEuIip2jFoSbF8LZsL6TfB7XhUnvQT4NTXry-XVQA_Rvfrs61IPtvw0HOwkCxtd0PglW1p53B_onH6NknofRT0ZThoC9Jhs8NYa4FkTyyK1Wo46_aZQ2XbCny9UZzOjBxYo8iv_OL3crIytQV6UjrA2q-XkJuGCRc_vvXpPS4KO3ke7dsjrCwOTTz8QRGiljyscHzCJmN733VxvGSDuDoonxty894DhqsL6iRHKS5X8UVaq3MGNyndfQBSJfUnT75dFYD12Cr_BZRONBF66iGSXbaa-_Ft-eTgCEq0o_j2Nw",
+func getFakeKubeClient() *fake.Clientset {
+	kubeClient := fake.NewSimpleClientset()
+	return kubeClient
+}
+
+func setupKubernetes(kc kubernetes.Interface) error {
+	svc := core.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "sanity-service",
+			Namespace: testNamespace,
+		},
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ServiceAccount",
+			APIVersion: "v1",
+		},
+		Secrets: []core.ObjectReference{
+			{
+				Name:      "sanity-service-secret",
+				Namespace: testNamespace,
+			},
+		},
 	}
-	d, e := json.Marshal(body)
-	fmt.Println(string(d), e)
-	if err := r.SetJSONBody(body); err != nil {
-		fmt.Println(err, "***************")
-	}
-	r.Headers = make(map[string][]string)
-	r.Headers.Set("Content-Type", "application/json")
-
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
-	resp, err := client.RawRequestWithContext(ctx, r)
+	_, err := kc.CoreV1().ServiceAccounts(testNamespace).Create(&svc)
 	if err != nil {
-		fmt.Println(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Println(resp.Body)*/
-	//secret, err :=  vaultapi.ParseSecret(resp.Body)
-	//fmt.Println(secret, err)
-	/*return
-
-
-
-	token, err := client.GetPolicyToken([]string{"nginx"}, true)
-	fmt.Println(err)
-	fmt.Println(token)
-
-	c, err := vault.NewVaultClient("http://159.65.253.198:30001", "root", nil)
-
-	path := fmt.Sprintf("/v1/kv/%s", "my-secret")
-	req := c.Vc.NewRequest("GET", path)
-	resp, err := c.Vc.RawRequest(req)
-	fmt.Println(err)
-	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data["my-value"])*/
-}
-
-func TestVault(t *testing.T) {
-	/*c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
-
-	path := fmt.Sprintf("/v1/pki/roles/%s", "my-pki-role")
-	req := c.NewRequest("GET", path)
-	resp, err := c.RawRequest(req)
-	fmt.Println(err)
-	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data) */
-}
-
-func TestAT(t *testing.T) {
-	l := map[string]interface{}{
-		"max_ttl": 259200,
-	}
-	fmt.Println(l["max_ttl"].(int))
-
-}
-
-func TestPKI(t *testing.T) {
-	/*c, err := vault.NewVaultClient("http://142.93.77.58:30001", "root", nil)
-
-	r := c.NewRequest("POST", "/v1/pki/issue/my-pki-role")
-	if err := r.SetJSONBody(map[string]string{
-		"common_name": "www.my-website.com",
-	}); err != nil {
-		fmt.Println(err, "**********")
+		return err
 	}
 
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
-	resp, err := c.RawRequestWithContext(ctx, r)
+	secret := core.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "sanity-service-secret",
+			Namespace: testNamespace,
+		},
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: "v1",
+		},
+		Data: map[string][]byte{
+			"token": []byte("sanity-token"),
+		},
+	}
+	if _, err = kc.CoreV1().Secrets(testNamespace).Create(&secret); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getAppBindingWithFakeClient(vaultUrl string) (appcat_cs.AppcatalogV1alpha1Interface, error) {
+	data := `{
+      "apiVersion": "kubevault.com/v1alpha1",
+      "kind": "VaultServerConfiguration",
+      "usePodServiceAccountForCSIDriver": true,
+      "authPath": "kubernetes",
+	  "policyControllerRole": "testrole"
+    }`
+
+	app := cr.AppBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "sanity-app",
+			Namespace: "default",
+		},
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "appcatalog.appscode.com/v1alpha1",
+			Kind:       "AppBinding",
+		},
+		Spec: cr.AppBindingSpec{
+			ClientConfig: cr.ClientConfig{
+				URL:                   &vaultUrl,
+				InsecureSkipTLSVerify: true,
+			},
+			Parameters: &runtime.RawExtension{
+				Raw: []byte(data),
+			},
+		},
+	}
+	client := appFake.NewSimpleClientset().AppcatalogV1alpha1()
+	_, err := client.AppBindings(testNamespace).Create(&app)
 	if err != nil {
-		fmt.Println(err, ")))")
+		return nil, err
 	}
-	defer resp.Body.Close()
-
-	secret, err := vaultapi.ParseSecret(resp.Body)
-	fmt.Println(secret.Data)*/
+	return client, nil
 }
-
-func TestHttp(t *testing.T) {
-	url := "http://142.93.77.58:30001/v1/pki/issue/my-pki-role"
-	body := map[string]interface{}{
-		"common_name": "www.my-website.com",
-	}
-	d, e := json.Marshal(body)
-
-	fmt.Println(e)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(d))
-	fmt.Println(err)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
-	bdy, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(bdy))
-}
-
-func TestPath(t *testing.T) {
-	path := "/var/www"
-	fmt.Println(filepath.Join(path, "*"))
-
-	//fmt.Println(os.Link("/home/sanjid/test/a", "/home/sanjid/test/b"))
-	//return
-
-	args := []string{
-		"-s",
-		"/home/sanjid/test/a/*",
-		"/home/sanjid/test/b",
-		"-v",
-	}
-	fmt.Println(args)
-	err := exec.Command("ln", args...).Run()
-	fmt.Println(err)
-}
-
-/*
-
-
-vault write pki/config/urls \
-    issuing_certificates="http://142.93.77.58:30001/v1/pki/ca" \
-    crl_distribution_points="http://142.93.77.58:30001/v1/pki/crl"
-
-vault write pki/roles/my-pki-role \
-    allowed_domains=my-website.com \
-    allow_subdomains=true \
-    max_ttl=72h
-
-vault write pki/issue/my-pki-role \
-    common_name=www.my-website.com
-*/
 
 func TestRaw(t *testing.T) {
 	data := `{

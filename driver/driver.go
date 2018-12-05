@@ -13,6 +13,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
 const (
@@ -22,6 +25,8 @@ const (
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"
 	podUID            = "csi.storage.k8s.io/pod.uid"
 	podServiceAccount = "csi.storage.k8s.io/serviceAccount.name"
+
+	TestEnvForCSIDriver = "VAULT_CSI_TEST"
 )
 
 // Driver implements the following CSI interfaces:
@@ -33,7 +38,9 @@ const (
 type Driver struct {
 	endpoint string
 	nodeId   string
-	url      string
+
+	kubeClient kubernetes.Interface
+	appClient  appcat_cs.AppcatalogV1alpha1Interface
 
 	srv         *grpc.Server
 	vaultClient *vaultapi.Client
@@ -44,10 +51,29 @@ type Driver struct {
 }
 
 func NewDriver(ep, node string) (*Driver, error) {
+	var kubeClient kubernetes.Interface
+	var appClient appcat_cs.AppcatalogV1alpha1Interface
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	if kubeClient, err = kubernetes.NewForConfig(config); err != nil {
+		return nil, err
+	}
+
+	if appClient, err = appcat_cs.NewForConfig(config); err != nil {
+		return nil, err
+	}
+
 	return &Driver{
 		endpoint: ep,
 		mounter:  &mounter{},
 		nodeId:   node,
+
+		kubeClient: kubeClient,
+		appClient:  appClient,
+
 		log: logrus.New().WithFields(logrus.Fields{
 			"node-id": node,
 		}),
@@ -108,4 +134,11 @@ func (d *Driver) Run() error {
 func (d *Driver) Stop() {
 	d.log.Info("server stopped")
 	d.srv.Stop()
+}
+
+func isTestEnv() bool {
+	if os.Getenv(TestEnvForCSIDriver) != "" {
+		return true
+	}
+	return false
 }

@@ -36,11 +36,20 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 		"method":  "create_volume",
 	}).Info("create volume called")
 
+	if len(req.VolumeCapabilities) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "volumeCapabilities must be provided")
+	}
+
+	var size int64 = defaultVolumeSizeInGB
+	if req.CapacityRange != nil {
+		size = req.CapacityRange.RequiredBytes
+	}
+
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
 			Id:            req.Name,
 			Attributes:    req.Parameters,
-			CapacityBytes: req.CapacityRange.RequiredBytes,
+			CapacityBytes: size,
 		},
 	}
 	return resp, nil
@@ -48,6 +57,9 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 
 // DeleteVolume deletes the given volume. The function is idempotent.
 func (d *Driver) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "DeleteVolume Volume ID must be provided")
+	}
 	d.log.WithFields(logrus.Fields{
 		"requesnt": req,
 		"method":   "delete_volume",
@@ -76,15 +88,21 @@ func (d *Driver) ControllerUnpublishVolume(ctx context.Context, req *csi.Control
 // ValidateVolumeCapabilities checks whether the volume capabilities requested
 // are supported.
 func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "ValidateVolumeCapabilities Volume ID must be provided")
+	}
+
+	if req.VolumeCapabilities == nil {
+		return nil, status.Error(codes.InvalidArgument, "ValidateVolumeCapabilities Volume Capabilities must be provided")
+	}
 	d.log.WithFields(logrus.Fields{
 		"request": req,
 		"method":  "validate_volume_capabilities",
 	}).Info("validate volume capabilities called")
 	var vcaps []*csi.VolumeCapability_AccessMode
 	for _, mode := range []csi.VolumeCapability_AccessMode_Mode{
-		// DO currently only support a single node to be attached to a single
-		// node in read/write mode
 		csi.VolumeCapability_AccessMode_SINGLE_NODE_READER_ONLY,
+		csi.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
 	} {
 		vcaps = append(vcaps, &csi.VolumeCapability_AccessMode{Mode: mode})
 	}
