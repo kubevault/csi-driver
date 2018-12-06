@@ -1,5 +1,5 @@
-hash: 4479aa17e7db9c59ab3d288fccc8c8d5369c977772af184958c244a9325412b4
-updated: 2018-12-04T15:46:43.671026218+06:00
+hash: 63921933977135addeb6bdac5539779e13bb7fe437efe119445598fe0359b763
+updated: 2018-12-05T18:41:34.644089326+06:00
 imports:
 - name: github.com/appscode/go
   version: aa0a55d74dac66f9b9bec9c0e7b67944115a3f44
@@ -220,7 +220,7 @@ imports:
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
 - name: github.com/kubevault/operator
-  version: 73aee8bd242347e5fee83c1874d48d9330be2613
+  version: 7b0500bdb607349cac9f3914183d04f92bb9c645
   subpackages:
   - apis
   - apis/catalog
@@ -231,6 +231,8 @@ imports:
   - apis/kubevault/v1alpha1
   - apis/policy
   - apis/policy/v1alpha1
+  - apis/secretengine
+  - apis/secretengine/v1alpha1
   - client/clientset/versioned/scheme
   - pkg/util
   - pkg/vault
@@ -503,39 +505,72 @@ imports:
   version: 1638f8970cefaa404ff3a62950f88b08292b2696
   subpackages:
   - discovery
+  - discovery/fake
   - kubernetes
+  - kubernetes/fake
   - kubernetes/scheme
   - kubernetes/typed/admissionregistration/v1alpha1
+  - kubernetes/typed/admissionregistration/v1alpha1/fake
   - kubernetes/typed/admissionregistration/v1beta1
+  - kubernetes/typed/admissionregistration/v1beta1/fake
   - kubernetes/typed/apps/v1
+  - kubernetes/typed/apps/v1/fake
   - kubernetes/typed/apps/v1beta1
+  - kubernetes/typed/apps/v1beta1/fake
   - kubernetes/typed/apps/v1beta2
+  - kubernetes/typed/apps/v1beta2/fake
   - kubernetes/typed/authentication/v1
+  - kubernetes/typed/authentication/v1/fake
   - kubernetes/typed/authentication/v1beta1
+  - kubernetes/typed/authentication/v1beta1/fake
   - kubernetes/typed/authorization/v1
+  - kubernetes/typed/authorization/v1/fake
   - kubernetes/typed/authorization/v1beta1
+  - kubernetes/typed/authorization/v1beta1/fake
   - kubernetes/typed/autoscaling/v1
+  - kubernetes/typed/autoscaling/v1/fake
   - kubernetes/typed/autoscaling/v2beta1
+  - kubernetes/typed/autoscaling/v2beta1/fake
   - kubernetes/typed/autoscaling/v2beta2
+  - kubernetes/typed/autoscaling/v2beta2/fake
   - kubernetes/typed/batch/v1
+  - kubernetes/typed/batch/v1/fake
   - kubernetes/typed/batch/v1beta1
+  - kubernetes/typed/batch/v1beta1/fake
   - kubernetes/typed/batch/v2alpha1
+  - kubernetes/typed/batch/v2alpha1/fake
   - kubernetes/typed/certificates/v1beta1
+  - kubernetes/typed/certificates/v1beta1/fake
   - kubernetes/typed/coordination/v1beta1
+  - kubernetes/typed/coordination/v1beta1/fake
   - kubernetes/typed/core/v1
+  - kubernetes/typed/core/v1/fake
   - kubernetes/typed/events/v1beta1
+  - kubernetes/typed/events/v1beta1/fake
   - kubernetes/typed/extensions/v1beta1
+  - kubernetes/typed/extensions/v1beta1/fake
   - kubernetes/typed/networking/v1
+  - kubernetes/typed/networking/v1/fake
   - kubernetes/typed/policy/v1beta1
+  - kubernetes/typed/policy/v1beta1/fake
   - kubernetes/typed/rbac/v1
+  - kubernetes/typed/rbac/v1/fake
   - kubernetes/typed/rbac/v1alpha1
+  - kubernetes/typed/rbac/v1alpha1/fake
   - kubernetes/typed/rbac/v1beta1
+  - kubernetes/typed/rbac/v1beta1/fake
   - kubernetes/typed/scheduling/v1alpha1
+  - kubernetes/typed/scheduling/v1alpha1/fake
   - kubernetes/typed/scheduling/v1beta1
+  - kubernetes/typed/scheduling/v1beta1/fake
   - kubernetes/typed/settings/v1alpha1
+  - kubernetes/typed/settings/v1alpha1/fake
   - kubernetes/typed/storage/v1
+  - kubernetes/typed/storage/v1/fake
   - kubernetes/typed/storage/v1alpha1
+  - kubernetes/typed/storage/v1alpha1/fake
   - kubernetes/typed/storage/v1beta1
+  - kubernetes/typed/storage/v1beta1/fake
   - pkg/apis/clientauthentication
   - pkg/apis/clientauthentication/v1alpha1
   - pkg/apis/clientauthentication/v1beta1
@@ -543,6 +578,7 @@ imports:
   - plugin/pkg/client/auth/exec
   - rest
   - rest/watch
+  - testing
   - tools/clientcmd/api
   - tools/metrics
   - tools/reference
@@ -567,8 +603,11 @@ imports:
   subpackages:
   - apis/appcatalog
   - apis/appcatalog/v1alpha1
+  - client/clientset/versioned
+  - client/clientset/versioned/fake
   - client/clientset/versioned/scheme
   - client/clientset/versioned/typed/appcatalog/v1alpha1
+  - client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 - name: kmodules.xyz/monitoring-agent-api
   version: c68fa034fbbaeb8c930c17d1ec0790a4ea46bad3
   repo: https://github.com/kmodules/monitoring-agent-api.git
@@ -588,12 +627,12 @@ imports:
   subpackages:
   - api/v1
 testImports:
-- name: github.com/kmodules/custom-resources
-  version: 10b24c8fd9028ab67a4b75cbf16d8f8e52cfe634
-  subpackages:
-  - apis/appcatalog/v1alpha1
+- name: github.com/appscode/pat
+  version: 48ff78925b7955367d8a048fc2b5cec8efadf8d3
 - name: github.com/kubernetes-csi/csi-test
-  version: d6869a2704bb7e603ab294a42fbb893c18b8e46e
+  version: b0141e38ce0e81d067fc3ae77ec08ef8cd6578fe
+  repo: https://github.com/kubevault/csi-test.git
+  vcs: git
   subpackages:
   - pkg/sanity
   - utils

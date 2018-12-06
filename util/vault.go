@@ -10,12 +10,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
 type PodInfo struct {
+	KubeClient kubernetes.Interface
+	AppClient  appcat_cs.AppcatalogV1alpha1Interface
+
 	Name           string
 	Namespace      string
 	UID            string
@@ -25,14 +26,8 @@ type PodInfo struct {
 	RefNamespace string
 }
 
-func GetAppBindingVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
-
-	kubeClient, err := getKubeClient()
-	if err != nil {
-		return nil, err
-	}
-
-	app, err := getAppBinding(pi.RefName, pi.RefNamespace)
+func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
+	app, err := pi.AppClient.AppBindings(pi.RefNamespace).Get(pi.RefName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -60,29 +55,6 @@ func GetAppBindingVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 		Raw: rawData,
 	}
 
-	return vaultauth.NewClientWithAppBinding(kubeClient, binding)
+	return vaultauth.NewClientWithAppBinding(pi.KubeClient, binding)
 
-}
-
-func getAppBinding(appName, appNamespace string) (*appcat.AppBinding, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-	appClient, err := appcat_cs.NewForConfig(config)
-
-	app, err := appClient.AppBindings(appNamespace).Get(appName, metav1.GetOptions{})
-	return app, err
-}
-
-func getKubeClient() (*kubernetes.Clientset, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-	kubeClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	return kubeClient, nil
 }

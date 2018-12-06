@@ -43,7 +43,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	options := req.VolumeAttributes
 
 	if _, ok := options[SecretEngineKey]; !ok {
-		return nil, errors.Errorf("Missing engine name field (%s)", SecretEngineKey)
+		return nil, errors.Errorf("Missing engine name field (%s) in options %v", SecretEngineKey, options)
 	}
 
 	_, sKey := options[vs.SecretKey]
@@ -128,6 +128,9 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, err
 	}
 
+	podInfo.KubeClient = d.kubeClient
+	podInfo.AppClient = d.appClient
+
 	podInfo.RefNamespace, podInfo.RefName, err = getAppBindingInfo(req.VolumeAttributes)
 	if err != nil {
 		return nil, err
@@ -162,7 +165,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	// login with policy token
 
-	authClient, err := util.GetAppBindingVaultClient(podInfo)
+	authClient, err := util.NewVaultClient(podInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -183,12 +186,14 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	}
 
 	if _, found := d.ch[req.VolumeId]; !found {
-		renewer, err := util.SetRenewal(authClient, secretData)
-		if err != nil {
-			return nil, err
-		}
+		if secretData.Renewable {
+			renewer, err := util.SetRenewal(authClient, secretData)
+			if err != nil {
+				return nil, err
+			}
 
-		d.ch[req.VolumeId] = renewer
+			d.ch[req.VolumeId] = renewer
+		}
 	}
 
 	ll.Info("bind mounting the volume is finished")
