@@ -26,7 +26,7 @@ type PodInfo struct {
 	RefNamespace string
 }
 
-func GetAppBindingVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
+func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 	app, err := pi.AppClient.AppBindings(pi.RefNamespace).Get(pi.RefName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err

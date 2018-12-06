@@ -165,7 +165,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	// login with policy token
 
-	authClient, err := util.GetAppBindingVaultClient(podInfo)
+	authClient, err := util.NewVaultClient(podInfo)
 	if err != nil {
 		return nil, err
 	}
