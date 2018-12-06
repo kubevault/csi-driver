@@ -135,10 +135,3 @@ func (d *Driver) Stop() {
 	d.log.Info("server stopped")
 	d.srv.Stop()
 }
-
-func isTestEnv() bool {
-	if os.Getenv(TestEnvForCSIDriver) != "" {
-		return true
-	}
-	return false
-}

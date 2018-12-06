@@ -34,11 +34,9 @@ const testNamespace = "default"
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	os.Setenv(TestEnvForCSIDriver, "")
 }
 
 func TestDriverSuite(t *testing.T) {
-	os.Setenv(TestEnvForCSIDriver, "true")
 	socket := "/tmp/csi.sock"
 	endpoint := "unix://" + socket
 	if err := os.Remove(socket); err != nil && !os.IsNotExist(err) {
