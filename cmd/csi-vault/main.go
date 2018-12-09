@@ -4,7 +4,7 @@ import (
 	"os"
 
 	logs "github.com/appscode/go/log/golog"
-	"github.com/kubevault/csi-driver/cmds"
+	"github.com/kubevault/csi-driver/pkg/cmds"
 )
 
 func main() {

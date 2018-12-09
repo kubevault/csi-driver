@@ -3,7 +3,7 @@ package driver
 import (
 	"strings"
 
-	"github.com/kubevault/csi-driver/util"
+	"github.com/kubevault/csi-driver/pkg/util"
 	"github.com/pkg/errors"
 )
 

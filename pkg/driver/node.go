@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
-	"github.com/kubevault/csi-driver/util"
+	"github.com/kubevault/csi-driver/pkg/util"
 	vs "github.com/kubevault/operator/pkg/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

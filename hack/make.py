@@ -35,19 +35,25 @@ import subprocess
 import sys
 from os.path import expandvars, join, dirname
 
-libbuild.REPO_ROOT = expandvars('$GOPATH') + '/src/github.com/kubevault/csi-driver'
+libbuild.REPO_ROOT = libbuild.GOPATH + '/src/github.com/kubevault/csi-driver'
 BUILD_METADATA = libbuild.metadata(libbuild.REPO_ROOT)
 libbuild.BIN_MATRIX = {
     'csi-vault': {
         'type': 'go',
         'go_version': True,
-        'use_cgo': False,
+        'release': True,
         'distro': {
             'alpine': ['amd64'],
             'linux': ['amd64']
         }
     }
 }
+if libbuild.ENV not in ['prod']:
+    libbuild.BIN_MATRIX['csi-vault']['distro'] = {
+        'alpine': ['amd64'],
+        libbuild.GOHOSTOS: [libbuild.GOHOSTARCH]
+    }
+
 libbuild.BUCKET_MATRIX = {
     'prod': 'gs://appscode-cdn',
     'dev': 'gs://appscode-dev'
@@ -76,38 +82,35 @@ def version():
 
 
 def fmt():
-    libbuild.ungroup_go_imports('*.go', 'cmds', 'driver', 'util')
-    die(call('goimports -w *.go driver cmds util'))
-    call('gofmt -s -w *.go driver cmds util')
+    libbuild.ungroup_go_imports('hack', 'pkg')
+    die(call('goimports -w hack pkg'))
+    call('gofmt -s -w hack pkg')
 
 
 def vet():
-    call('go vet *.go')
-    call('go vet $(go list ./... | grep -v /vendor/)')
+    call('go vet ./pkg/...')
 
 
 def lint():
-    call('golint *.go')
-    call('golint $(go list ./... | grep -v /vendor/)')
-
-
-def gen_assets():
-    pass
+    call('golint ./pkg/...')
 
 
 def gen():
-    gen_assets()
+    pass
 
 
 def build_cmd(name):
     cfg = libbuild.BIN_MATRIX[name]
+    entrypoint = 'cmd/{}/*.go'.format(name)
+    compress = libbuild.ENV in ['prod']
+    upx= False
     if cfg['type'] == 'go':
         if 'distro' in cfg:
             for goos, archs in cfg['distro'].items():
                 for goarch in archs:
-                    libbuild.go_build(name, goos, goarch, main='*.go')
+                    libbuild.go_build(name, goos, goarch, entrypoint, compress, upx)
         else:
-            libbuild.go_build(name, libbuild.GOHOSTOS, libbuild.GOHOSTARCH, main='*.go')
+            libbuild.go_build(name, libbuild.GOHOSTOS, libbuild.GOHOSTARCH, entrypoint, compress, upx)
 
 
 def build_cmds():
@@ -126,14 +129,38 @@ def build(name=None):
         build_cmds()
 
 
+def push(name=None):
+    if name:
+        bindir = libbuild.REPO_ROOT + '/dist/' + name
+        push_bin(bindir)
+    else:
+        dist = libbuild.REPO_ROOT + '/dist'
+        for name in os.listdir(dist):
+            d = dist + '/' + name
+            if os.path.isdir(d):
+                push_bin(d)
+
+
+def push_bin(bindir):
+    call('rm -f *.md5', cwd=bindir)
+    call('rm -f *.sha1', cwd=bindir)
+    for f in os.listdir(bindir):
+        if os.path.isfile(bindir + '/' + f):
+            libbuild.upload_to_cloud(bindir, f, BUILD_METADATA['version'])
+
+
+def update_registry():
+    libbuild.update_registry(BUILD_METADATA['version'])
+
+
 def install():
-    die(call('GOBIN={} {} install *.go'.format(libbuild.GOBIN, libbuild.GOC)))
+    die(call(libbuild.GOC + ' install ./...'))
 
 
 def default():
     gen()
     fmt()
-    die(call('GOBIN={} {} install .'.format(libbuild.GOBIN, libbuild.GOC)))
+    die(call(libbuild.GOC + ' install ./...'))
 
 
 def test(type, *args):
@@ -141,7 +168,7 @@ def test(type, *args):
     if type == 'unit':
         die(call(libbuild.GOC + ' test -v ./pkg/...'))
     elif type == 'e2e':
-        die(call('ginkgo -r --v --progress --trace -- --v=3'))
+        die(call('ginkgo -r --v --progress --trace test/e2e -- ' + " ".join(args)))
     else:
         print '{test unit|e2e}'
 

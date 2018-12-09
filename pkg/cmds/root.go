@@ -2,14 +2,13 @@ package cmds
 
 import (
 	"flag"
-	"log"
 
+	"github.com/appscode/go/flags"
 	v "github.com/appscode/go/version"
 	"github.com/appscode/kutil/tools/cli"
 	dbscheme "github.com/kubedb/apimachinery/client/clientset/versioned/scheme"
 	"github.com/kubevault/operator/client/clientset/versioned/scheme"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	clientsetscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 	appcatscheme "kmodules.xyz/custom-resources/client/clientset/versioned/scheme"
@@ -21,9 +20,7 @@ func NewRootCmd() *cobra.Command {
 		Short:             `Vault CSI by Appscode - Start farms`,
 		DisableAutoGenTag: true,
 		PersistentPreRun: func(c *cobra.Command, args []string) {
-			c.Flags().VisitAll(func(flag *pflag.Flag) {
-				log.Printf("FLAG: --%s=%q", flag.Name, flag.Value)
-			})
+			flags.DumpAll(c.Flags())
 			cli.SendAnalytics(c, v.Version.Version)
 
 			scheme.AddToScheme(clientsetscheme.Scheme)
