@@ -4,8 +4,8 @@ import (
 	v "github.com/appscode/go/version"
 	"github.com/appscode/kutil/tools/cli"
 	"github.com/golang/glog"
-	"github.com/kubevault/csi-driver/cmds/options"
-	"github.com/kubevault/csi-driver/driver"
+	"github.com/kubevault/csi-driver/pkg/cmds/options"
+	"github.com/kubevault/csi-driver/pkg/driver"
 	"github.com/spf13/cobra"
 )
 

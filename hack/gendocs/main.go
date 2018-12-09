@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	"github.com/appscode/go/runtime"
-	"github.com/kubevault/csi-driver/cmds"
+	"github.com/kubevault/csi-driver/pkg/cmds"
 	"github.com/spf13/cobra/doc"
 )
 
