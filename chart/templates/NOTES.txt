@@ -1,0 +1,1 @@
+To verify that csi vault has install, run:
