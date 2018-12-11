@@ -4,31 +4,37 @@
 
 replicaCount: 1
 
-csi-vault:
+csi:
   registry: kubevault
   repository: csi-vault
   tag: 0.1.2
+  pullPolicy: Always
 attacher:
   registry: quay.io/k8scsi
   repository: csi-attacher
   tag: v0.2.0
+  pullPolicy: Always
 provisioner:
   registry: quay.io/k8scsi
   repository: csi-provisioner
   tag: v0.2.1
-driver-registrar:
+  pullPolicy: Always
+registrar:
   registry: quay.io/k8scsi
   repository: driver-registrar
   tag: v0.3.0
+  pullPolicy: Always
 
 logLevel: 5
 
-imagePullPolicy: IfNotPresent
 nameOverride: ""
 fullnameOverride: ""
 
 driverName: com.vault.csi.vaultdbs
+pluginAddress: /var/lib/csi/sockets/pluginproxy/csi.sock
+pluginDir: /var/lib/csi/sockets/pluginproxy/
 
+attachRequired: false
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -40,7 +46,7 @@ resources: {}
   #  memory: 128Mi
   # requests:
   #  cpu: 100m
-  #  memory: 128Mi
+#  memory: 128Mi
 
 nodeSelector: {}
 

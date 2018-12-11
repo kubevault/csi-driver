@@ -1,14 +1,20 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: csi-provisioner
+  name: {{ template "vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+    app: {{ template "vault.fullname" . }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: external-provisioner-runner
+  name: {{ template "vault.provisioner" . }}-role
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.fullname" . }}
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -36,28 +42,32 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-provisioner-role
+  name: {{ template "vault.provisioner" . }}-binding
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.fullname" . }}
 subjects:
   - kind: ServiceAccount
-    name: csi-provisioner
+    name: {{ template "vault.provisioner" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: external-provisioner-runner
+  name: {{ template "vault.provisioner" . }}-role
   apiGroup: rbac.authorization.k8s.io
 ---
 # needed for StatefulSet
 kind: Service
 apiVersion: v1
 metadata:
-  name: csi-provisioner-vaultplugin
+  name: {{ template "vault.provisioner" . }}-service
   namespace: {{ .Release.Namespace }}
   labels:
-    app: csi-provisioner-vaultplugin
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.provisioner" . }}
 spec:
   selector:
-    app: csi-provisioner-vaultplugin
+    app: {{ template  "vault.provisioner" . }}
   ports:
     - name: dummy
       port: 12345
@@ -65,20 +75,21 @@ spec:
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
-  name: csi-provisioner-vaultplugin
+  name: {{ template  "vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: csi-provisioner-vaultplugin
-  serviceName: "csi-provisioner-vaultplugin"
+      app: {{ template "vault.provisioner" . }}
+  serviceName: {{ template "vault.provisioner" . }}-service
   replicas: 1
   template:
     metadata:
       labels:
-        app: csi-provisioner-vaultplugin
+        {{- include "vault.labels" . | nindent 8 }}
+        app: {{ template "vault.provisioner" . }}
     spec:
-      serviceAccount: csi-provisioner
+      serviceAccount: {{ template "vault.provisioner" . }}
       containers:
         - name: csi-provisioner
           image: {{ .Values.provisioner.registry }}/{{ .Values.provisioner.repository }}:{{ .Values.provisioner.tag }}
@@ -88,13 +99,13 @@ spec:
             - "--v={{ .Values.logLevel }}"
           env:
             - name: ADDRESS
-              value: /var/lib/csi/sockets/pluginproxy/csi.sock
-          imagePullPolicy: "Always"
+              value: {{ .Values.pluginAddress}}
+          imagePullPolicy: {{ .Values.provisioner.pullPolicy }}
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
+              mountPath: {{ .Values.pluginDir}}
         - name: vault-csi-plugin
-          image: { .Values.csi-vault.registry }}/{{ .Values.csi-vault.registry }}:{{ .Values.csi-vault.tag }}
+          image: {{ .Values.csi.registry }}/{{ .Values.csi.repository }}:{{ .Values.csi.tag }}
           args :
             - init
             - "--endpoint=$(CSI_ENDPOINT)"
@@ -102,15 +113,13 @@ spec:
             - "--v={{ .Values.logLevel }}"
           env:
             - name: CSI_ENDPOINT
-              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+              value: unix://{{ .Values.pluginAddress }}
             - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          imagePullPolicy: "Always"
+              {{- include "vault.node" . | nindent 14 }}
+          imagePullPolicy: {{ .Values.csi.pullPolicy }}
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/csi/sockets/pluginproxy/
+              mountPath: {{ .Values.pluginDir }}
       volumes:
         - name: socket-dir
           emptyDir: {}
