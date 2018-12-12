@@ -4,11 +4,9 @@ kind: CustomResourceDefinition
 metadata:
     creationTimestamp: null
     labels:
-      {{- include "vault.labels" . | nindent 4}}
+      {{- include "vault.labels" . | nindent 6}}
       app: catalog
     name: appbindings.appcatalog.appscode.com
-    annotations:
-      "helm.sh/hook": crd-install
 spec:
     additionalPrinterColumns:
         - JSONPath: .metadata.creationTimestamp
