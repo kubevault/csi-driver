@@ -16,27 +16,27 @@ metadata:
     {{- include "vault.labels" . | nindent 4}}
     app: {{ template "vault.fullname" . }}
 rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "create", "delete"]
-  - apiGroups: [""]
-    resources: ["persistentvolumeclaims"]
-    verbs: ["get", "list", "watch", "update"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["list", "watch", "create", "update", "patch"]
-  - apiGroups: ["csi.storage.k8s.io"]
-    resources: ["csidrivers", "csinodeinfos"]
-    verbs: ["get", "watch", "list", "update", "patch", "create"]
-  - apiGroups: ["appcatalog.appscode.com"]
-    resources: ["*"]
-    verbs: ["*"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["list", "watch", "create", "update", "patch"]
+- apiGroups: ["csi.storage.k8s.io"]
+  resources: ["csidrivers", "csinodeinfos"]
+  verbs: ["get", "watch", "list", "update", "patch", "create"]
+- apiGroups: ["appcatalog.appscode.com"]
+  resources: ["*"]
+  verbs: ["*"]
 
 ---
 kind: ClusterRoleBinding
@@ -48,9 +48,9 @@ metadata:
     {{- include "vault.labels" . | nindent 4}}
     app: {{ template "vault.fullname" . }}
 subjects:
-  - kind: ServiceAccount
-    name: {{ template "vault.provisioner" . }}
-    namespace: {{ .Release.Namespace }}
+- kind: ServiceAccount
+  name: {{ template "vault.provisioner" . }}
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ template "vault.provisioner" . }}-role
@@ -69,8 +69,8 @@ spec:
   selector:
     app: {{ template  "vault.provisioner" . }}
   ports:
-    - name: dummy
-      port: 12345
+  - name: dummy
+    port: 12345
 ---
 kind: StatefulSet
 apiVersion: apps/v1
@@ -91,35 +91,35 @@ spec:
     spec:
       serviceAccount: {{ template "vault.provisioner" . }}
       containers:
-        - name: csi-provisioner
-          image: {{ .Values.provisioner.registry }}/{{ .Values.provisioner.repository }}:{{ .Values.provisioner.tag }}
-          args:
-            - "--provisioner={{ .Values.driverName }}"
-            - "--csi-address=$(ADDRESS)"
-            - "--v={{ .Values.logLevel }}"
-          env:
-            - name: ADDRESS
-              value: {{ .Values.pluginAddress}}
-          imagePullPolicy: {{ .Values.provisioner.pullPolicy }}
-          volumeMounts:
-            - name: socket-dir
-              mountPath: {{ .Values.pluginDir}}
-        - name: vault-csi-plugin
-          image: {{ .Values.csi.registry }}/{{ .Values.csi.repository }}:{{ .Values.csi.tag }}
-          args :
-            - init
-            - "--endpoint=$(CSI_ENDPOINT)"
-            - "--node=$(NODE_NAME)"
-            - "--v={{ .Values.logLevel }}"
-          env:
-            - name: CSI_ENDPOINT
-              value: unix://{{ .Values.pluginAddress }}
-            - name: NODE_NAME
-              {{- include "vault.node" . | nindent 14 }}
-          imagePullPolicy: {{ .Values.csi.pullPolicy }}
-          volumeMounts:
-            - name: socket-dir
-              mountPath: {{ .Values.pluginDir }}
-      volumes:
+      - name: csi-provisioner
+        image: {{ .Values.provisioner.registry }}/{{ .Values.provisioner.repository }}:{{ .Values.provisioner.tag }}
+        args:
+        - "--provisioner={{ .Values.driverName }}"
+        - "--csi-address=$(ADDRESS)"
+        - "--v={{ .Values.logLevel }}"
+        env:
+        - name: ADDRESS
+          value: {{ .Values.pluginAddress}}
+        imagePullPolicy: {{ .Values.provisioner.pullPolicy }}
+        volumeMounts:
         - name: socket-dir
-          emptyDir: {}
+          mountPath: {{ .Values.pluginDir}}
+      - name: vault-csi-plugin
+        image: {{ .Values.csi.registry }}/{{ .Values.csi.repository }}:{{ .Values.csi.tag }}
+        args :
+        - init
+        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--node=$(NODE_NAME)"
+        - "--v={{ .Values.logLevel }}"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix://{{ .Values.pluginAddress }}
+        - name: NODE_NAME
+          {{- include "vault.node" . | nindent 10 }}
+        imagePullPolicy: {{ .Values.csi.pullPolicy }}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: {{ .Values.pluginDir }}
+      volumes:
+      - name: socket-dir
+        emptyDir: {}
