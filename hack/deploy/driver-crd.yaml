@@ -22,11 +22,3 @@ spec:
     plural: csinodeinfos
   scope: Cluster
   version: v1alpha1
----
-apiVersion: csi.storage.k8s.io/v1alpha1
-kind: CSIDriver
-metadata:
-  name: ${VAULT_CSI_DRIVER_NAME}
-spec:
-  attachRequired: ${CSI_REQUIRED_ATTACHMENT}
-  podInfoOnMountVersion: v1

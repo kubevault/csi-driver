@@ -4,6 +4,7 @@ set -eou pipefail
 crds=(
   csidrivers.csi.storage.k8s.io
   csinodeinfos.csi.storage.k8s.io
+  appbindings.appcatalog.appscode.com
 )
 
 echo "checking kubeconfig context"
@@ -282,9 +283,6 @@ if [ "$VAULT_CSI_DRIVER_UNINSTALL" -eq 1 ]; then
     for crd in "${crds[@]}"; do
       kubectl delete crd ${crd} --ignore-not-found=true
     done
-    if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
-        kubectl delete -f https://raw.githubusercontent.com/kmodules/custom-resources/master/api/crds/appbinding.yaml
-    fi
   fi
 
   echo
@@ -295,9 +293,18 @@ fi
 ${SCRIPT_LOCATION}hack/deploy/driver-crd.yaml | $ONESSL envsubst  | kubectl apply -f -
 
 if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
-  kubectl apply -f https://raw.githubusercontent.com/kmodules/custom-resources/master/api/crds/appbinding.yaml
+  ${SCRIPT_LOCATION}hack/deploy/appbinding.yaml | $ONESSL envsubst  | kubectl apply -f -
 fi
 
+echo "waiting until Vault CSI driver crds are ready"
+for crd in "${crds[@]}"; do
+  $ONESSL wait-until-ready crd ${crd} || {
+    echo "$crd crd failed to be ready"
+    exit 1
+  }
+done
+
+${SCRIPT_LOCATION}hack/deploy/csidriver.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/csi-attacher.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/csi-provisioner.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/csi-driver-registrar.yaml | $ONESSL envsubst  | kubectl apply -f -
