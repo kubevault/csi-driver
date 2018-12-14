@@ -36,7 +36,10 @@ pluginDir: /var/lib/csi/sockets/pluginproxy/
 
 attachRequired: false
 
-installAppBindingCRD: true
+## Install AppBinding CRD
+appbinding:
+  # Specifies whether AppBinding CRD should be created
+  create: true
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
