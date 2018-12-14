@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-vault-attacher
+  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  labels:
+    app: vault-csi-driver
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-vault-attacher-role
+  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  labels:
+    app: vault-csi-driver
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["volumeattachments"]
+  verbs: ["get", "list", "watch", "update", "create"]
+- apiGroups: ["csi.storage.k8s.io"]
+  resources: ["csidrivers", "csinodeinfos"]
+  verbs: ["get", "watch", "list", "update", "patch", "create"]
+- apiGroups: ["appcatalog.appscode.com"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-vault-attacher-binding
+  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  labels:
+    app: vault-csi-driver
+subjects:
+- kind: ServiceAccount
+  name: csi-vault-attacher
+  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+roleRef:
+  kind: ClusterRole
+  name: csi-vault-attacher-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# needed for StatefulSet
+kind: Service
+apiVersion: v1
+metadata:
+  name: csi-vault-attacher-service
+  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  labels:
+    app: csi-vault-attacher
+spec:
+  selector:
+    app: csi-vault-attacher
+  ports:
+  - name: dummy
+    port: 12345
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: csi-vault-attacher
+  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  labels:
+    app: csi-vault-attacher
+spec:
+  selector:
+    matchLabels:
+      app: csi-vault-attacher
+  serviceName: csi-vault-attacher-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: csi-vault-attacher
+    spec:
+      serviceAccount: csi-vault-attacher
+      containers:
+      - name: csi-attacher
+        image: ${CSI_ATTACHER_DOCKER_REGISTRY}/${CSI_ATTACHER_DOCKER_REPOSITORY}:${CSI_ATTACHER_IMAGE_TAG}
+        args:
+        - "--v=5"
+        - "--csi-address=$(ADDRESS)"
+        env:
+        - name: ADDRESS
+          value: /var/lib/csi/sockets/pluginproxy/csi.sock
+        imagePullPolicy: ${CSI_ATTACHER_IMAGE_PULL_POLICY}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: /var/lib/csi/sockets/pluginproxy/
+      - name: vault-csi-plugin
+        image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
+        args :
+        - init
+        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--node=$(NODE_NAME)"
+        - "--v=10"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        imagePullPolicy: ${CSI_VAULT_IMAGE_PULL_POLICY}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: /var/lib/csi/sockets/pluginproxy/
+      volumes:
+      - name: socket-dir
+        emptyDir: {}
+---
