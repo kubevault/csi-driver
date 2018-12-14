@@ -1,8 +1,8 @@
 hash: 63921933977135addeb6bdac5539779e13bb7fe437efe119445598fe0359b763
-updated: 2018-12-08T21:42:50.272713239-08:00
+updated: 2018-12-14T16:53:24.936254957+06:00
 imports:
 - name: github.com/appscode/go
-  version: aa0a55d74dac66f9b9bec9c0e7b67944115a3f44
+  version: 584aaa73af837f112c0a471be398ea837341c330
   subpackages:
   - analytics
   - context
@@ -19,7 +19,7 @@ imports:
 - name: github.com/appscode/jsonpatch
   version: 5af499cf01c842bfdd7761a433fc90525ccd6836
 - name: github.com/appscode/kutil
-  version: 51b5bcd8acd29487177991028426f9864c4c3637
+  version: 333f8316973162b49176cdd933f1bbf64157ba74
   subpackages:
   - apiextensions/v1beta1
   - meta
@@ -107,7 +107,7 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
@@ -144,7 +144,9 @@ imports:
 - name: github.com/hashicorp/go-multierror
   version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/hashicorp/go-plugin
-  version: 54b6ff97d8180dbbd93d2010dd4a92c86f604bb8
+  version: f444068e8f5a19853177f7aa0aea7e7d95b5b528
+  subpackages:
+  - internal/proto
 - name: github.com/hashicorp/go-retryablehttp
   version: dfbae6744eb4c188d26ef53f1d39444c0c68b60c
 - name: github.com/hashicorp/go-rootcerts
@@ -209,7 +211,7 @@ imports:
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/kubedb/apimachinery
-  version: bd45ce0b7b20bea3aa4029fcbfef4e15350c7bc6
+  version: 4064f4cc0baa2d2eca5154a8b44cc817f658342e
   subpackages:
   - apis
   - apis/authorization
@@ -221,7 +223,7 @@ imports:
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
 - name: github.com/kubevault/operator
-  version: 21bac77f14a09c62b9349324a2fda7df003066bd
+  version: 90ee6f68348e0d5aefa4c981179d30899f668566
   subpackages:
   - apis
   - apis/catalog
@@ -259,7 +261,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mitchellh/go-homedir
-  version: ae18d6b8b3205b561c79e8e5f69bff09736185f4
+  version: d682a8f0cf139663a984ff12528da460ca963de9
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -287,7 +289,8 @@ imports:
 - name: github.com/ryanuber/go-glob
   version: 256dc444b735e061061cf46c809487313d5b0065
 - name: github.com/sergi/go-diff
-  version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
+  version: 24e2351369ec4949b2ed0dc5c477afdd4c4034e8
+  repo: https://github.com/sergi/go-diff
   subpackages:
   - diffmatchpatch
 - name: github.com/SermoDigital/jose
@@ -305,11 +308,12 @@ imports:
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: github.com/yudai/gojsondiff
-  version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
+  version: e21612694bdd50975f93cd5eaccb457477128e28
   subpackages:
   - formatter
 - name: github.com/yudai/golcs
   version: d1c525dea8ce39ea9a783d33cf08932305373f2c
+  repo: https://github.com/yudai/golcs
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -369,7 +373,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/base
@@ -625,6 +629,8 @@ imports:
   vcs: git
   subpackages:
   - api/v1
+- name: sigs.k8s.io/yaml
+  version: fd68e9863619f6ec2fdd8625fe1f02e7c877e480
 testImports:
 - name: github.com/appscode/pat
   version: 48ff78925b7955367d8a048fc2b5cec8efadf8d3
