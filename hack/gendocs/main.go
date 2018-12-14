@@ -16,38 +16,39 @@ import (
 )
 
 const (
-	version = "0.1.0-alpha.1"
+	version = "0.1.0"
 )
 
 var (
 	tplFrontMatter = template.Must(template.New("index").Parse(`---
-title: Reference
-description: csi-vault CLI Reference
+title: Reference | Vault CSI Driver
+description: Vault CSI Driver Reference
 menu:
-  product_csi_vault_{{ .Version }}:
-    identifier: reference
-    name: Reference
-    weight: 1000
-menu_name: product_csi_vault_{{ .Version }}
+  product_kubevault_{{ .Version }}:
+    identifier: reference-csi-driver
+    name: Vault CSI Driver
+    weight: 10
+    parent: reference
+menu_name: product_kubevault_{{ .Version }}
 ---
 `))
 
 	_ = template.Must(tplFrontMatter.New("cmd").Parse(`---
 title: {{ .Name }}
 menu:
-  product_csi_vault_{{ .Version }}:
+  product_kubevault_{{ .Version }}:
     identifier: {{ .ID }}
     name: {{ .Name }}
-    parent: reference
+    parent: reference-csi-driver
 {{- if .RootCmd }}
     weight: 0
 {{ end }}
 product_name: kubevault
-menu_name: product_csi_vault_{{ .Version }}
+menu_name: product_kubevault_{{ .Version }}
 section_menu_id: reference
 {{- if .RootCmd }}
 aliases:
-  - products/kubevault/{{ .Version }}/reference/
+  - products/kubevault/{{ .Version }}/reference/csi-driver/
 {{ end }}
 ---
 `))
@@ -56,7 +57,7 @@ aliases:
 // ref: https://github.com/spf13/cobra/blob/master/doc/md_docs.md
 func main() {
 	rootCmd := cmds.NewRootCmd()
-	dir := runtime.GOPath() + "/src/github.com/kubevault/csi-driver/docs/reference"
+	dir := runtime.GOPath() + "/src/github.com/kubevault/docs/docs/reference/csi-driver"
 	fmt.Printf("Generating cli markdown tree in: %v\n", dir)
 	err := os.RemoveAll(dir)
 	if err != nil {
@@ -89,7 +90,7 @@ func main() {
 	}
 
 	linkHandler := func(name string) string {
-		return "/docs/reference/" + name
+		return "/docs/reference/csi-driver/" + name
 	}
 	doc.GenMarkdownTreeCustom(rootCmd, dir, filePrepender, linkHandler)
 
