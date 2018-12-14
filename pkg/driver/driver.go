@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	driverName        = "com.vault.csi.vaultdbs"
+	driverName        = "com.kubevault.csi.secrets"
 	vendorVersion     = "0.1.1"
 	podName           = "csi.storage.k8s.io/pod.name"
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"

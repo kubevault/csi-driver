@@ -30,7 +30,7 @@ logLevel: 5
 nameOverride: ""
 fullnameOverride: ""
 
-driverName: com.vault.csi.vaultdbs
+driverName: com.kubevault.csi.secrets
 pluginAddress: /var/lib/csi/sockets/pluginproxy/csi.sock
 pluginDir: /var/lib/csi/sockets/pluginproxy/
 

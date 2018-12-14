@@ -129,7 +129,7 @@ export CSI_REGISTRAR_DOCKER_REPOSITORY=driver-registrar
 export CSI_REGISTRAR_IMAGE_TAG=v0.3.0
 export CSI_REGISTRAR_IMAGE_PULL_SECRET=
 export CSI_REGISTRAR_IMAGE_PULL_POLICY=IfNotPresent
-export VAULT_CSI_DRIVER_NAME=com.vault.csi.vaultdbs
+export VAULT_CSI_DRIVER_NAME=com.kubevault.csi.secrets
 export VAULT_CSI_DRIVER_UNINSTALL=0
 export VAULT_CSI_DRIVER_PURGE=0
 export CSI_REQUIRED_ATTACHMENT=false
@@ -164,7 +164,7 @@ show_help() {
   echo "    --csi-registrar-docker-registry       docker registry used to pull csi registrar image (default: quay.io/k8scsi)"
   echo "    --csi-registrar-image-pull-secret     name of secret used to pull csi registrar image"
   echo "    --csi-registrar-image-tag             docker image version of csi registrar"
-  echo "    --csi-driver-name                     name of csi driver to install (default: com.vault.csi.vaultdbs)"
+  echo "    --csi-driver-name                     name of csi driver to install (default: com.kubevault.csi.secrets)"
   echo "    --csi-required-attachment             indicates csi volume driver requires an attach operation (default: false)"
   echo "    --install-appbinding                  indicates appbinding crd need to be installed (default: true)"
   echo "    --uninstall                           uninstall vault csi driver"

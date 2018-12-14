@@ -72,7 +72,7 @@ The following table lists the configurable parameters of the Stash chart and the
 | `registrar.tag`                       | CSI driver registrar container image tag                           | `v0.3.0`                                   |
 | `registrar.pullPolicy`                | CSI driver registrar container image pull policy                   | `IfNotPresent`                             |
 | `logLevel`                            | Log level for container                                            | `5`                                        |
-| `driverName`                          | Vault CSI driver name                                              | `com.vault.csi.vaultdbs`                   |
+| `driverName`                          | Vault CSI driver name                                              | `com.kubevault.csi.secrets`                   |
 | `pluginAddress`                       | Vault CSI driver endpoint address                                  | `/var/lib/csi/sockets/pluginproxy/csi.sock`|
 | `pluginDir`                           | Vault CSI driver plugin directory                                  | `/var/lib/csi/sockets/pluginproxy/`        |
 | `attachRequired`                      | Indicates CSI volume driver requires an attach operation           | `false`                                    |

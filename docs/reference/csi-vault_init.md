@@ -24,7 +24,7 @@ csi-vault init [flags]
 ### Options
 
 ```
-      --endpoint string   CSI endpoint (default "unix:///var/lib/kubelet/plugins/com.vault.csi.vaultdbs/csi.sock")
+      --endpoint string   CSI endpoint (default "unix:///var/lib/kubelet/plugins/com.kubevault.csi.secrets/csi.sock")
   -h, --help              help for init
       --node string       Linode Hostname (default "beast")
 ```

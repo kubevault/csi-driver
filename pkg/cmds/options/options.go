@@ -14,7 +14,7 @@ type Config struct {
 func NewConfig() *Config {
 	hostname, _ := os.Hostname()
 	return &Config{
-		Endpoint: "unix:///var/lib/kubelet/plugins/com.vault.csi.vaultdbs/csi.sock",
+		Endpoint: "unix:///var/lib/kubelet/plugins/com.kubevault.csi.secrets/csi.sock",
 		NodeName: hostname,
 	}
 }
