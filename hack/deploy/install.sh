@@ -296,7 +296,7 @@ if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
   ${SCRIPT_LOCATION}hack/deploy/appbinding.yaml | $ONESSL envsubst  | kubectl apply -f -
 fi
 
-echo "waiting until Vault operator crds are ready"
+echo "waiting until Vault CSI driver crds are ready"
 for crd in "${crds[@]}"; do
   $ONESSL wait-until-ready crd ${crd} || {
     echo "$crd crd failed to be ready"
