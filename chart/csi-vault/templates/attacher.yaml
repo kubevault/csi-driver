@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "vault.attacher" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+    app: {{ template "vault.fullname" . }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "vault.attacher" . }}-role
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.fullname" . }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["volumeattachments"]
+  verbs: ["get", "list", "watch", "update", "create"]
+- apiGroups: ["csi.storage.k8s.io"]
+  resources: ["csidrivers", "csinodeinfos"]
+  verbs: ["get", "watch", "list", "update", "patch", "create"]
+- apiGroups: ["appcatalog.appscode.com"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "vault.attacher" . }}-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "vault.attacher" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "vault.attacher" . }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# needed for StatefulSet
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "vault.attacher" . }}-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.attacher" . }}
+spec:
+  selector:
+    app: {{ template "vault.attacher" .}}
+  ports:
+  - name: dummy
+    port: 12345
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ template "vault.attacher" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "vault.attacher" .}}
+  serviceName: {{ template "vault.attacher" . }}-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "vault.labels" . | nindent 8}}
+        app: {{ template "vault.attacher" .}}
+    spec:
+      serviceAccount: {{ template "vault.attacher" . }}
+      containers:
+      - name: csi-attacher
+        image: {{ .Values.attacher.registry }}/{{ .Values.attacher.repository }}:{{ .Values.attacher.tag }}
+        args:
+        - "--v={{ .Values.logLevel }}"
+        - "--csi-address=$(ADDRESS)"
+        env:
+        - name: ADDRESS
+          value: {{ .Values.pluginAddress }}
+        imagePullPolicy: {{ .Values.attacher.pullPolicy }}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: {{ .Values.pluginDir }}
+      - name: vault-csi-plugin
+        image: {{ .Values.csi.registry }}/{{ .Values.csi.repository }}:{{ .Values.csi.tag }}
+        args :
+        - init
+        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--node=$(NODE_NAME)"
+        - "--v={{ .Values.logLevel }}"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix://{{ .Values.pluginAddress}}
+        - name: NODE_NAME
+          {{- include "vault.node" . | nindent 10}}
+        imagePullPolicy: {{ .Values.csi.pullPolicy }}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: {{ .Values.pluginDir}}
+      volumes:
+      - name: socket-dir
+        emptyDir: {}

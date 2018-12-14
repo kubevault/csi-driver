@@ -213,5 +213,5 @@ func (d *Driver) ListSnapshots(ctx context.Context, req *csi.ListSnapshotsReques
 	d.log.WithFields(logrus.Fields{
 		"method": "list_snapshot",
 	}).Info("list snapshot called")
-	return nil, errors.New("Not implemented")
+	return &csi.ListSnapshotsResponse{}, errors.New("Not implemented")
 }

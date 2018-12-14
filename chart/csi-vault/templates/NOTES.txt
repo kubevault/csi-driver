@@ -1,0 +1,9 @@
+To verify that CSI driver has installed successfully, run:
+
+  $ kubectl --namespace={{ .Release.Namespace }} get pods -l "release={{ .Release.Name }}"
+
+If all pods are running, then run:
+
+ $ kubectl get csinodeinfos
+
+If you can see the node's list, then your installation is ok.
