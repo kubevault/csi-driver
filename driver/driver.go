@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	driverName        = "vaultdbs.csi.vault.com"
-	vendorVersion     = "0.1.3"
+	// https://github.com/container-storage-interface/spec/pull/260
+	driverName        = "secrets.csi.kubevault.com"
+	vendorVersion     = "1.0.0"
 	podName           = "csi.storage.k8s.io/pod.name"
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"
 	podUID            = "csi.storage.k8s.io/pod.uid"
@@ -35,7 +36,6 @@ const (
 type Driver struct {
 	endpoint string
 	nodeId   string
-	url      string
 
 	srv     *grpc.Server
 	mounter Mounter

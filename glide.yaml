@@ -21,9 +21,9 @@ import:
 - package: k8s.io/apimachinery
   repo: https://github.com/kmodules/apimachinery.git
   vcs: git
-  version: ac-1.12.0
+  version: ac-1.13.0
 - package: k8s.io/client-go
-  version: v9.0.0
+  version: v10.0.0
 - package: github.com/cpuguy83/go-md2man
   version: v1.0.8
 - package: github.com/json-iterator/go
@@ -41,7 +41,7 @@ import:
 - package: github.com/davecgh/go-spew
   version: v1.1.1
 - package: k8s.io/kube-openapi
-  version: 0cf8f7e6ed1d2e3d47d02e3b6e559369af24d803
+  version: c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d
 - package: kmodules.xyz/custom-resources
   repo: https://github.com/kmodules/custom-resources.git
   vcs: git
@@ -60,6 +60,12 @@ import:
   version: v2.2.1
 - package: github.com/gorilla/websocket
   version: v1.4.0
+- package: k8s.io/api
+  version: kubernetes-1.13.0
+- package: k8s.io/apiextensions-apiserver
+  version: kubernetes-1.13.0
+- package: k8s.io/kubernetes
+  version: v1.13.0
 testImport:
 - package: github.com/kubernetes-csi/csi-test
   version: v1.0.0-2

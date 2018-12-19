@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   clientConfig:
-    url: http://104.248.12.34:30001
+    url: http://159.65.45.4:30001
     insecureSkipTLSVerify: true
   parameters:
     apiVersion: "kubevault.com/v1alpha1"
