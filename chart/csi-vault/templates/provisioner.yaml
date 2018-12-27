@@ -1,20 +1,22 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "vault.labels" . | nindent 4 }}
-    app: {{ template "vault.fullname" . }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "vault.provisioner" . }}-role
+  name: {{ template "csi-vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "vault.labels" . | nindent 4}}
-    app: {{ template "vault.fullname" . }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -37,59 +39,118 @@ rules:
 - apiGroups: ["appcatalog.appscode.com"]
   resources: ["*"]
   verbs: ["*"]
-
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "vault.provisioner" . }}-binding
+  name: {{ template "csi-vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "vault.labels" . | nindent 4}}
-    app: {{ template "vault.fullname" . }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ template "vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ template "vault.provisioner" . }}-role
+  name: {{ template "csi-vault.provisioner" . }}
   apiGroup: rbac.authorization.k8s.io
+---
+# to read the config for terminating authentication
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "csi-vault.provisioner" . }}-extension-server-authentication-reader
+  namespace: kube-system
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ template "csi-vault.provisioner" . }}
+  namespace: {{ .Release.Namespace }}
+---
+# to delegate authentication and authorization
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "csi-vault.provisioner" . }}-auth-delegator
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: {{ template "csi-vault.provisioner" . }}
+  namespace: {{ .Release.Namespace }}
 ---
 # needed for StatefulSet
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "vault.provisioner" . }}-service
+  name: {{ template "csi-vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "vault.labels" . | nindent 4}}
-    app: {{ template "vault.provisioner" . }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
+    release: "{{ .Release.Name }}"
+  {{- if and (eq .Values.monitoring.agent "prometheus.io/builtin") .Values.monitoring.provisioner }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8443"
+    prometheus.io/scheme: "https"
+  {{- end }}
 spec:
   selector:
-    app: {{ template  "vault.provisioner" . }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
   ports:
-  - name: dummy
-    port: 12345
+  - name: api
+    port: 443
+    targetPort: 8443
 ---
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
-  name: {{ template  "vault.provisioner" . }}
+  name: {{ template  "csi-vault.provisioner" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "vault.provisioner" . }}
-  serviceName: {{ template "vault.provisioner" . }}-service
-  replicas: 1
+      app: {{ template "csi-vault.name" . }}
+      component: {{ template "csi-vault.provisioner" . }}
+      release: "{{ .Release.Name }}"
+  serviceName: {{ template "csi-vault.provisioner" . }}
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        {{- include "vault.labels" . | nindent 8 }}
-        app: {{ template "vault.provisioner" . }}
+        {{- include "csi-vault.labels" . | nindent 8 }}
+        app: {{ template "csi-vault.name" . }}
+        component: {{ template "csi-vault.provisioner" . }}
     spec:
-      serviceAccount: {{ template "vault.provisioner" . }}
+      serviceAccount: {{ template "csi-vault.provisioner" . }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 6 }}
+      {{- end }}
       containers:
       - name: csi-provisioner
         image: {{ .Values.provisioner.registry }}/{{ .Values.provisioner.repository }}:{{ .Values.provisioner.tag }}
@@ -101,25 +162,77 @@ spec:
         - name: ADDRESS
           value: {{ .Values.pluginAddress}}
         imagePullPolicy: {{ .Values.provisioner.pullPolicy }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
         - name: socket-dir
-          mountPath: {{ .Values.pluginDir}}
+          mountPath: {{ .Values.pluginDir }}
       - name: vault-csi-plugin
-        image: {{ .Values.csi.registry }}/{{ .Values.csi.repository }}:{{ .Values.csi.tag }}
+        image: {{ .Values.plugin.registry }}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :
         - run
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v={{ .Values.logLevel }}"
+        - --secure-port=8443
+        - --tls-cert-file=/var/serving-cert/tls.crt
+        - --tls-private-key-file=/var/serving-cert/tls.key
+        - --use-kubeapiserver-fqdn-for-aks={{ .Values.apiserver.useKubeapiserverFqdnForAks }}
+        - --enable-analytics={{ .Values.enableAnalytics }}
+        ports:
+        - containerPort: 8443
         env:
         - name: CSI_ENDPOINT
           value: unix://{{ .Values.pluginAddress }}
         - name: NODE_NAME
-          {{- include "vault.node" . | nindent 10 }}
-        imagePullPolicy: {{ .Values.csi.pullPolicy }}
+          {{- include "csi-vault.node" . | nindent 10 }}
+        imagePullPolicy: {{ .Values.plugin.pullPolicy }}
+{{- if .Values.apiserver.healthcheck.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+{{- end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
         - name: socket-dir
           mountPath: {{ .Values.pluginDir }}
+        - mountPath: /var/serving-cert
+          name: serving-cert
       volumes:
       - name: socket-dir
         emptyDir: {}
+      - name: serving-cert
+        secret:
+          defaultMode: 420
+          secretName: {{ template "csi-vault.fullname" . }}-apiserver-cert
+{{- if or .Values.tolerations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
+      tolerations:
+{{- if .Values.tolerations }}
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end -}}
+{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+      - key: CriticalAddonsOnly
+        operator: Exists
+{{- end -}}
+{{- end -}}
+{{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end -}}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end -}}
+{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+      priorityClassName: system-cluster-critical
+{{- end -}}

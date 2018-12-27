@@ -1,0 +1,99 @@
+{{- if and (eq .Values.monitoring.agent "prometheus.io/coreos-operator") .Values.monitoring.attacher }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "csi-vault.attacher" . }}-servicemonitor
+  namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
+    {{- if .Values.monitoring.serviceMonitor.labels }}
+    {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
+    {{ $key }}: {{ $val }}
+    {{- end }}
+    {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: "{{ template "csi-vault.name" . }}"
+      component: {{ template "csi-vault.attacher" . }}
+      release: "{{ .Release.Name }}"
+  endpoints:
+  - port: api
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/{{ template "csi-vault.fullname" . }}-apiserver-cert/tls.crt
+      serverName: "{{ template "csi-vault.attacher" . }}.{{ .Release.Namespace }}.svc"
+---
+{{- end }}
+{{- if and (eq .Values.monitoring.agent "prometheus.io/coreos-operator") .Values.monitoring.plugin }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "csi-vault.plugin" . }}-servicemonitor
+  namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
+    {{- if .Values.monitoring.serviceMonitor.labels }}
+    {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
+    {{ $key }}: {{ $val }}
+    {{- end }}
+    {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: "{{ template "csi-vault.name" . }}"
+      component: {{ template "csi-vault.plugin" . }}
+      release: "{{ .Release.Name }}"
+  endpoints:
+  - port: api
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/{{ template "csi-vault.fullname" . }}-apiserver-cert/tls.crt
+      serverName: "{{ template "csi-vault.plugin" . }}.{{ .Release.Namespace }}.svc"
+---
+{{- end }}
+{{- if and (eq .Values.monitoring.agent "prometheus.io/coreos-operator") .Values.monitoring.provisioner }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "csi-vault.provisioner" . }}-servicemonitor
+  namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    app: {{ template "csi-vault.name" . }}
+    component: {{ template "csi-vault.provisioner" . }}
+    {{- if .Values.monitoring.serviceMonitor.labels }}
+    {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
+    {{ $key }}: {{ $val }}
+    {{- end }}
+    {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: "{{ template "csi-vault.name" . }}"
+      component: {{ template "csi-vault.provisioner" . }}
+      release: "{{ .Release.Name }}"
+  endpoints:
+  - port: api
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/{{ template "csi-vault.fullname" . }}-apiserver-cert/tls.crt
+      serverName: "{{ template "csi-vault.provisioner" . }}.{{ .Release.Namespace }}.svc"
+---
+{{- end }}

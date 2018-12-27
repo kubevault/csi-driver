@@ -3,8 +3,8 @@ kind: CustomResourceDefinition
 metadata:
   name: csidrivers.csi.storage.k8s.io
   labels:
-    {{- include "vault.labels" . | nindent 4}}
-    app: {{ template "vault.fullname" . }}
+    {{- include "csi-vault.labels" . | nindent 4}}
+    app: {{ template "csi-vault.fullname" . }}
 spec:
   group: csi.storage.k8s.io
   names:
@@ -19,8 +19,8 @@ kind: CustomResourceDefinition
 metadata:
   name: csinodeinfos.csi.storage.k8s.io
   labels:
-    {{- include "vault.labels" . | nindent 4}}
-    app: {{ template "vault.fullname" . }}
+    {{- include "csi-vault.labels" . | nindent 4}}
+    app: {{ template "csi-vault.fullname" . }}
 spec:
   group: csi.storage.k8s.io
   names:

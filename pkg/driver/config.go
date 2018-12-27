@@ -28,8 +28,16 @@ func NewConfig(clientConfig *rest.Config) *Config {
 	}
 }
 
+func isSupportedVersion(kc kubernetes.Interface) error {
+	return discovery.IsSupportedVersion(
+		kc,
+		">= 1.12.0, < 1.14.0", // supported versions: 1.12.x & 1.13.x
+		discovery.DefaultBlackListedVersions,
+		discovery.DefaultBlackListedMultiMasterVersions)
+}
+
 func (c *Config) New() (*Driver, error) {
-	if err := discovery.IsDefaultSupportedVersion(c.KubeClient); err != nil {
+	if err := isSupportedVersion(c.KubeClient); err != nil {
 		return nil, err
 	}
 

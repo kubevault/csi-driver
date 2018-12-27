@@ -1,0 +1,43 @@
+{{- $ca := genCA "ca" 3650 }}
+{{- $cn := include "csi-vault.fullname" . -}}
+{{- $altName1 := printf "%s.%s"     (include "csi-vault.attacher" .)    .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" (include "csi-vault.attacher" .)    .Release.Namespace }}
+{{- $altName3 := printf "%s.%s"     (include "csi-vault.plugin" .)      .Release.Namespace }}
+{{- $altName4 := printf "%s.%s.svc" (include "csi-vault.plugin" .)      .Release.Namespace }}
+{{- $altName5 := printf "%s.%s"     (include "csi-vault.provisioner" .) .Release.Namespace }}
+{{- $altName6 := printf "%s.%s.svc" (include "csi-vault.provisioner" .) .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2 $altName3 $altName4 $altName5 $altName6) 3650 $ca }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "csi-vault.fullname" . }}-apiserver-cert
+  namespace: {{ .Release.Namespace }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: "{{ template "csi-vault.name" . }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+type: Opaque
+data:
+  tls.crt: {{ b64enc $cert.Cert }}
+  tls.key: {{ b64enc $cert.Key }}
+---
+{{ $promNamespace:= default .Release.Namespace .Values.monitoring.prometheus.namespace }}
+{{- if (and (ne $promNamespace .Release.Namespace) .Values.monitoring.operator) }}
+# if operator monitoring is enabled and prometheus namespace is different than operator
+# create the above secret in prometheus namespace too.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "csi-vault.fullname" . }}-apiserver-cert
+  namespace: {{ $promNamespace }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: "{{ template "csi-vault.name" . }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ b64enc $cert.Cert }}
+  tls.key: {{ b64enc $cert.Key }}
+{{- end }}
