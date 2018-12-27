@@ -107,7 +107,7 @@ spec:
       - name: vault-csi-plugin
         image: {{ .Values.csi.registry }}/{{ .Values.csi.repository }}:{{ .Values.csi.tag }}
         args :
-        - init
+        - run
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v={{ .Values.logLevel }}"

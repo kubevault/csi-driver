@@ -1,0 +1,13 @@
+apiVersion: csi.storage.k8s.io/v1alpha1
+kind: CSIDriver
+metadata:
+  name: {{ .Values.driverName }}
+  labels:
+    {{- include "vault.labels" . | nindent 4}}
+    app: {{ template "vault.fullname" . }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+spec:
+  attachRequired: {{ .Values.attachRequired }}
+  podInfoOnMountVersion: v1
