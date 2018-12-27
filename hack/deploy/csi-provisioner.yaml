@@ -93,7 +93,7 @@ spec:
         args:
         - --provisioner=${VAULT_CSI_DRIVER_NAME}
         - "--csi-address=$(ADDRESS)"
-        - "--v=5"
+        - "--v=3"
         env:
         - name: ADDRESS
           value: /var/lib/csi/sockets/pluginproxy/csi.sock
@@ -107,7 +107,7 @@ spec:
         - init
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
-        - "--v=10"
+        - "--v=3"
         env:
         - name: CSI_ENDPOINT
           value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
