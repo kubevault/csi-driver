@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"flag"
+	"os"
 
 	"github.com/appscode/go/flags"
 	v "github.com/appscode/go/version"
@@ -9,6 +10,7 @@ import (
 	dbscheme "github.com/kubedb/apimachinery/client/clientset/versioned/scheme"
 	"github.com/kubevault/operator/client/clientset/versioned/scheme"
 	"github.com/spf13/cobra"
+	genericapiserver "k8s.io/apiserver/pkg/server"
 	clientsetscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 	appcatscheme "kmodules.xyz/custom-resources/client/clientset/versioned/scheme"
@@ -34,8 +36,9 @@ func NewRootCmd() *cobra.Command {
 	flag.CommandLine.Parse([]string{})
 	rootCmd.PersistentFlags().BoolVar(&cli.EnableAnalytics, "enable-analytics", cli.EnableAnalytics, "Send analytical events to Google Analytics")
 
-	rootCmd.AddCommand(NewCmdRun())
 	rootCmd.AddCommand(v.NewCmdVersion())
+	stopCh := genericapiserver.SetupSignalHandler()
+	rootCmd.AddCommand(NewCmdRun(os.Stdout, os.Stderr, stopCh))
 
 	return rootCmd
 }

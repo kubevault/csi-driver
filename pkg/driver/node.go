@@ -247,7 +247,7 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 func (d *Driver) NodeGetId(ctx context.Context, req *csi.NodeGetIdRequest) (*csi.NodeGetIdResponse, error) {
 	d.log.WithField("method", "node_get_id").Info("node get id called")
 	return &csi.NodeGetIdResponse{
-		NodeId: d.nodeId,
+		NodeId: d.NodeId,
 	}, nil
 }
 
@@ -276,7 +276,7 @@ func (d *Driver) NodeGetCapabilities(ctx context.Context, req *csi.NodeGetCapabi
 func (d *Driver) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (*csi.NodeGetInfoResponse, error) {
 	d.log.WithField("method", "node_get_info").Info("node get info called")
 	return &csi.NodeGetInfoResponse{
-		NodeId:            d.nodeId,
+		NodeId:            d.NodeId,
 		MaxVolumesPerNode: 10,
 	}, nil
 }

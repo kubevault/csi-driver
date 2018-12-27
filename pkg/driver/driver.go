@@ -14,7 +14,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
@@ -36,8 +35,7 @@ const (
 //   csi.NodeServer
 //
 type Driver struct {
-	endpoint string
-	nodeId   string
+	config
 
 	kubeClient kubernetes.Interface
 	appClient  appcat_cs.AppcatalogV1alpha1Interface
@@ -50,41 +48,9 @@ type Driver struct {
 	ch map[string]*vaultapi.Renewer
 }
 
-func NewDriver(ep, node string) (*Driver, error) {
-	var kubeClient kubernetes.Interface
-	var appClient appcat_cs.AppcatalogV1alpha1Interface
-
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-	if kubeClient, err = kubernetes.NewForConfig(config); err != nil {
-		return nil, err
-	}
-
-	if appClient, err = appcat_cs.NewForConfig(config); err != nil {
-		return nil, err
-	}
-
-	return &Driver{
-		endpoint: ep,
-		mounter:  &mounter{},
-		nodeId:   node,
-
-		kubeClient: kubeClient,
-		appClient:  appClient,
-
-		log: logrus.New().WithFields(logrus.Fields{
-			"node-id": node,
-		}),
-		ch: make(map[string]*vaultapi.Renewer),
-	}, nil
-
-}
-
-// Run starts the CSI plugin by communication over the given endpoint
+// Run starts the CSI plugin by communication over the given Endpoint
 func (d *Driver) Run() error {
-	u, err := url.Parse(d.endpoint)
+	u, err := url.Parse(d.Endpoint)
 	if err != nil {
 		return errors.Errorf("unable to parse address: %q", err)
 	}
