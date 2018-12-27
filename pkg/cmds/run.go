@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdInit() *cobra.Command {
+func NewCmdRun() *cobra.Command {
 	cfg := options.NewConfig()
 	cmd := &cobra.Command{
-		Use:               "init",
-		Short:             "Initializes the driver.",
+		Use:               "run",
+		Short:             "Run Vault CSI driver",
 		DisableAutoGenTag: true,
 		PreRun: func(c *cobra.Command, args []string) {
 			cli.SendPeriodicAnalytics(c, v.Version.Version)
