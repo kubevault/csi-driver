@@ -1,7 +1,7 @@
 apiVersion: csi.storage.k8s.io/v1alpha1
 kind: CSIDriver
 metadata:
-  name: ${VAULT_CSI_DRIVER_NAME}
+  name: ${CSI_VAULT_DRIVER_NAME}
 spec:
   attachRequired: ${CSI_REQUIRED_ATTACHMENT}
   podInfoOnMountVersion: v1

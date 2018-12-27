@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: csi-vault-provisioner-servicemonitor
+  namespace: ${PROMETHEUS_NAMESPACE}
+  labels:
+    ${SERVICE_MONITOR_LABEL_KEY}: ${SERVICE_MONITOR_LABEL_VALUE}
+    component: provisioner
+spec:
+  namespaceSelector:
+    matchNames:
+    - ${CSI_VAULT_NAMESPACE}
+  selector:
+    matchLabels:
+      app: csi-vault
+      component: provisioner
+  endpoints:
+  - port: api
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/csi-vault-apiserver-cert/tls.crt
+      serverName: "csi-vault-provisioner.${CSI_VAULT_NAMESPACE}.svc"

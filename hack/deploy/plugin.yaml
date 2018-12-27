@@ -1,18 +1,20 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: csi-vaultplugin
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: vault-csi-driver
+    app: csi-vault
+    component: plugin
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-vaultplugin-role
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: vault-csi-driver
+    app: csi-vault
+    component: plugin
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -42,35 +44,92 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-vaultplugin-binding
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: vault-csi-driver
+    app: csi-vault
+    component: plugin
 subjects:
 - kind: ServiceAccount
-  name: csi-vaultplugin
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
 roleRef:
   kind: ClusterRole
-  name: csi-vaultplugin-role
+  name: csi-vault-plugin
   apiGroup: rbac.authorization.k8s.io
-
+---
+# to read the config for terminating authentication
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: csi-vault-plugin-extension-server-authentication-reader
+  namespace: kube-system
+  labels:
+    app: csi-vault
+    component: plugin
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
+---
+# to delegate authentication and authorization
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csi-vault-plugin-auth-delegator
+  labels:
+    app: csi-vault
+    component: plugin
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
+---
+# needed for StatefulSet
+kind: Service
+apiVersion: v1
+metadata:
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
+  labels:
+    app: csi-vault
+    component: plugin
+spec:
+  selector:
+    app: csi-vault
+    component: plugin
+  clusterIP: None
+  ports:
+  - name: api
+    port: 443
+    targetPort: 8443
 ---
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
-  name: csi-vaultplugin
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-plugin
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: csi-vaultplugin
+    app: csi-vault
+    component: plugin
 spec:
   selector:
     matchLabels:
-      app: csi-vaultplugin
+      app: csi-vault
+      component: plugin
   template:
     metadata:
       labels:
-        app: csi-vaultplugin
+        app: csi-vault
+        component: plugin
     spec:
       serviceAccount: csi-vaultplugin
       hostNetwork: true
@@ -85,7 +144,7 @@ spec:
         - name: ADDRESS
           value: /csi/csi.sock
         - name: DRIVER_REG_SOCK_PATH
-          value: /var/lib/kubelet/plugins/${VAULT_CSI_DRIVER_NAME}/csi.sock
+          value: /var/lib/kubelet/plugins/${CSI_VAULT_DRIVER_NAME}/csi.sock
         - name: KUBE_NODE_NAME
           valueFrom:
             fieldRef:
@@ -95,7 +154,7 @@ spec:
           mountPath: /csi/
         - name: registration-dir
           mountPath: /registration
-      - name: csi-vaultplugin
+      - name: csi-vault-plugin
         securityContext:
           privileged: true
           capabilities:
@@ -107,6 +166,13 @@ spec:
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v=3"
+        - --secure-port=8443
+        - --tls-cert-file=/var/serving-cert/tls.crt
+        - --tls-private-key-file=/var/serving-cert/tls.key
+        - --use-kubeapiserver-fqdn-for-aks=${CSI_VAULT_USE_KUBEAPISERVER_FQDN_FOR_AKS}
+        - --enable-analytics=${CSI_VAULT_ENABLE_ANALYTICS}
+        ports:
+        - containerPort: 8443
         env:
         - name: CSI_ENDPOINT
           value: unix:///csi/csi.sock
@@ -115,6 +181,18 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         imagePullPolicy: ${CSI_VAULT_IMAGE_PULL_POLICY}
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
         volumeMounts:
         - name: plugin-dir
           mountPath: /csi
@@ -125,6 +203,8 @@ spec:
           mountPropagation: "Bidirectional"
         - mountPath: /dev
           name: device-dir
+        - mountPath: /var/serving-cert
+          name: serving-cert
       volumes:
       # TODO(arslan): the registar is not implemented yet
       #- name: registrar-socket-dir
@@ -133,7 +213,7 @@ spec:
       #    type: DirectoryOrCreate
       - name: plugin-dir
         hostPath:
-          path: /var/lib/kubelet/plugins/${VAULT_CSI_DRIVER_NAME}
+          path: /var/lib/kubelet/plugins/${CSI_VAULT_DRIVER_NAME}
           type: DirectoryOrCreate
       - name: pods-mount-dir
         hostPath:
@@ -146,3 +226,11 @@ spec:
       - name: device-dir
         hostPath:
           path: /dev
+      - name: serving-cert
+        secret:
+          defaultMode: 420
+          secretName: vault-operator-apiserver-cert
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      priorityClassName: system-cluster-critical
