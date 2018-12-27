@@ -90,7 +90,7 @@ spec:
       - name: csi-attacher
         image: ${CSI_ATTACHER_DOCKER_REGISTRY}/${CSI_ATTACHER_DOCKER_REPOSITORY}:${CSI_ATTACHER_IMAGE_TAG}
         args:
-        - "--v=5"
+        - "--v=3"
         - "--csi-address=$(ADDRESS)"
         env:
         - name: ADDRESS
@@ -105,7 +105,7 @@ spec:
         - init
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
-        - "--v=10"
+        - "--v=3"
         env:
         - name: CSI_ENDPOINT
           value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock

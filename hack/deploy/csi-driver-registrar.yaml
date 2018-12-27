@@ -78,7 +78,7 @@ spec:
       - name: driver-registrar
         image: ${CSI_REGISTRAR_DOCKER_REGISTRY}/${CSI_REGISTRAR_DOCKER_REPOSITORY}:${CSI_REGISTRAR_IMAGE_TAG}
         args:
-        - "--v=5"
+        - "--v=3"
         - "--csi-address=$(ADDRESS)"
         - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
         env:
@@ -106,7 +106,7 @@ spec:
         - init
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
-        - "--v=10"
+        - "--v=3"
         env:
         - name: CSI_ENDPOINT
           value: unix:///csi/csi.sock
