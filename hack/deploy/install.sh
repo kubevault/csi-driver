@@ -145,8 +145,8 @@ if [ "$APPSCODE_ENV" = "dev" ]; then
 fi
 
 KUBE_APISERVER_VERSION=$(kubectl version -o=json | $ONESSL jsonpath '{.serverVersion.gitVersion}')
-$ONESSL semver --check='>= 1.12.0, < 1.14.0' $KUBE_APISERVER_VERSION || {
-  echo "Vault CSI driver is not supported for Kubernetes version ${KUBE_APISERVER_VERSION}."
+$ONESSL semver --check='>= 1.12.0, < 1.13.0' $KUBE_APISERVER_VERSION || {
+  echo "This release of Vault CSI driver does not support Kubernetes version ${KUBE_APISERVER_VERSION}."
   echo
   exit 1
 }

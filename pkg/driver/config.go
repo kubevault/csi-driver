@@ -31,7 +31,7 @@ func NewConfig(clientConfig *rest.Config) *Config {
 func isSupportedVersion(kc kubernetes.Interface) error {
 	return discovery.IsSupportedVersion(
 		kc,
-		">= 1.12.0, < 1.14.0", // supported versions: 1.12.x & 1.13.x
+		">= 1.12.0, < 1.13.0", // supported versions: 1.12.x
 		discovery.DefaultBlackListedVersions,
 		discovery.DefaultBlackListedMultiMasterVersions)
 }
