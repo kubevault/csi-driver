@@ -5,8 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -15,8 +14,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -50,8 +48,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
 subjects:
 - kind: ServiceAccount
   name: {{ template "csi-vault.provisioner" . }}
@@ -69,8 +66,7 @@ metadata:
   namespace: kube-system
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
 roleRef:
   kind: Role
   apiGroup: rbac.authorization.k8s.io
@@ -87,8 +83,7 @@ metadata:
   name: {{ template "csi-vault.provisioner" . }}-auth-delegator
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
 roleRef:
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
@@ -106,9 +101,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
-    release: "{{ .Release.Name }}"
+    component: {{ .Values.provisioner.name }}
   {{- if and (eq .Values.monitoring.agent "prometheus.io/builtin") .Values.monitoring.provisioner }}
   annotations:
     prometheus.io/scrape: "true"
@@ -119,7 +112,7 @@ metadata:
 spec:
   selector:
     app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
   ports:
   - name: api
     port: 443
@@ -132,13 +125,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
 spec:
   selector:
     matchLabels:
       app: {{ template "csi-vault.name" . }}
-      component: {{ template "csi-vault.provisioner" . }}
+      component: {{ .Values.provisioner.name }}
       release: "{{ .Release.Name }}"
   serviceName: {{ template "csi-vault.provisioner" . }}
   replicas: {{ .Values.replicaCount }}
@@ -146,8 +138,7 @@ spec:
     metadata:
       labels:
         {{- include "csi-vault.labels" . | nindent 8 }}
-        app: {{ template "csi-vault.name" . }}
-        component: {{ template "csi-vault.provisioner" . }}
+        component: {{ .Values.provisioner.name }}
     spec:
       serviceAccount: {{ template "csi-vault.provisioner" . }}
       {{- if .Values.imagePullSecrets }}

@@ -33,6 +33,7 @@ Create chart name and version as used by the chart label.
 
 
 {{- define "csi-vault.labels" -}}
+app: "{{ template "csi-vault.name" . }}"
 chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 release: {{ .Release.Name | quote}}
 heritage: "{{ .Release.Service }}"

@@ -5,8 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -15,8 +14,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -47,8 +45,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
 subjects:
 - kind: ServiceAccount
   name: {{ template "csi-vault.attacher" . }}
@@ -66,8 +63,7 @@ metadata:
   namespace: kube-system
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
 roleRef:
   kind: Role
   apiGroup: rbac.authorization.k8s.io
@@ -84,8 +80,7 @@ metadata:
   name: {{ template "csi-vault.attacher" . }}-auth-delegator
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
 roleRef:
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
@@ -103,8 +98,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
   {{- if and (eq .Values.monitoring.agent "prometheus.io/builtin") .Values.monitoring.attacher }}
   annotations:
     prometheus.io/scrape: "true"
@@ -115,7 +109,7 @@ metadata:
 spec:
   selector:
     app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
     release: "{{ .Release.Name }}"
   ports:
   - name: api
@@ -129,13 +123,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.attacher" . }}
+    component: {{ .Values.attacher.name }}
 spec:
   selector:
     matchLabels:
       app: {{ template "csi-vault.name" . }}
-      component: {{ template "csi-vault.attacher" . }}
+      component: {{ .Values.attacher.name }}
       release: "{{ .Release.Name }}"
   serviceName: {{ template "csi-vault.attacher" . }}
   replicas: {{ .Values.replicaCount }}
@@ -143,8 +136,7 @@ spec:
     metadata:
       labels:
         {{- include "csi-vault.labels" . | nindent 8}}
-        app: {{ template "csi-vault.name" . }}
-        component: {{ template "csi-vault.attacher" . }}
+        component: {{ .Values.attacher.name }}
     spec:
       serviceAccount: {{ template "csi-vault.attacher" . }}
       {{- if .Values.imagePullSecrets }}

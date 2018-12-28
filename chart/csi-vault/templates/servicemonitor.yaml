@@ -6,8 +6,7 @@ metadata:
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.attacher.name }}
     {{- if .Values.monitoring.serviceMonitor.labels }}
     {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
     {{ $key }}: {{ $val }}
@@ -20,7 +19,7 @@ spec:
   selector:
     matchLabels:
       app: "{{ template "csi-vault.name" . }}"
-      component: {{ template "csi-vault.attacher" . }}
+      component: {{ .Values.attacher.name }}
       release: "{{ .Release.Name }}"
   endpoints:
   - port: api
@@ -39,8 +38,7 @@ metadata:
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.plugin.name }}
     {{- if .Values.monitoring.serviceMonitor.labels }}
     {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
     {{ $key }}: {{ $val }}
@@ -53,7 +51,7 @@ spec:
   selector:
     matchLabels:
       app: "{{ template "csi-vault.name" . }}"
-      component: {{ template "csi-vault.plugin" . }}
+      component: {{ .Values.plugin.name }}
       release: "{{ .Release.Name }}"
   endpoints:
   - port: api
@@ -72,8 +70,7 @@ metadata:
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    app: {{ template "csi-vault.name" . }}
-    component: {{ template "csi-vault.provisioner" . }}
+    component: {{ .Values.provisioner.name }}
     {{- if .Values.monitoring.serviceMonitor.labels }}
     {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
     {{ $key }}: {{ $val }}
@@ -86,7 +83,7 @@ spec:
   selector:
     matchLabels:
       app: "{{ template "csi-vault.name" . }}"
-      component: {{ template "csi-vault.provisioner" . }}
+      component: {{ .Values.provisioner.name }}
       release: "{{ .Release.Name }}"
   endpoints:
   - port: api

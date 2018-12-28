@@ -78,6 +78,7 @@ func (c completedConfig) New() (*VaultDriver, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	driver, err := c.ExtraConfig.New()
 	if err != nil {
 		return nil, err

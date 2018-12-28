@@ -4,7 +4,6 @@ metadata:
   name: csidrivers.csi.storage.k8s.io
   labels:
     {{- include "csi-vault.labels" . | nindent 4}}
-    app: {{ template "csi-vault.fullname" . }}
 spec:
   group: csi.storage.k8s.io
   names:
@@ -20,7 +19,6 @@ metadata:
   name: csinodeinfos.csi.storage.k8s.io
   labels:
     {{- include "csi-vault.labels" . | nindent 4}}
-    app: {{ template "csi-vault.fullname" . }}
 spec:
   group: csi.storage.k8s.io
   names:
