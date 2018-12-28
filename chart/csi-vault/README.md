@@ -55,14 +55,17 @@ The following table lists the configurable parameters of the Stash chart and the
 | Parameter                               | Description                                                        | Default                                    |
 | --------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------|
 | `replicaCount`                          | Number of Vault operator replicas to create (only 1 is supported)  | `1`                                        |
+| `attacher.name`                         | Name of the attacher component                                     | `attacher`                                 |
 | `attacher.registry`                     | Docker registry used to pull CSI attacher image                    | `quay.io/k8scsi`                           |
 | `attacher.repository`                   | CSI attacher container image                                       | `csi-attacher`                             |
 | `attacher.tag`                          | CSI attacher container image tag                                   | `v0.2.0`                                   |
 | `attacher.pullPolicy`                   | CSI attacher container image pull policy                           | `IfNotPresent`                             |
+| `plugin.name`                           | Name of the plugin component                                       | `plugin`                                   |
 | `plugin.registry`                       | Docker registry used to pull Vault CSI driver image                | `kubevault`                                |
 | `plugin.repository`                     | Vault CSI driver container image                                   | `csi-vault`                                |
 | `plugin.tag`                            | Vault CSI driver container image tag                               | `0.1.0`                                    |
 | `plugin.pullPolicy`                     | Vault CSI driver container image pull policy                       | `IfNotPresent`                             |
+| `provisioner.name`                      | Name of the provisioner component                                  | `provisioner`                              |
 | `provisioner.registry`                  | Docker registry used to pull CSI provisioner image                 | `quay.io/k8scsi`                           |
 | `provisioner.repository`                | CSI provisioner container image                                    | `csi-provisioner`                          |
 | `provisioner.tag`                       | CSI provisioner container image tag                                | `v0.2.1`                                   |
