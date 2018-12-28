@@ -3,8 +3,7 @@ kind: CSIDriver
 metadata:
   name: {{ .Values.driverName }}
   labels:
-    {{- include "vault.labels" . | nindent 4}}
-    app: {{ template "vault.fullname" . }}
+    {{- include "csi-vault.labels" . | nindent 4}}
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": "before-hook-creation"

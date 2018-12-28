@@ -1,0 +1,12 @@
+# kube lacks the service serving cert signer, so provide a manual secret for it
+apiVersion: v1
+kind: Secret
+metadata:
+  name: csi-vault-apiserver-cert
+  namespace: ${CSI_VAULT_NAMESPACE}
+  labels:
+    app: csi-vault
+type: kubernetes.io/tls
+data:
+  tls.crt: ${TLS_SERVING_CERT}
+  tls.key: ${TLS_SERVING_KEY}

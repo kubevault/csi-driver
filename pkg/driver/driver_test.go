@@ -57,8 +57,10 @@ func TestDriverSuite(t *testing.T) {
 	}
 
 	driver := &Driver{
-		endpoint:    endpoint,
-		nodeId:      "1234567879",
+		config: config{
+			Endpoint: endpoint,
+			NodeId:   "1234567879",
+		},
 		vaultClient: nil,
 		mounter:     &fakeMounter{},
 		log:         logrus.New().WithField("test_enabed", true),

@@ -2,17 +2,19 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: csi-vault-provisioner
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: vault-csi-driver
+    app: csi-vault
+    component: provisioner
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-vault-provisioner-role
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-provisioner
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: vault-csi-driver
+    app: csi-vault
+    component: provisioner
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -35,90 +37,163 @@ rules:
 - apiGroups: ["appcatalog.appscode.com"]
   resources: ["*"]
   verbs: ["*"]
-
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-vault-provisioner-binding
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-provisioner
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: vault-csi-driver
+    app: csi-vault
+    component: provisioner
 subjects:
 - kind: ServiceAccount
   name: csi-vault-provisioner
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  namespace: ${CSI_VAULT_NAMESPACE}
 roleRef:
   kind: ClusterRole
-  name: csi-vault-provisioner-role
+  name: csi-vault-provisioner
   apiGroup: rbac.authorization.k8s.io
+---
+# to read the config for terminating authentication
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: csi-vault-provisioner-extension-server-authentication-reader
+  namespace: kube-system
+  labels:
+    app: csi-vault
+    component: provisioner
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: csi-vault-provisioner
+  namespace: ${CSI_VAULT_NAMESPACE}
+---
+# to delegate authentication and authorization
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csi-vault-provisioner-auth-delegator
+  labels:
+    app: csi-vault
+    component: provisioner
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: csi-vault-provisioner
+  namespace: ${CSI_VAULT_NAMESPACE}
 ---
 # needed for StatefulSet
 kind: Service
 apiVersion: v1
 metadata:
-  name: csi-vault-provisioner-service
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  name: csi-vault-provisioner
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: csi-vault-provisioner
+    app: csi-vault
+    component: provisioner
 spec:
   selector:
-    app: csi-vault-provisioner
+    app: csi-vault
+    component: provisioner
   ports:
-  - name: dummy
-    port: 12345
+  - name: api
+    port: 443
+    targetPort: 8443
 ---
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: csi-vault-provisioner
-  namespace: ${VAULT_CSI_DRIVER_NAMESPACE}
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
-    app: csi-vault-provisioner
+    app: csi-vault
+    component: provisioner
 spec:
   selector:
     matchLabels:
-      app: csi-vault-provisioner
-  serviceName: csi-vault-provisioner-service
+      app: csi-vault
+      component: provisioner
+  serviceName: csi-vault-provisioner
   replicas: 1
   template:
     metadata:
       labels:
-        app: csi-vault-provisioner
+        app: csi-vault
+        component: provisioner
     spec:
       serviceAccount: csi-vault-provisioner
       containers:
       - name: csi-provisioner
         image: ${CSI_PROVISIONER_DOCKER_REGISTRY}/${CSI_PROVISIONER_DOCKER_REPOSITORY}:${CSI_PROVISIONER_IMAGE_TAG}
         args:
-        - --provisioner=${VAULT_CSI_DRIVER_NAME}
+        - --provisioner=${CSI_VAULT_DRIVER_NAME}
         - "--csi-address=$(ADDRESS)"
         - "--v=3"
         env:
         - name: ADDRESS
-          value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          value: /var/lib/csi/sockets/provisionerproxy/csi.sock
         imagePullPolicy: ${CSI_ATTACHER_IMAGE_PULL_POLICY}
         volumeMounts:
         - name: socket-dir
-          mountPath: /var/lib/csi/sockets/pluginproxy/
-      - name: vault-csi-plugin
+          mountPath: /var/lib/csi/sockets/provisionerproxy/
+      - name: vault-csi-provisioner
         image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
         args :
         - run
         - "--endpoint=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v=3"
+        - --secure-port=8443
+        - --tls-cert-file=/var/serving-cert/tls.crt
+        - --tls-private-key-file=/var/serving-cert/tls.key
+        - --use-kubeapiserver-fqdn-for-aks=${CSI_VAULT_USE_KUBEAPISERVER_FQDN_FOR_AKS}
+        - --enable-analytics=${CSI_VAULT_ENABLE_ANALYTICS}
+        ports:
+        - containerPort: 8443
         env:
         - name: CSI_ENDPOINT
-          value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+          value: unix:///var/lib/csi/sockets/provisionerproxy/csi.sock
         - name: NODE_NAME
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
         imagePullPolicy: ${CSI_VAULT_IMAGE_PULL_POLICY}
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
         volumeMounts:
         - name: socket-dir
-          mountPath: /var/lib/csi/sockets/pluginproxy/
+          mountPath: /var/lib/csi/sockets/provisionerproxy/
+        - mountPath: /var/serving-cert
+          name: serving-cert
       volumes:
       - name: socket-dir
         emptyDir: {}
+      - name: serving-cert
+        secret:
+          defaultMode: 420
+          secretName: vault-operator-apiserver-cert
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      priorityClassName: system-cluster-critical

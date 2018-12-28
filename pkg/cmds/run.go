@@ -1,16 +1,18 @@
 package cmds
 
 import (
+	"io"
+
+	"github.com/appscode/go/log"
 	v "github.com/appscode/go/version"
 	"github.com/appscode/kutil/tools/cli"
-	"github.com/golang/glog"
-	"github.com/kubevault/csi-driver/pkg/cmds/options"
-	"github.com/kubevault/csi-driver/pkg/driver"
+	"github.com/kubevault/csi-driver/pkg/cmds/server"
 	"github.com/spf13/cobra"
 )
 
-func NewCmdRun() *cobra.Command {
-	cfg := options.NewConfig()
+func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
+	o := server.NewVaultDriverOptions(out, errOut)
+
 	cmd := &cobra.Command{
 		Use:               "run",
 		Short:             "Run Vault CSI driver",
@@ -18,17 +20,23 @@ func NewCmdRun() *cobra.Command {
 		PreRun: func(c *cobra.Command, args []string) {
 			cli.SendPeriodicAnalytics(c, v.Version.Version)
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			drv, err := driver.NewDriver(cfg.Endpoint, cfg.NodeName)
-			if err != nil {
-				glog.Fatalln(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Infof("Starting Vault csi driver version %s+%s ...", v.Version.Version, v.Version.CommitHash)
 
-			if err := drv.Run(); err != nil {
-				glog.Fatalln(err)
+			if err := o.Complete(); err != nil {
+				return err
 			}
+			if err := o.Validate(args); err != nil {
+				return err
+			}
+			if err := o.Run(stopCh); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
-	cfg.AddFlags(cmd.Flags())
+
+	o.AddFlags(cmd.Flags())
+
 	return cmd
 }
