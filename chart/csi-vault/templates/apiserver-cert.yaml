@@ -14,7 +14,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-type: Opaque
+type: kubernetes.io/tls
 data:
   tls.crt: {{ b64enc $cert.Cert }}
   tls.key: {{ b64enc $cert.Key }}
