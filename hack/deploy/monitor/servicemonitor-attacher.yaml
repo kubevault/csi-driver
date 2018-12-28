@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: csi-vault-attacher-servicemonitor
+  name: csi-vault-attacher
   namespace: ${PROMETHEUS_NAMESPACE}
   labels:
     ${SERVICE_MONITOR_LABEL_KEY}: ${SERVICE_MONITOR_LABEL_VALUE}

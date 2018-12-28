@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -10,7 +10,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -44,25 +44,25 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.provisioner.name }}
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 ---
 # to read the config for terminating authentication
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}-extension-server-authentication-reader
+  name: {{ template "csi-vault.provisioner.fullname" . }}-extension-server-authentication-reader
   namespace: kube-system
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -73,14 +73,14 @@ roleRef:
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
 # to delegate authentication and authorization
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}-auth-delegator
+  name: {{ template "csi-vault.provisioner.fullname" . }}-auth-delegator
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.provisioner.name }}
@@ -90,14 +90,14 @@ roleRef:
   name: system:auth-delegator
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
 # needed for StatefulSet
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -121,7 +121,7 @@ spec:
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
-  name: {{ template  "csi-vault.provisioner" . }}
+  name: {{ template  "csi-vault.provisioner.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -132,7 +132,7 @@ spec:
       app: {{ template "csi-vault.name" . }}
       component: {{ .Values.provisioner.name }}
       release: "{{ .Release.Name }}"
-  serviceName: {{ template "csi-vault.provisioner" . }}
+  serviceName: {{ template "csi-vault.provisioner.fullname" . }}
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
@@ -140,7 +140,7 @@ spec:
         {{- include "csi-vault.labels" . | nindent 8 }}
         component: {{ .Values.provisioner.name }}
     spec:
-      serviceAccount: {{ template "csi-vault.provisioner" . }}
+      serviceAccount: {{ template "csi-vault.provisioner.fullname" . }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 6 }}

@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "csi-vault.attacher" . }}-servicemonitor
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -27,14 +27,14 @@ spec:
     scheme: https
     tlsConfig:
       caFile: /etc/prometheus/secrets/{{ template "csi-vault.fullname" . }}-apiserver-cert/tls.crt
-      serverName: "{{ template "csi-vault.attacher" . }}.{{ .Release.Namespace }}.svc"
+      serverName: "{{ template "csi-vault.attacher.fullname" . }}.{{ .Release.Namespace }}.svc"
 ---
 {{- end }}
 {{- if and (eq .Values.monitoring.agent "prometheus.io/coreos-operator") .Values.monitoring.plugin }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "csi-vault.plugin" . }}-servicemonitor
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -59,14 +59,14 @@ spec:
     scheme: https
     tlsConfig:
       caFile: /etc/prometheus/secrets/{{ template "csi-vault.fullname" . }}-apiserver-cert/tls.crt
-      serverName: "{{ template "csi-vault.plugin" . }}.{{ .Release.Namespace }}.svc"
+      serverName: "{{ template "csi-vault.plugin.fullname" . }}.{{ .Release.Namespace }}.svc"
 ---
 {{- end }}
 {{- if and (eq .Values.monitoring.agent "prometheus.io/coreos-operator") .Values.monitoring.provisioner }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "csi-vault.provisioner" . }}-servicemonitor
+  name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -91,6 +91,6 @@ spec:
     scheme: https
     tlsConfig:
       caFile: /etc/prometheus/secrets/{{ template "csi-vault.fullname" . }}-apiserver-cert/tls.crt
-      serverName: "{{ template "csi-vault.provisioner" . }}.{{ .Release.Namespace }}.svc"
+      serverName: "{{ template "csi-vault.provisioner.fullname" . }}.{{ .Release.Namespace }}.svc"
 ---
 {{- end }}

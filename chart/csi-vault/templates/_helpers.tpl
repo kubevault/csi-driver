@@ -39,16 +39,16 @@ release: {{ .Release.Name | quote}}
 heritage: "{{ .Release.Service }}"
 {{- end -}}
 
-{{- define "csi-vault.attacher" -}}
-{{- printf "%s-%s" (include "csi-vault.fullname" .) "attacher" | trunc 63 | trimSuffix "-" -}}
+{{- define "csi-vault.attacher.fullname" -}}
+{{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.attacher.name | trunc 63 | trimSuffix "-" -}}
 {{ end }}
 
-{{- define "csi-vault.provisioner" -}}
-{{- printf "%s-%s" (include "csi-vault.fullname" .) "provisioner" | trunc 63 | trimSuffix "-" -}}
+{{- define "csi-vault.provisioner.fullname" -}}
+{{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.provisioner.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define  "csi-vault.plugin" -}}
-{{- printf "%s-%s" (include "csi-vault.fullname" .) "plugin" | trunc 63 | trimSuffix "-" -}}
+{{- define  "csi-vault.plugin.fullname" -}}
+{{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.plugin.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "csi-vault.node" -}}

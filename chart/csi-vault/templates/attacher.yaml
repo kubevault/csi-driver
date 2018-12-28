@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -10,7 +10,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -41,25 +41,25 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.attacher.name }}
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 ---
 # to read the config for terminating authentication
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ template "csi-vault.attacher" . }}-extension-server-authentication-reader
+  name: {{ template "csi-vault.attacher.fullname" . }}-extension-server-authentication-reader
   namespace: kube-system
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -70,14 +70,14 @@ roleRef:
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
 # to delegate authentication and authorization
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "csi-vault.attacher" . }}-auth-delegator
+  name: {{ template "csi-vault.attacher.fullname" . }}-auth-delegator
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.attacher.name }}
@@ -87,14 +87,14 @@ roleRef:
   name: system:auth-delegator
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
 # needed for StatefulSet
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -119,7 +119,7 @@ spec:
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
-  name: {{ template "csi-vault.attacher" . }}
+  name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -130,7 +130,7 @@ spec:
       app: {{ template "csi-vault.name" . }}
       component: {{ .Values.attacher.name }}
       release: "{{ .Release.Name }}"
-  serviceName: {{ template "csi-vault.attacher" . }}
+  serviceName: {{ template "csi-vault.attacher.fullname" . }}
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
@@ -138,7 +138,7 @@ spec:
         {{- include "csi-vault.labels" . | nindent 8}}
         component: {{ .Values.attacher.name }}
     spec:
-      serviceAccount: {{ template "csi-vault.attacher" . }}
+      serviceAccount: {{ template "csi-vault.attacher.fullname" . }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 6 }}

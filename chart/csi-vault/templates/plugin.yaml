@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -10,7 +10,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -44,25 +44,25 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.plugin.name }}
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 ---
 # to read the config for terminating authentication
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ template "csi-vault.plugin" . }}-extension-server-authentication-reader
+  name: {{ template "csi-vault.plugin.fullname" . }}-extension-server-authentication-reader
   namespace: kube-system
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -73,14 +73,14 @@ roleRef:
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
 # to delegate authentication and authorization
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "csi-vault.plugin" . }}-auth-delegator
+  name: {{ template "csi-vault.plugin.fullname" . }}-auth-delegator
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.plugin.name }}
@@ -90,13 +90,13 @@ roleRef:
   name: system:auth-delegator
 subjects:
 - kind: ServiceAccount
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -122,7 +122,7 @@ spec:
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
-  name: {{ template "csi-vault.plugin" . }}
+  name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
@@ -139,7 +139,7 @@ spec:
         {{- include "csi-vault.labels" . | nindent 8}}
         component: {{ .Values.plugin.name }}
     spec:
-      serviceAccount: {{ template "csi-vault.plugin" . }}
+      serviceAccount: {{ template "csi-vault.plugin.fullname" . }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 6 }}
