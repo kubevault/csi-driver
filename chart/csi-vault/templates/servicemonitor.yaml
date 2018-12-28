@@ -5,12 +5,13 @@ metadata:
   name: {{ template "csi-vault.attacher.fullname" . }}
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
-    {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.attacher.name }}
     {{- if .Values.monitoring.serviceMonitor.labels }}
     {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
     {{ $key }}: {{ $val }}
     {{- end }}
+    {{- else }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.attacher.name }}
     {{- end }}
 spec:
   namespaceSelector:
@@ -37,12 +38,13 @@ metadata:
   name: {{ template "csi-vault.plugin.fullname" . }}
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
-    {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
     {{- if .Values.monitoring.serviceMonitor.labels }}
     {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
     {{ $key }}: {{ $val }}
     {{- end }}
+    {{- else }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.plugin.name }}
     {{- end }}
 spec:
   namespaceSelector:
@@ -69,12 +71,13 @@ metadata:
   name: {{ template "csi-vault.provisioner.fullname" . }}
   namespace: {{ default .Release.Namespace .Values.monitoring.prometheus.namespace }}
   labels:
-    {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.provisioner.name }}
     {{- if .Values.monitoring.serviceMonitor.labels }}
     {{- range $key, $val := .Values.monitoring.serviceMonitor.labels }}
     {{ $key }}: {{ $val }}
     {{- end }}
+    {{- else }}
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.provisioner.name }}
     {{- end }}
 spec:
   namespaceSelector:
