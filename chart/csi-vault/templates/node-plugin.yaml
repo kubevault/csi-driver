@@ -1,20 +1,55 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}
+  name: {{ template "csi-vault.node.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
+    component: {{ .Values.nodePlugin.name }}
+
 ---
+
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}
+  name: {{ template "csi-vault.node.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
+    component: {{ .Values.nodePlugin.name }}
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.node.fullname" . }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.nodePlugin.name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "csi-vault.node.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "csi-vault.node.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.node-registrar.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.nodePlugin.name }}
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -22,6 +57,9 @@ rules:
 - apiGroups: [""]
   resources: ["nodes"]
   verbs: ["get", "list", "update"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["get", "list"]
@@ -40,68 +78,24 @@ rules:
 - apiGroups: ["appcatalog.appscode.com"]
   resources: ["*"]
   verbs: ["*"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["subjectaccessreviews"]
+  verbs: ["get", "create"]
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["get", "create"]
 ---
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
-subjects:
-- kind: ServiceAccount
-  name: {{ template "csi-vault.plugin.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-roleRef:
-  kind: ClusterRole
-  name: {{ template "csi-vault.plugin.fullname" . }}
-  apiGroup: rbac.authorization.k8s.io
----
-# to read the config for terminating authentication
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}-extension-server-authentication-reader
-  namespace: kube-system
-  labels:
-    {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
-roleRef:
-  kind: Role
-  apiGroup: rbac.authorization.k8s.io
-  name: extension-apiserver-authentication-reader
-subjects:
-- kind: ServiceAccount
-  name: {{ template "csi-vault.plugin.fullname" . }}
-  namespace: {{ .Release.Namespace }}
----
-# to delegate authentication and authorization
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}-auth-delegator
-  labels:
-    {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
-roleRef:
-  kind: ClusterRole
-  apiGroup: rbac.authorization.k8s.io
-  name: system:auth-delegator
-subjects:
-- kind: ServiceAccount
-  name: {{ template "csi-vault.plugin.fullname" . }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: v1
+
+# needed for StatefulSet
 kind: Service
+apiVersion: v1
 metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}
+  name: {{ template "csi-vault.node.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
-  {{- if and (eq .Values.monitoring.agent "prometheus.io/builtin") .Values.monitoring.plugin }}
+    component: {{ .Values.nodePlugin.name }}
+  {{- if and (eq .Values.monitoring.agent "prometheus.io/builtin") .Values.monitoring.node }}
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/path: "/metrics"
@@ -111,33 +105,51 @@ metadata:
 spec:
   selector:
     app: {{ template "csi-vault.name" . }}
-    component: {{ .Values.plugin.name }}
-    release: "{{ .Release.Name }}"
-  clusterIP: None
+    component: {{ .Values.nodePlugin.name }}
   ports:
   - name: api
     port: 443
     targetPort: 8443
+
 ---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.node-registrar.fullname" . }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.nodePlugin.name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "csi-vault.node.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "csi-vault.node-registrar.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
-  name: {{ template "csi-vault.plugin.fullname" . }}
+  name: {{ template "csi-vault.node.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
-    component: {{ .Values.plugin.name }}
+    component: {{ .Values.nodePlugin.name }}
 spec:
   selector:
     matchLabels:
       app: {{ template "csi-vault.name" . }}
-      component: {{ .Values.plugin.name }}
+      component: {{ .Values.nodePlugin.name }}
       release: "{{ .Release.Name }}"
   template:
     metadata:
       labels:
         {{- include "csi-vault.labels" . | nindent 8}}
-        component: {{ .Values.plugin.name }}
+        component: {{ .Values.nodePlugin.name }}
 {{- if or .Values.annotations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
       annotations:
 {{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
@@ -148,41 +160,37 @@ spec:
 {{- end }}
 {{- end }}
     spec:
-      serviceAccount: {{ template "csi-vault.plugin.fullname" . }}
-      {{- if .Values.imagePullSecrets }}
+      priorityClassName: system-node-critical
+      serviceAccount: {{ template "csi-vault.node.fullname" . }}
+            {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-{{ toYaml .Values.imagePullSecrets | indent 6 }}
-      {{- end }}
+            {{ toYaml .Values.imagePullSecrets | indent 6 }}
+            {{- end }}
       hostNetwork: true
       containers:
-      - name: driver-registrar
-        image: {{ .Values.registrar.registry }}/{{ .Values.registrar.repository }}:{{ .Values.registrar.tag }}
+      - name: node-driver-registrar
+        image: {{ .Values.nodeRegistrar.registry}}/{{ .Values.nodeRegistrar.repository }}:{{ .Values.nodeRegistrar.tag }}
         args:
         - --v={{ .Values.logLevel }}
-        - --csi-address=$(ADDRESS)
-        - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
+        - "--csi-address=$(ADDRESS)"
+        - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
         env:
         - name: ADDRESS
           value: /csi/csi.sock
         - name: DRIVER_REG_SOCK_PATH
           value: /var/lib/kubelet/plugins/{{ .Values.driverName }}/csi.sock
         - name: KUBE_NODE_NAME
-          {{- include "csi-vault.node" . | nindent 10 }}
-        imagePullPolicy: {{ .Values.registrar.pullPolicy }}
+              {{- include "csi-vault.node" . | nindent 10 }}
+        imagePullPolicy: {{ .Values.nodeRegistrar.pullPolicy }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+              {{ toYaml .Values.resources | nindent 10 }}
         volumeMounts:
         - name: plugin-dir
           mountPath: /csi/
         - name: registration-dir
-          mountPath: /registration
-      - name: csi-vaultplugin
-        securityContext:
-          privileged: true
-          capabilities:
-            add: ["SYS_ADMIN"]
-          allowPrivilegeEscalation: true
-        image: {{ .Values.plugin.registry }}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
+          mountPath: /registration/
+      - name: csi-vault-plugin
+        image: {{ .Values.plugin.registry}}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :
         - run
         - "--endpoint=$(CSI_ENDPOINT)"
@@ -199,9 +207,9 @@ spec:
         - name: CSI_ENDPOINT
           value: unix:///csi/csi.sock
         - name: NODE_NAME
-          {{- include "csi-vault.node" . | nindent 10 }}
+              {{- include "csi-vault.node" . | nindent 10 }}
         imagePullPolicy: {{ .Values.plugin.pullPolicy }}
-{{- if .Values.apiserver.healthcheck.enabled }}
+              {{- if .Values.apiserver.healthcheck.enabled }}
         readinessProbe:
           httpGet:
             path: /healthz
@@ -214,27 +222,31 @@ spec:
             port: 8443
             scheme: HTTPS
           initialDelaySeconds: 5
-{{- end }}
+              {{- end }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+              {{ toYaml .Values.resources | indent 10 }}
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
         volumeMounts:
         - name: plugin-dir
           mountPath: /csi
         - name: pods-mount-dir
           mountPath: /var/lib/kubelet
-          # needed so that any mounts setup inside this container are
+                  # needed so that any mounts setup inside this container are
           # propagated back to the host machine.
           mountPropagation: "Bidirectional"
-        - mountPath: /dev
-          name: device-dir
+        - name: device-dir
+          mountPath: /dev
         - mountPath: /var/serving-cert
           name: serving-cert
       volumes:
-      # TODO(arslan): the registar is not implemented yet
-      #- name: registrar-socket-dir
-      #  hostPath:
-      #    path: /var/lib/kubelet/device-plugins/
-      #    type: DirectoryOrCreate
+      - name: registration-dir
+        hostPath:
+          path: /var/lib/kubelet/plugins_registry/
+          type: DirectoryOrCreate
       - name: plugin-dir
         hostPath:
           path: /var/lib/kubelet/plugins/{{ .Values.driverName }}
@@ -243,10 +255,6 @@ spec:
         hostPath:
           path: /var/lib/kubelet
           type: Directory
-      - name: registration-dir
-        hostPath:
-          path: /var/lib/kubelet/plugins/
-          type: Directory
       - name: device-dir
         hostPath:
           path: /dev
@@ -254,24 +262,21 @@ spec:
         secret:
           defaultMode: 420
           secretName: {{ template "csi-vault.fullname" . }}-apiserver-cert
-{{- if or .Values.tolerations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
+            {{- if or .Values.tolerations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
       tolerations:
-{{- if .Values.tolerations }}
-{{ toYaml .Values.tolerations | indent 8 }}
-{{- end -}}
-{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+              {{- if .Values.tolerations }}
+              {{ toYaml .Values.tolerations | indent 8 }}
+              {{- end -}}
+              {{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
       - key: CriticalAddonsOnly
         operator: Exists
-{{- end -}}
-{{- end -}}
-{{- if .Values.affinity }}
+            {{- end -}}
+            {{- end -}}
+            {{- if .Values.affinity }}
       affinity:
-{{ toYaml .Values.affinity | indent 8 }}
-{{- end -}}
-{{- if .Values.nodeSelector }}
+            {{ toYaml .Values.affinity | indent 8 }}
+            {{- end -}}
+            {{- if .Values.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
-{{- end -}}
-{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
-      priorityClassName: system-cluster-critical
-{{- end -}}
+        {{ toYaml .Values.nodeSelector | indent 8 }}
+        {{- end -}}

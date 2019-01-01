@@ -1,5 +1,5 @@
-hash: 61e5ea63430f59d5c80be2a3a019414968d3130664bf988beb6bc7430e53c116
-updated: 2019-02-28T09:18:00.781803939-08:00
+hash: 35ed2001ad3108b120a78174153ef144cdaa32d8b4183205fe14af9a5950fcb3
+updated: 2019-02-28T09:28:13.441591305-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -80,9 +80,9 @@ imports:
   subpackages:
   - quantile
 - name: github.com/container-storage-interface/spec
-  version: 2178fdeea87f1150a17a63252eee28d4d8141f72
+  version: ed0bb0e1557548aa028307f48728767cfe8f6345
   subpackages:
-  - lib/go/csi/v0
+  - lib/go/csi
 - name: github.com/coreos/etcd
   version: 27fc7e2296f506182f58ce846e48f36b34fe6842
   subpackages:
@@ -217,8 +217,10 @@ imports:
 - name: github.com/golang/protobuf
   version: b4deda0973fb4c70b50d226b1af49f3da59f5265
   subpackages:
+  - descriptor
   - jsonpb
   - proto
+  - protoc-gen-go/descriptor
   - ptypes
   - ptypes/any
   - ptypes/duration
@@ -356,8 +358,12 @@ imports:
   - apis/kubedb
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
+- name: github.com/kubernetes-csi/csi-lib-utils
+  version: 8053f37bf1d11d769c20f9514538c4b3b906e1f7
+  subpackages:
+  - protosanitizer
 - name: github.com/kubernetes-csi/livenessprobe
-  version: 9ef0206a61c12026e81271e93de1e9dd478fd0ac
+  version: 857ef605621e21fe3348ce2ccda1f61ad90e53e8
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
@@ -1008,14 +1014,10 @@ imports:
   - client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 - name: kmodules.xyz/monitoring-agent-api
   version: e79ddf3f680a16a99b9aacb718f5607b54cef04d
-  repo: https://github.com/kmodules/monitoring-agent-api.git
-  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/objectstore-api
   version: ebe27c957a5bf41e0680776e3626b5507087f4c3
-  repo: https://github.com/kmodules/objectstore-api.git
-  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/offshoot-api
@@ -1028,7 +1030,7 @@ testImports:
 - name: github.com/appscode/pat
   version: 48ff78925b7955367d8a048fc2b5cec8efadf8d3
 - name: github.com/kubernetes-csi/csi-test
-  version: 7b57c9d52fff56f21b0834a9db1c9ff484115e33
+  version: 5d949466a9fb903ff83affa0ab5e862f5bf817ce
   repo: https://github.com/kubevault/csi-test.git
   vcs: git
   subpackages:

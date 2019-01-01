@@ -1,0 +1,291 @@
+# needed for StatefulSet
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "csi-vault.controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4}}
+    component: {{ .Values.controllerPlugin.name }}
+  {{- if and (eq .Values.monitoring.agent "prometheus.io/builtin") .Values.monitoring.controller }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8443"
+    prometheus.io/scheme: "https"
+{{- end }}
+spec:
+  selector:
+    app: {{ template "csi-vault.name" .}}
+    component: {{ .Values.controllerPlugin.name }}
+    release: "{{ .Release.Name }}"
+  ports:
+  - name: api
+    port: 443
+    targetPort: 8443
+
+---
+
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ template "csi-vault.controller.fullname". }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.controllerPlugin.name }}
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.controllerPlugin.name }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["list", "watch", "create", "update", "patch"]
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshots"]
+  verbs: ["get", "list"]
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshotcontents"]
+  verbs: ["get", "list"]
+- apiGroups: ["csi.storage.k8s.io"]
+  resources: ["csidrivers", "csinodeinfos"]
+  verbs: ["get", "watch", "list", "update", "patch", "create"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["subjectaccessreviews"]
+  verbs: ["get", "create"]
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["get", "create"]
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.controller.fullname" . }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.controllerPlugin.name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "csi-vault.controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+    kind: ClusterRole
+    name: {{ template "csi-vault.controller.fullname" . }}
+    apiGroup: rbac.authorization.k8s.io
+
+---
+
+# Attacher must be able to work with PVs, nodes and VolumeAttachments
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.attacher.fullname" . }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.controllerPlugin.name }}
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["csi.storage.k8s.io"]
+  resources: ["csidrivers", "csinodeinfos"]
+  verbs: ["get", "watch", "list", "update", "patch", "create"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["volumeattachments"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "list", "watch", "delete"]
+- apiGroups: ["appcatalog.appscode.com"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "csi-vault.attacher.fullname" . }}
+  labels:
+    {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.controllerPlugin.name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "csi-vault.controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+    kind: ClusterRole
+    name: {{ template "csi-vault.attacher.fullname" . }}
+    apiGroup: rbac.authorization.k8s.io
+
+---
+
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ template "csi-vault.controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+          {{- include "csi-vault.labels" . | nindent 4 }}
+    component: {{ .Values.controllerPlugin.name }}
+spec:
+  serviceName: {{ template "csi-vault.controller.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "csi-vault.name" . }}
+      component: {{ .Values.controllerPlugin.name }}
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+              {{- include "csi-vault.labels" . | nindent 8 }}
+        component: {{ .Values.controllerPlugin.name }}
+    spec:
+      serviceAccount: {{ template "csi-vault.controller.fullname" . }}
+            {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+            {{ toYaml .Values.imagePullSecrets | indent 6 }}
+            {{- end }}
+      containers:
+      - name: csi-provisioner
+        image: {{ .Values.provisioner.registry}}/{{ .Values.provisioner.repository}}:{{ .Values.provisioner.tag }}
+        args:
+        - --provisioner={{ .Values.driverName }}
+        - "--csi-address=$(ADDRESS)"
+        - --v={{ .Values.logLevel }}
+        env:
+        - name: ADDRESS
+          value: {{ .Values.pluginAddress}}
+        imagePullPolicy: {{ .Values.provisioner.pullPolicy }}
+        resources:
+              {{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: {{ .Values.pluginDir }}
+      - name: csi-attacher
+        image: {{ .Values.attacher.registry}}/{{ .Values.attacher.repository }}:{{ .Values.attacher.tag }}
+        args:
+        - --v={{ .Values.logLevel }}
+        - "--csi-address=$(ADDRESS)"
+        env:
+        - name: ADDRESS
+          value: {{ .Values.pluginAddress }}
+        imagePullPolicy: {{ .Values.attacher.pullPolicy }}
+        resources:
+              {{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: {{ .Values.pluginDir }}
+      - name: csi-cluster-registry
+        image: {{ .Values.clusterRegistrar.registry}}/{{ .Values.clusterRegistrar.repository }}:{{ .Values.clusterRegistrar.tag }}
+        args:
+        - --v={{ .Values.logLevel }}
+        - "--pod-info-mount-version=v1"
+        - "--csi-address=$(ADDRESS)"
+        env:
+        - name: ADDRESS
+          value: {{ .Values.pluginAddress }}
+        imagePullPolicy: {{ .Values.clusterRegistrar.pullPolicy }}
+        resources:
+              {{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - mountPath: {{ .Values.pluginDir }}
+          name: socket-dir
+      - name: csi-vault-plugin
+        image: {{ .Values.plugin.registry }}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
+        args :
+        - run
+        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--node=$(NODE_NAME)"
+        - "--v={{ .Values.logLevel }}"
+        - --secure-port=8443
+        - --tls-cert-file=/var/serving-cert/tls.crt
+        - --tls-private-key-file=/var/serving-cert/tls.key
+        - --use-kubeapiserver-fqdn-for-aks={{ .Values.apiserver.useKubeapiserverFqdnForAks }}
+        - --enable-analytics={{ .Values.enableAnalytics }}
+        ports:
+        - containerPort: 8443
+        env:
+        - name: CSI_ENDPOINT
+          value: unix://{{ .Values.pluginAddress }}
+        - name: NODE_NAME
+              {{- include "csi-vault.node" . | nindent 10 }}
+        imagePullPolicy: {{ .Values.plugin.pullPolicy }}
+              {{- if .Values.apiserver.healthcheck.enabled }}
+        readinessProbe:
+          httpGet:
+            port: 8443
+            path: /healthz
+            scheme: HTTPS
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            port: 8443
+            path: /healthz
+            scheme: HTTPS
+          initialDelaySeconds: 5
+              {{- end }}
+        resources:
+              {{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: socket-dir
+          mountPath: {{ .Values.pluginDir }}
+        - name: serving-cert
+          mountPath: /var/serving-cert
+      volumes:
+      - name: socket-dir
+        emptyDir: {}
+      - name: serving-cert
+        secret:
+          defaultMode: 420
+          secretName: {{ template "csi-vault.fullname" . }}-apiserver-cert
+            {{- if or .Values.tolerations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
+      tolerations:
+              {{- if .Values.tolerations }}
+              {{ toYaml .Values.tolerations | indent 8 }}
+              {{- end -}}
+              {{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+      - key: CriticalAddonsOnly
+        operator: Exists
+            {{- end -}}
+            {{- end -}}
+            {{- if .Values.affinity }}
+      affinity:
+            {{ toYaml .Values.affinity | indent 8 }}
+            {{- end -}}
+            {{- if .Values.nodeSelector }}
+      nodeSelector:
+            {{ toYaml .Values.nodeSelector | indent 8 }}
+            {{- end -}}
+            {{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+      priorityClassName: system-cluster-critical
+        {{- end -}}

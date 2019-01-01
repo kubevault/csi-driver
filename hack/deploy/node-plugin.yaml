@@ -1,20 +1,71 @@
+# needed for StatefulSet
+kind: Service
 apiVersion: v1
-kind: ServiceAccount
 metadata:
-  name: csi-vault-plugin
+  name: csi-vault-node
   namespace: ${CSI_VAULT_NAMESPACE}
   labels:
     app: csi-vault
-    component: plugin
+    component: node
+spec:
+  selector:
+    app: csi-vault
+    component: node
+  clusterIP: None
+  ports:
+  - name: api
+    port: 443
 ---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-vault-node
+  namespace: ${CSI_VAULT_NAMESPACE}
+  labels:
+    app: csi-vault
+    component: controller
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-vault-node
+  namespace: ${CSI_VAULT_NAMESPACE}
+  labels:
+    app: csi-vault
+    component: node
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["subjectaccessreviews"]
+  verbs: ["get", "create"]
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["get", "create"]
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-vault-node
+subjects:
+- kind: ServiceAccount
+  name: csi-vault-node
+  namespace: ${CSI_VAULT_NAMESPACE}
+roleRef:
+  kind: ClusterRole
+  name: csi-vault-node
+  apiGroup: rbac.authorization.k8s.io
+---
+
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: csi-vault-plugin
   namespace: ${CSI_VAULT_NAMESPACE}
-  labels:
-    app: csi-vault
-    component: plugin
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -40,102 +91,50 @@ rules:
 - apiGroups: ["appcatalog.appscode.com"]
   resources: ["*"]
   verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
 ---
+
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: csi-vault-plugin
-  namespace: ${CSI_VAULT_NAMESPACE}
-  labels:
-    app: csi-vault
-    component: plugin
 subjects:
 - kind: ServiceAccount
-  name: csi-vault-plugin
+  name: csi-vault-node
   namespace: ${CSI_VAULT_NAMESPACE}
 roleRef:
   kind: ClusterRole
   name: csi-vault-plugin
   apiGroup: rbac.authorization.k8s.io
 ---
-# to read the config for terminating authentication
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: csi-vault-plugin-extension-server-authentication-reader
-  namespace: kube-system
-  labels:
-    app: csi-vault
-    component: plugin
-roleRef:
-  kind: Role
-  apiGroup: rbac.authorization.k8s.io
-  name: extension-apiserver-authentication-reader
-subjects:
-- kind: ServiceAccount
-  name: csi-vault-plugin
-  namespace: ${CSI_VAULT_NAMESPACE}
----
-# to delegate authentication and authorization
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: csi-vault-plugin-auth-delegator
-  labels:
-    app: csi-vault
-    component: plugin
-roleRef:
-  kind: ClusterRole
-  apiGroup: rbac.authorization.k8s.io
-  name: system:auth-delegator
-subjects:
-- kind: ServiceAccount
-  name: csi-vault-plugin
-  namespace: ${CSI_VAULT_NAMESPACE}
----
-# needed for StatefulSet
-kind: Service
-apiVersion: v1
-metadata:
-  name: csi-vault-plugin
-  namespace: ${CSI_VAULT_NAMESPACE}
-  labels:
-    app: csi-vault
-    component: plugin
-spec:
-  selector:
-    app: csi-vault
-    component: plugin
-  clusterIP: None
-  ports:
-  - name: api
-    port: 443
-    targetPort: 8443
----
+
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
-  name: csi-vault-plugin
+  name: csi-vault-node
   namespace: ${CSI_VAULT_NAMESPACE}
   labels:
     app: csi-vault
-    component: plugin
+    component: node
 spec:
   selector:
     matchLabels:
       app: csi-vault
-      component: plugin
+      component: node
   template:
     metadata:
       labels:
         app: csi-vault
-        component: plugin
+        component: node
     spec:
-      serviceAccount: csi-vaultplugin
+      priorityClassName: system-node-critical
+      serviceAccount: csi-vault-node
       hostNetwork: true
       containers:
-      - name: driver-registrar
-        image: ${CSI_REGISTRAR_DOCKER_REGISTRY}/${CSI_REGISTRAR_DOCKER_REPOSITORY}:${CSI_REGISTRAR_IMAGE_TAG}
+      - name: node-driver-registrar
+        image: ${CSI_NODE_REGISTRAR_DOCKER_REGISTRY}/${CSI_NODE_REGISTRAR_DOCKER_REPOSITORY}:${CSI_NODE_REGISTRAR_IMAGE_TAG}
         args:
         - "--v=3"
         - "--csi-address=$(ADDRESS)"
@@ -149,17 +148,13 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        imagePullPolicy: ${CSI_NODE_REGISTRAR_IMAGE_PULL_POLICY}
         volumeMounts:
         - name: plugin-dir
           mountPath: /csi/
         - name: registration-dir
-          mountPath: /registration
+          mountPath: /registration/
       - name: csi-vault-plugin
-        securityContext:
-          privileged: true
-          capabilities:
-            add: ["SYS_ADMIN"]
-          allowPrivilegeEscalation: true
         image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
         args :
         - run
@@ -181,6 +176,11 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         imagePullPolicy: ${CSI_VAULT_IMAGE_PULL_POLICY}
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
         readinessProbe:
           httpGet:
             path: /healthz
@@ -201,16 +201,15 @@ spec:
           # needed so that any mounts setup inside this container are
           # propagated back to the host machine.
           mountPropagation: "Bidirectional"
-        - mountPath: /dev
-          name: device-dir
+        - name: device-dir
+          mountPath: /dev
         - mountPath: /var/serving-cert
           name: serving-cert
       volumes:
-      # TODO(arslan): the registar is not implemented yet
-      #- name: registrar-socket-dir
-      #  hostPath:
-      #    path: /var/lib/kubelet/device-plugins/
-      #    type: DirectoryOrCreate
+      - name: registration-dir
+        hostPath:
+          path: /var/lib/kubelet/plugins_registry/
+          type: DirectoryOrCreate
       - name: plugin-dir
         hostPath:
           path: /var/lib/kubelet/plugins/${CSI_VAULT_DRIVER_NAME}
@@ -218,10 +217,6 @@ spec:
       - name: pods-mount-dir
         hostPath:
           path: /var/lib/kubelet
-          type: Directory
-      - name: registration-dir
-        hostPath:
-          path: /var/lib/kubelet/plugins/
           type: Directory
       - name: device-dir
         hostPath:

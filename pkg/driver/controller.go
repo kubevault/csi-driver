@@ -4,8 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/container-storage-interface/spec/lib/go/csi/v0"
-	"github.com/pkg/errors"
+	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,6 +19,8 @@ const (
 )
 
 const (
+	PublishInfoVolumeName = driverName + "/volume-name"
+
 	defaultVolumeSizeInGB = 10 * GB
 	RetryInterval         = 5 * time.Second
 	RetryTimeout          = 10 * time.Minute
@@ -47,11 +48,19 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 
 	resp := &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
-			Id:            req.Name,
-			Attributes:    req.Parameters,
+			VolumeId:      req.Name,
+			VolumeContext: req.GetParameters(),
 			CapacityBytes: size,
+			AccessibleTopology: []*csi.Topology{
+				{
+					Segments: map[string]string{
+						driverName: d.NodeId,
+					},
+				},
+			},
 		},
 	}
+	d.log.WithField("response", resp).Info("volume created")
 	return resp, nil
 }
 
@@ -64,6 +73,7 @@ func (d *Driver) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest)
 		"requesnt": req,
 		"method":   "delete_volume",
 	}).Info("delete volume called")
+	d.log.WithField("response", "delete").Info("volume is deleted")
 	return &csi.DeleteVolumeResponse{}, nil
 }
 
@@ -79,11 +89,29 @@ func (d *Driver) ControllerPublishVolume(ctx context.Context, req *csi.Controlle
 		"request": req,
 		"method":  "controller_publish_volume",
 	}).Info("controller publish volume called")
-	return &csi.ControllerPublishVolumeResponse{}, nil
+
+	if req.Readonly {
+		d.log.WithField("req.Readonly", req.Readonly).Info("readonly volume published")
+	}
+	ll := d.log.WithFields(logrus.Fields{
+		"volume_id": req.VolumeId,
+		"node_id":   req.NodeId,
+		"method":    "controller_publish_volume",
+	})
+	ll.Info("controller publish volume called")
+
+	return &csi.ControllerPublishVolumeResponse{
+		PublishContext: map[string]string{
+			PublishInfoVolumeName: req.VolumeId,
+		},
+	}, nil
 }
 
 // ControllerUnpublishVolume deattaches the given volume from the node
 func (d *Driver) ControllerUnpublishVolume(ctx context.Context, req *csi.ControllerUnpublishVolumeRequest) (*csi.ControllerUnpublishVolumeResponse, error) {
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "ControllerPublishVolume Volume ID must be provided")
+	}
 	d.log.WithFields(logrus.Fields{
 		"request": req,
 		"method":  "controller_unpublish_volume",
@@ -107,8 +135,7 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 	}).Info("validate volume capabilities called")
 	var vcaps []*csi.VolumeCapability_AccessMode
 	for _, mode := range []csi.VolumeCapability_AccessMode_Mode{
-		csi.VolumeCapability_AccessMode_SINGLE_NODE_READER_ONLY,
-		csi.VolumeCapability_AccessMode_SINGLE_NODE_WRITER,
+		csi.VolumeCapability_AccessMode_MULTI_NODE_READER_ONLY,
 	} {
 		vcaps = append(vcaps, &csi.VolumeCapability_AccessMode{Mode: mode})
 	}
@@ -117,33 +144,29 @@ func (d *Driver) ValidateVolumeCapabilities(ctx context.Context, req *csi.Valida
 		"volume_id":              req.VolumeId,
 		"volume_capabilities":    req.VolumeCapabilities,
 		"supported_capabilities": vcaps,
-		"vollume_attributes":     req.VolumeAttributes,
+		"vollume_context":        req.VolumeContext,
 		"method":                 "validate_volume_capabilities",
 	})
 	ll.Info("validate volume capabilities called")
 
-	hasSupport := func(mode csi.VolumeCapability_AccessMode_Mode) bool {
-		for _, m := range vcaps {
-			if mode == m.Mode {
-				return true
-			}
-		}
-		return false
-	}
-
 	resp := &csi.ValidateVolumeCapabilitiesResponse{
-		Supported: false,
-	}
-
-	for _, cap := range req.VolumeCapabilities {
-		// cap.AccessMode.Mode
-		if hasSupport(cap.AccessMode.Mode) {
-			resp.Supported = true
-		} else {
-			// we need to make sure all capabilities are supported. Revert back
-			// in case we have a cap that is supported, but is invalidated now
-			resp.Supported = false
-		}
+		Confirmed: &csi.ValidateVolumeCapabilitiesResponse_Confirmed{
+			VolumeCapabilities: []*csi.VolumeCapability{
+				{
+					AccessType: &csi.VolumeCapability_Mount{
+						Mount: &csi.VolumeCapability_MountVolume{
+							FsType:     "tmpfs",
+							MountFlags: []string{"r"},
+						},
+					},
+					AccessMode: &csi.VolumeCapability_AccessMode{
+						Mode: csi.VolumeCapability_AccessMode_MULTI_NODE_READER_ONLY,
+					},
+				},
+			},
+			VolumeContext: req.VolumeContext,
+			Parameters:    req.GetParameters(),
+		},
 	}
 
 	ll.WithField("response", resp).Info("supported capabilities")
@@ -166,7 +189,7 @@ func (d *Driver) GetCapacity(ctx context.Context, req *csi.GetCapacityRequest) (
 		"params": req.Parameters,
 		"method": "get_capacity",
 	}).Warn("get capacity is not implemented")
-	return nil, status.Error(codes.Unimplemented, "")
+	return nil, status.Error(codes.Unimplemented, "GetCapacity is not implemented")
 }
 
 // ControllerGetCapabilities returns the capabilities of the controller service.
@@ -205,22 +228,28 @@ func (d *Driver) CreateSnapshot(ctx context.Context, req *csi.CreateSnapshotRequ
 	if req.SourceVolumeId == "" {
 		return nil, status.Error(codes.InvalidArgument, "CreateSnapshot Volume ID must be provided")
 	}
+	if req.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "CreateSnapshot Name must be provided")
+	}
 	d.log.WithFields(logrus.Fields{
 		"method": "create_snapshot",
 	}).Info("create snapshot called")
-	return nil, errors.New("Not implemented")
+	return nil, status.Error(codes.Unimplemented, "CreateSnapshot is not implemented")
 }
 
 func (d *Driver) DeleteSnapshot(ctx context.Context, req *csi.DeleteSnapshotRequest) (*csi.DeleteSnapshotResponse, error) {
+	if req.SnapshotId == "" {
+		return nil, status.Error(codes.InvalidArgument, "DeleteSnapshot SnapshotId must be provided")
+	}
 	d.log.WithFields(logrus.Fields{
 		"method": "delete_snapshot",
 	}).Info("delete snapshot called")
-	return nil, errors.New("Not implemented")
+	return nil, status.Error(codes.Unimplemented, "DeleteSnapshot is not implemented")
 }
 
 func (d *Driver) ListSnapshots(ctx context.Context, req *csi.ListSnapshotsRequest) (*csi.ListSnapshotsResponse, error) {
 	d.log.WithFields(logrus.Fields{
 		"method": "list_snapshot",
 	}).Info("list snapshot called")
-	return &csi.ListSnapshotsResponse{}, errors.New("Not implemented")
+	return &csi.ListSnapshotsResponse{}, status.Error(codes.Unimplemented, "ListSnapshots is not implemented")
 }

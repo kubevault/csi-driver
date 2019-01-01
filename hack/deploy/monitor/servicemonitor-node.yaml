@@ -1,11 +1,11 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: csi-vault-attacher
+  name: csi-vault-node-servicemonitor
   namespace: ${PROMETHEUS_NAMESPACE}
   labels:
     ${SERVICE_MONITOR_LABEL_KEY}: ${SERVICE_MONITOR_LABEL_VALUE}
-    component: attacher
+    component: node
 spec:
   namespaceSelector:
     matchNames:
@@ -13,11 +13,11 @@ spec:
   selector:
     matchLabels:
       app: csi-vault
-      component: attacher
+      component: node
   endpoints:
   - port: api
     bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     scheme: https
     tlsConfig:
       caFile: /etc/prometheus/secrets/csi-vault-apiserver-cert/tls.crt
-      serverName: "csi-vault-attacher.${CSI_VAULT_NAMESPACE}.svc"
+      serverName: "csi-vault-node.${CSI_VAULT_NAMESPACE}.svc"

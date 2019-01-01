@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/kubevault/csi-driver/pkg/util"
 	vs "github.com/kubevault/operator/pkg/vault/secret"
 	"github.com/pkg/errors"
@@ -68,7 +68,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 		"method":  "node_stage_volume",
 	}).Info("node stage volume called")
 
-	options := req.VolumeAttributes
+	options := req.VolumeContext
 
 	if _, ok := options[SecretEngineKey]; !ok {
 		return nil, errors.Errorf("Missing engine name field (%s) in options %v", SecretEngineKey, options)
@@ -129,7 +129,14 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		"request": req,
 		"method":  "node_unstage_volume",
 	}).Info("node unstage volume called")
+	resp := &csi.NodeUnstageVolumeResponse{}
 	err := d.mounter.VaultUnmount(req.StagingTargetPath)
+	if err != nil {
+		return resp, err
+	}
+	if _, err = os.Stat(req.StagingTargetPath); err == nil {
+		err = os.RemoveAll(req.StagingTargetPath)
+	}
 	nodeVolumeTotal.WithLabelValues(req.VolumeId, "unstage").Inc()
 	return &csi.NodeUnstageVolumeResponse{}, err
 }
@@ -148,11 +155,11 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Target Path must be provided")
 	}
 
-	if len(req.VolumeAttributes) == 0 {
+	if len(req.VolumeContext) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "NodePublishVolume Volume attributes are not provided")
 	}
 
-	podInfo, err := getPodInfo(req.VolumeAttributes)
+	podInfo, err := getPodInfo(req.VolumeContext)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +167,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	podInfo.KubeClient = d.kubeClient
 	podInfo.AppClient = d.appClient
 
-	podInfo.RefNamespace, podInfo.RefName, err = getAppBindingInfo(req.VolumeAttributes)
+	podInfo.RefNamespace, podInfo.RefName, err = getAppBindingInfo(req.VolumeContext)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +197,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		ll.Info("volume is already mounted")
 	}
 
-	options := req.VolumeAttributes
+	options := req.VolumeContext
 
 	// login with policy token
 
@@ -278,15 +285,9 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
-// NodeGetId returns the unique id of the node. This should eventually return
-// the linode ID if possible. This is used so the CO knows where to place the
-// workload. The result of this function will be used by the CO in
-// ControllerPublishVolume.
-func (d *Driver) NodeGetId(ctx context.Context, req *csi.NodeGetIdRequest) (*csi.NodeGetIdResponse, error) {
+func (d *Driver) NodeGetVolumeStats(ctx context.Context, req *csi.NodeGetVolumeStatsRequest) (*csi.NodeGetVolumeStatsResponse, error) {
 	d.log.WithField("method", "node_get_id").Info("node get id called")
-	return &csi.NodeGetIdResponse{
-		NodeId: d.NodeId,
-	}, nil
+	return nil, status.Error(codes.Unimplemented, "NodeGetVolumeStats is not implemented")
 }
 
 // NodeGetCapabilities returns the supported capabilities of the node server
@@ -316,5 +317,10 @@ func (d *Driver) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (
 	return &csi.NodeGetInfoResponse{
 		NodeId:            d.NodeId,
 		MaxVolumesPerNode: 10,
+		AccessibleTopology: &csi.Topology{
+			Segments: map[string]string{
+				driverName: d.NodeId,
+			},
+		},
 	}, nil
 }

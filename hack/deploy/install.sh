@@ -111,30 +111,38 @@ onessl_found || {
 export CSI_VAULT_NAMESPACE=kube-system
 export CSI_VAULT_DOCKER_REGISTRY=kubevault
 export CSI_VAULT_DOCKER_REPOSITORY=csi-vault
-export CSI_VAULT_IMAGE_TAG=0.1.0
+export CSI_VAULT_IMAGE_TAG=0.2.0
 export CSI_VAULT_IMAGE_PULL_SECRET=
 export CSI_VAULT_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_ATTACHER_DOCKER_REGISTRY=quay.io/k8scsi
 export CSI_ATTACHER_DOCKER_REPOSITORY=csi-attacher
-export CSI_ATTACHER_IMAGE_TAG=v0.4.1
+export CSI_ATTACHER_IMAGE_TAG=v1.0.1
 export CSI_ATTACHER_IMAGE_PULL_SECRET=
 export CSI_ATTACHER_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_PROVISIONER_DOCKER_REGISTRY=quay.io/k8scsi
 export CSI_PROVISIONER_DOCKER_REPOSITORY=csi-provisioner
-export CSI_PROVISIONER_IMAGE_TAG=v0.4.1
+export CSI_PROVISIONER_IMAGE_TAG=v1.0.1
 export CSI_PROVISIONER_IMAGE_PULL_SECRET=
 export CSI_PROVISIONER_IMAGE_PULL_POLICY=IfNotPresent
-export CSI_REGISTRAR_DOCKER_REGISTRY=quay.io/k8scsi
-export CSI_REGISTRAR_DOCKER_REPOSITORY=driver-registrar
-export CSI_REGISTRAR_IMAGE_TAG=v0.4.1
-export CSI_REGISTRAR_IMAGE_PULL_SECRET=
-export CSI_REGISTRAR_IMAGE_PULL_POLICY=IfNotPresent
-export CSI_VAULT_DRIVER_NAME=com.kubevault.csi.secrets
+export CSI_CLUSTER_REGISTRAR_DOCKER_REGISTRY=quay.io/k8scsi
+export CSI_CLUSTER_REGISTRAR_DOCKER_REPOSITORY=csi-cluster-driver-registrar
+export CSI_CLUSTER_REGISTRAR_IMAGE_TAG=v1.0.1
+export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET=
+export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_POLICY=IfNotPresent
+export CSI_NODE_REGISTRAR_DOCKER_REGISTRY=quay.io/k8scsi
+export CSI_NODE_REGISTRAR_DOCKER_REPOSITORY=csi-node-driver-registrar
+export CSI_NODE_REGISTRAR_IMAGE_TAG=v1.0.1
+export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET=
+export CSI_NODE_REGISTRAR_IMAGE_PULL_POLICY=IfNotPresent
+export CSI_VAULT_DRIVER_NAME=secrets.csi.kubevault.com
 export CSI_VAULT_UNINSTALL=0
 export CSI_VAULT_PURGE=0
 export CSI_REQUIRED_ATTACHMENT=false
 export REQUIRED_APPBINDING_INSTALL=true
 export CSI_VAULT_PRIORITY_CLASS=system-cluster-critical
+
+export CSI_VAULT_USE_KUBEAPISERVER_FQDN_FOR_AKS=false
+export CSI_VAULT_ENABLE_ANALYTICS=false
 
 export APPSCODE_ENV=${APPSCODE_ENV:-prod}
 export SCRIPT_LOCATION="curl -fsSL https://raw.githubusercontent.com/kubevault/csi-driver/0.1.0/"
@@ -142,11 +150,11 @@ if [ "$APPSCODE_ENV" = "dev" ]; then
   detect_tag
   export SCRIPT_LOCATION="cat "
   export CSI_VAULT_IMAGE_TAG=$TAG
-  export CSI_VAULT_IMAGE_PULL_POLICY=Always
+  export CSI_VAULT_IMAGE_PULL_POLICY=IfNotPresent
 fi
 
 KUBE_APISERVER_VERSION=$(kubectl version -o=json | $ONESSL jsonpath '{.serverVersion.gitVersion}')
-$ONESSL semver --check='>= 1.12.0, < 1.13.0' $KUBE_APISERVER_VERSION || {
+$ONESSL semver --check='>=1.13.0' $KUBE_APISERVER_VERSION || {
   echo "This release of Vault CSI driver does not support Kubernetes version ${KUBE_APISERVER_VERSION}."
   echo
   exit 1
@@ -158,9 +166,8 @@ MONITORING_AGENT_BUILTIN="prometheus.io/builtin"
 MONITORING_AGENT_COREOS_OPERATOR="prometheus.io/coreos-operator"
 
 export MONITORING_AGENT=${MONITORING_AGENT:-$MONITORING_AGENT_NONE}
-export MONITOR_ATTACHER=${MONITOR_ATTACHER:-false}
-export MONITOR_PLUGIN=${MONITOR_PLUGIN:-false}
-export MONITOR_PROVISIONER=${MONITOR_PROVISIONER:-false}
+export MONITOR_CONTROLLER_PLUGIN=${MONITOR_CONTROLLER_PLUGIN:-false}
+export MONITOR_NODE_PLUGIN=${MONITOR_NODE_PLUGIN:-false}
 export SERVICE_MONITOR_LABEL_KEY="app"
 export SERVICE_MONITOR_LABEL_VALUE="csi-vault"
 
@@ -170,31 +177,34 @@ show_help() {
   echo "install.sh [options]"
   echo " "
   echo "options:"
-  echo "-h, --help                                show brief help"
-  echo "-n, --namespace=NAMESPACE                 specify namespace (default: kube-system)"
-  echo "    --csi-vault-docker-registry           docker registry used to pull csi-vault image (default: kubevault)"
-  echo "    --csi-vault-image-pull-secret         name of secret used to pull csi-vault images"
-  echo "    --csi-vault-image-tag                 docker image version of csi vault"
-  echo "    --csi-attacher-docker-registry        docker registry used to pull csi attacher image (default: quay.io/k8scsi)"
-  echo "    --csi-attacher-image-pull-secret      name of secret used to pull csi attacher image"
-  echo "    --csi-attacher-image-tag              docker image version of csi attacher"
-  echo "    --csi-provisioner-docker-registry     docker registry used to pull csi provisioner image (default: quay.io/k8scsi)"
-  echo "    --csi-provisioner-image-pull-secret   name of secret used to pull csi provisioner image"
-  echo "    --csi-provisioner-image-tag           docker image version of csi provisioner"
-  echo "    --csi-registrar-docker-registry       docker registry used to pull csi registrar image (default: quay.io/k8scsi)"
-  echo "    --csi-registrar-image-pull-secret     name of secret used to pull csi registrar image"
-  echo "    --csi-registrar-image-tag             docker image version of csi registrar"
-  echo "    --csi-driver-name                     name of csi driver to install (default: com.kubevault.csi.secrets)"
-  echo "    --csi-required-attachment             indicates csi volume driver requires an attach operation (default: false)"
-  echo "    --install-appbinding                  indicates appbinding crd need to be installed (default: true)"
-  echo "    --monitoring-agent                    specify which monitoring agent to use (default: none)"
-  echo "    --monitor-attacher                    specify whether to monitor Vault CSI driver attacher (default: false)"
-  echo "    --monitor-plugin                      specify whether to monitor Vault CSI driver plugin (default: false)"
-  echo "    --monitor-provisioner                 specify whether to monitor Vault CSI driver provisioner (default: false)"
-  echo "    --prometheus-namespace                specify the namespace where Prometheus server is running or will be deployed (default: same namespace as csi-vault)"
-  echo "    --servicemonitor-label                specify the label for ServiceMonitor crd. Prometheus crd will use this label to select the ServiceMonitor. (default: 'app: csi-vault')"
-  echo "    --uninstall                           uninstall vault csi driver"
-  echo "    --purge                               purges csi driver crd objects and crds"
+  echo "-h, --help                                     show brief help"
+  echo "-n, --namespace=NAMESPACE                      specify namespace (default: kube-system)"
+  echo "    --csi-vault-docker-registry                docker registry used to pull csi-vault image (default: kubevault)"
+  echo "    --csi-vault-image-pull-secret              name of secret used to pull csi-vault images"
+  echo "    --csi-vault-image-tag                      docker image version of csi vault"
+  echo "    --csi-attacher-docker-registry             docker registry used to pull csi attacher image (default: quay.io/k8scsi)"
+  echo "    --csi-attacher-image-pull-secret           name of secret used to pull csi attacher image"
+  echo "    --csi-attacher-image-tag                   docker image version of csi attacher"
+  echo "    --csi-provisioner-docker-registry          docker registry used to pull csi provisioner image (default: quay.io/k8scsi)"
+  echo "    --csi-provisioner-image-pull-secret        name of secret used to pull csi provisioner image"
+  echo "    --csi-provisioner-image-tag                docker image version of csi provisioner"
+  echo "    --csi-cluster-registrar-docker-registry    docker registry used to pull csi registrar image (default: quay.io/k8scsi)"
+  echo "    --csi-cluster-registrar-image-pull-secret  name of secret used to pull csi registrar image"
+  echo "    --csi-cluster-registrar-image-tag          docker image version of csi registrar"
+  echo "    --csi-node-registrar-docker-registry       docker registry used to pull csi registrar image (default: quay.io/k8scsi)"
+  echo "    --csi-node-registrar-image-pull-secret     name of secret used to pull csi registrar image"
+  echo "    --csi-node-registrar-image-tag             docker image version of csi registrar"
+  echo "    --csi-driver-name                          name of csi driver to install (default: secrets.csi.kubevault.com)"
+  echo "    --csi-required-attachment                  indicates csi volume driver requires an attach operation (default: false)"
+  echo "    --install-appbinding                       indicates appbinding crd need to be installed (default: true)"
+  echo "    --monitoring-agent                         specify which monitoring agent to use (default: none)"
+  echo "    --monitor-attacher                         specify whether to monitor Vault CSI driver attacher (default: false)"
+  echo "    --monitor-plugin                           specify whether to monitor Vault CSI driver plugin (default: false)"
+  echo "    --monitor-provisioner                      specify whether to monitor Vault CSI driver provisioner (default: false)"
+  echo "    --prometheus-namespace                     specify the namespace where Prometheus server is running or will be deployed (default: same namespace as csi-vault)"
+  echo "    --servicemonitor-label                     specify the label for ServiceMonitor crd. Prometheus crd will use this label to select the ServiceMonitor. (default: 'app: csi-vault')"
+  echo "    --uninstall                                uninstall vault csi driver"
+  echo "    --purge                                    purges csi driver crd objects and crds"
 }
 
 while test $# -gt 0; do
@@ -256,17 +266,30 @@ while test $# -gt 0; do
       export CSI_PROVISIONER_IMAGE_TAG=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
-    --csi-registrar-docker-registry*)
-      export CSI_REGISTRAR_DOCKER_REGISTRY=$(echo $1 | sed -e 's/^[^=]*=//g')
+    --csi-cluster-registrar-docker-registry*)
+      export CSI_CLUSTER_REGISTRAR_DOCKER_REGISTRY=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
-    --csi-registrar-image-pull-secret*)
+    --csi-cluster-registrar-image-pull-secret*)
       secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-      export CSI_REGISTRAR_IMAGE_PULL_SECRET="name: '$secret'"
+      export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET="name: '$secret'"
       shift
       ;;
-    --csi-registrar-image-tag*)
-      export CSI_REGISTRAR_IMAGE_TAG=$(echo $1 | sed -e 's/^[^=]*=//g')
+    --csi-cluster-registrar-image-tag*)
+      export CSI_CLUSTER_REGISTRAR_IMAGE_TAG=$(echo $1 | sed -e 's/^[^=]*=//g')
+      shift
+      ;;
+    --csi-node-registrar-docker-registry*)
+      export CSI_NODE_REGISTRAR_DOCKER_REGISTRY=$(echo $1 | sed -e 's/^[^=]*=//g')
+      shift
+      ;;
+    --csi-node-registrar-image-pull-secret*)
+      secret=$(echo $1 | sed -e 's/^[^=]*=//g')
+      export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET="name: '$secret'"
+      shift
+      ;;
+    --csi-node-registrar-image-tag*)
+      export CSI_NODE_REGISTRAR_IMAGE_TAG=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
     --csi-driver-name*)
@@ -299,24 +322,17 @@ while test $# -gt 0; do
        fi
        shift
        ;;
-     --monitor-attacher*)
+     --monitor-controller-plugin*)
        val=$(echo $1 | sed -e 's/^[^=]*=//g')
        if [ "$val" = "true" ]; then
-         export MONITOR_ATTACHER="$val"
+         export MONITOR_CONTROLLER_PLUGIN="$val"
        fi
        shift
        ;;
-     --monitor-plugin*)
+     --monitor-node-plugin*)
        val=$(echo $1 | sed -e 's/^[^=]*=//g')
        if [ "$val" = "true" ]; then
-         export MONITOR_PLUGIN="$val"
-       fi
-       shift
-       ;;
-     --monitor-provisioner*)
-       val=$(echo $1 | sed -e 's/^[^=]*=//g')
-       if [ "$val" = "true" ]; then
-         export MONITOR_PROVISIONER="$val"
+         export MONITOR_NODE_PLUGIN="$val"
        fi
        shift
        ;;
@@ -354,23 +370,21 @@ if [ "$CSI_VAULT_NAMESPACE" != "kube-system" ]; then
 fi
 
 if [ "$CSI_VAULT_UNINSTALL" -eq 1 ]; then
-  kubectl delete csidrivers.csi.storage.k8s.io ${CSI_VAULT_DRIVER_NAME}
-
-  ${SCRIPT_LOCATION}hack/deploy/csi-attacher.yaml | $ONESSL envsubst  | kubectl delete -f -
-  ${SCRIPT_LOCATION}hack/deploy/csi-provisioner.yaml | $ONESSL envsubst  | kubectl delete -f -
-  ${SCRIPT_LOCATION}hack/deploy/csi-driver-registrar.yaml | $ONESSL envsubst  | kubectl delete -f -
-
   # delete monitoring resources. ignore error as they might not exist
-  kubectl delete servicemonitor csi-vault-attacher-servicemonitor --namespace $PROMETHEUS_NAMESPACE || true
-  kubectl delete servicemonitor csi-vault-plugin-servicemonitor --namespace $PROMETHEUS_NAMESPACE || true
-  kubectl delete servicemonitor csi-vault-provisioner-servicemonitor --namespace $PROMETHEUS_NAMESPACE || true
+  kubectl delete servicemonitor csi-vault-controller-servicemonitor --namespace $PROMETHEUS_NAMESPACE || true
+  kubectl delete servicemonitor csi-vault-node-servicemonitor --namespace $PROMETHEUS_NAMESPACE || true
   kubectl delete secret csi-vault-apiserver-cert --namespace $PROMETHEUS_NAMESPACE || true
 
-  if [ "$CSI_VAULT_PURGE" -eq 1 ]; then
-    for crd in "${driver_crds[@]}"; do
-      kubectl delete crd ${crd} --ignore-not-found=true
-    done
-  fi
+   if [ "$CSI_VAULT_PURGE" -eq 1 ]; then
+      kubectl delete csidrivers.csi.storage.k8s.io ${CSI_VAULT_DRIVER_NAME} --ignore-not-found=true
+
+      for crd in "${crds[@]}"; do
+        kubectl delete crd ${crd} --ignore-not-found=true
+      done
+   fi
+
+   ${SCRIPT_LOCATION}hack/deploy/controller-plugin.yaml | $ONESSL envsubst  | kubectl delete -f -
+   ${SCRIPT_LOCATION}hack/deploy/node-plugin.yaml | $ONESSL envsubst  | kubectl delete -f -
 
   echo
   echo "Successfully uninstalled Vault  CSI driver!"
@@ -403,10 +417,17 @@ fi
 
 ${SCRIPT_LOCATION}hack/deploy/appcatalog-user-roles.yaml | $ONESSL envsubst | kubectl auth reconcile -f -
 ${SCRIPT_LOCATION}hack/deploy/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
-${SCRIPT_LOCATION}hack/deploy/driver.yaml | $ONESSL envsubst  | kubectl apply -f -
-${SCRIPT_LOCATION}hack/deploy/attacher.yaml | $ONESSL envsubst  | kubectl apply -f -
-${SCRIPT_LOCATION}hack/deploy/provisioner.yaml | $ONESSL envsubst  | kubectl apply -f -
-${SCRIPT_LOCATION}hack/deploy/plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
+${SCRIPT_LOCATION}hack/deploy/controller-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
+${SCRIPT_LOCATION}hack/deploy/node-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
+
+# create necessary TLS certificates:
+# - a local CA key and cert
+# - a webhook server key and cert signed by the local CA
+$ONESSL create ca-cert
+$ONESSL create server-cert server --domains=csi-vault-controller.$CSI_VAULT_NAMESPACE,csi-vault-controller.$CSI_VAULT_NAMESPACE.svc,csi-vault-node.$CSI_VAULT_NAMESPACE,csi-vault-node.$CSI_VAULT_NAMESPACE.svc
+export SERVICE_SERVING_CERT_CA=$(cat ca.crt | $ONESSL base64)
+export TLS_SERVING_CERT=$(cat server.crt | $ONESSL base64)
+export TLS_SERVING_KEY=$(cat server.key | $ONESSL base64)
 
 # configure prometheus monitoring
 if [ "$MONITORING_AGENT" != "$MONITORING_AGENT_NONE" ]; then
@@ -418,22 +439,15 @@ if [ "$MONITORING_AGENT" != "$MONITORING_AGENT_NONE" ]; then
 
   case "$MONITORING_AGENT" in
     "$MONITORING_AGENT_BUILTIN")
-      if [ "$MONITOR_ATTACHER" = "true" ]; then
-        kubectl annotate service csi-vault-attacher -n "$CSI_VAULT_NAMESPACE" --overwrite \
+      if [ "$MONITOR_CONTROLLER_PLUGIN" = "true" ]; then
+        kubectl annotate service csi-vault-controller -n "$CSI_VAULT_NAMESPACE" --overwrite \
           prometheus.io/scrape="true" \
           prometheus.io/path="/metrics" \
           prometheus.io/port="8443" \
           prometheus.io/scheme="https"
       fi
-      if [ "$MONITOR_PLUGIN" = "true" ]; then
-        kubectl annotate service csi-vault-plugin -n "$CSI_VAULT_NAMESPACE" --overwrite \
-          prometheus.io/scrape="true" \
-          prometheus.io/path="/metrics" \
-          prometheus.io/port="8443" \
-          prometheus.io/scheme="https"
-      fi
-      if [ "$MONITOR_PROVISIONER" = "true" ]; then
-        kubectl annotate service csi-vault-provisioner -n "$CSI_VAULT_NAMESPACE" --overwrite \
+      if [ "$MONITOR_NODE_PLUGIN" = "true" ]; then
+        kubectl annotate service csi-vault-node -n "$CSI_VAULT_NAMESPACE" --overwrite \
           prometheus.io/scrape="true" \
           prometheus.io/path="/metrics" \
           prometheus.io/port="8443" \
@@ -441,14 +455,11 @@ if [ "$MONITORING_AGENT" != "$MONITORING_AGENT_NONE" ]; then
       fi
       ;;
     "$MONITORING_AGENT_COREOS_OPERATOR")
-      if [ "$MONITOR_ATTACHER" = "true" ]; then
-        ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor-attacher.yaml | $ONESSL envsubst | kubectl apply -f -
+      if [ "$MONITOR_CONTROLLER_PLUGIN" = "true" ]; then
+        ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor-controller.yaml | $ONESSL envsubst | kubectl apply -f -
       fi
-      if [ "$MONITOR_PLUGIN" = "true" ]; then
-        ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor-plugin.yaml | $ONESSL envsubst | kubectl apply -f -
-      fi
-      if [ "$MONITOR_PROVISIONER" = "true" ]; then
-        ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor-provisioner.yaml | $ONESSL envsubst | kubectl apply -f -
+      if [ "$MONITOR_NODE_PLUGIN" = "true" ]; then
+        ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor-node.yaml | $ONESSL envsubst | kubectl apply -f -
       fi
       ;;
   esac
