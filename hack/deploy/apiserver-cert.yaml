@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: csi-vault-apiserver-cert
-  namespace: ${PROMETHEUS_NAMESPACE}
+  namespace: ${CSI_VAULT_NAMESPACE}
   labels:
     app: csi-vault
 type: kubernetes.io/tls
