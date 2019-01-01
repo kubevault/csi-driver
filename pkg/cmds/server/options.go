@@ -3,6 +3,7 @@ package server
 import (
 	"flag"
 	"os"
+	"time"
 
 	"github.com/kubevault/csi-driver/pkg/driver"
 	"github.com/spf13/pflag"
@@ -11,25 +12,28 @@ import (
 )
 
 type ExtraOptions struct {
-	Endpoint string
-	NodeName string
-	QPS      float64
-	Burst    int
+	Endpoint          string
+	NodeName          string
+	ConnectionTimeout time.Duration
+	QPS               float64
+	Burst             int
 }
 
 func NewExtraOptions() *ExtraOptions {
 	hostname, _ := os.Hostname()
 	return &ExtraOptions{
-		Endpoint: "unix:///var/lib/kubelet/plugins/com.kubevault.csi.secrets/csi.sock",
-		NodeName: hostname,
-		QPS:      100,
-		Burst:    100,
+		Endpoint:          "unix:///var/lib/kubelet/plugins/com.kubevault.csi.secrets/csi.sock",
+		NodeName:          hostname,
+		ConnectionTimeout: 30 * time.Second,
+		QPS:               100,
+		Burst:             100,
 	}
 }
 
 func (s *ExtraOptions) AddGoFlags(fs *flag.FlagSet) {
 	fs.StringVar(&s.Endpoint, "endpoint", s.Endpoint, "CSI endpoint")
 	fs.StringVar(&s.NodeName, "node", s.NodeName, "Hostname")
+	fs.DurationVar(&s.ConnectionTimeout, "connection-timeout", s.ConnectionTimeout, "Timeout for waiting for CSI driver socket in seconds.")
 
 	fs.Float64Var(&s.QPS, "qps", s.QPS, "The maximum QPS to the master from this client")
 	fs.IntVar(&s.Burst, "burst", s.Burst, "The maximum burst for throttle")
