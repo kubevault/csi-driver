@@ -396,6 +396,7 @@ if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
   }
 fi
 
+${SCRIPT_LOCATION}hack/deploy/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/driver.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/attacher.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/provisioner.yaml | $ONESSL envsubst  | kubectl apply -f -
@@ -404,7 +405,7 @@ ${SCRIPT_LOCATION}hack/deploy/plugin.yaml | $ONESSL envsubst  | kubectl apply -f
 # configure prometheus monitoring
 if [ "$MONITORING_AGENT" != "$MONITORING_AGENT_NONE" ]; then
   # if operator monitoring is enabled and prometheus-namespace is provided,
-  # create vault-operator-apiserver-cert there. this will be mounted on prometheus pod.
+  # create csi-vault-apiserver-cert there. this will be mounted on prometheus pod.
   if [ "$PROMETHEUS_NAMESPACE" != "$CSI_VAULT_NAMESPACE" ]; then
     ${SCRIPT_LOCATION}hack/deploy/monitor/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
   fi
