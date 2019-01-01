@@ -1,5 +1,5 @@
-hash: 4ee1223f531bef14a71511c3fce88f62dc81351708af8a2cffb14aefdd4b857e
-updated: 2018-12-27T03:10:25.480411582-08:00
+hash: 3acf0f5ac140c5d10d93c902561fad23629d1c0aefd1238da52fdea6798fdf1e
+updated: 2019-01-01T10:28:35.301789945-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -359,8 +359,12 @@ imports:
   - apis/kubedb
   - apis/kubedb/v1alpha1
   - client/clientset/versioned/scheme
+- name: github.com/kubernetes-csi/livenessprobe
+  version: 9ef0206a61c12026e81271e93de1e9dd478fd0ac
+  subpackages:
+  - pkg/connection
 - name: github.com/kubevault/operator
-  version: 1b543d70bbdc6c334eabf4a89f6e374999c52f92
+  version: f56ae9a69c89c6a91d87251f0c5453555bc89bfc
   subpackages:
   - apis
   - apis/catalog
@@ -691,7 +695,7 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 419ab4faf457be27411fc8125ed110a03be373e8
+  version: 2aa1408a8c0a98b7d52911b63a98cbb7c9fd5e7c
   repo: https://github.com/kmodules/apiserver.git
   vcs: git
   subpackages:

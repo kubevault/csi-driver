@@ -7,6 +7,7 @@ import (
 
 	"github.com/appscode/kutil/tools/clientcmd"
 	"github.com/kubevault/csi-driver/pkg/driver"
+	"github.com/kubevault/csi-driver/pkg/healthz"
 	"github.com/kubevault/csi-driver/pkg/server"
 	"github.com/spf13/pflag"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
@@ -65,6 +66,10 @@ func (o VaultDriverOptions) Config() (*server.VaultDriverConfig, error) {
 	}
 	// Fixes https://github.com/Azure/AKS/issues/522
 	clientcmd.Fix(serverConfig.ClientConfig)
+
+	// register CSI provbe for health checking
+	probe := healthz.NewCSIProbe(o.ExtraOptions.Endpoint, o.ExtraOptions.ConnectionTimeout)
+	serverConfig.HealthzChecks = append(serverConfig.HealthzChecks, probe)
 
 	extraConfig := driver.NewConfig(serverConfig.ClientConfig)
 	if err := o.ExtraOptions.ApplyTo(extraConfig); err != nil {
