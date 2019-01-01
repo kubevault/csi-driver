@@ -8,7 +8,7 @@ attacher:
   name: attacher
   registry: quay.io/k8scsi
   repository: csi-attacher
-  tag: v0.2.0
+  tag: v0.4.1
   pullPolicy: IfNotPresent
 plugin:
   name: plugin
@@ -20,12 +20,12 @@ provisioner:
   name: provisioner
   registry: quay.io/k8scsi
   repository: csi-provisioner
-  tag: v0.2.1
+  tag: v0.4.1
   pullPolicy: IfNotPresent
 registrar:
   registry: quay.io/k8scsi
   repository: driver-registrar
-  tag: v0.3.0
+  tag: v0.4.1
   pullPolicy: IfNotPresent
 
 logLevel: 3
