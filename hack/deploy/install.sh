@@ -396,6 +396,7 @@ if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
   }
 fi
 
+${SCRIPT_LOCATION}hack/deploy/appcatalog-user-roles.yaml | $ONESSL envsubst | kubectl auth reconcile -f -
 ${SCRIPT_LOCATION}hack/deploy/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/driver.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/attacher.yaml | $ONESSL envsubst  | kubectl apply -f -
