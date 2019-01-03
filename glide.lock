@@ -1,5 +1,5 @@
-hash: 3acf0f5ac140c5d10d93c902561fad23629d1c0aefd1238da52fdea6798fdf1e
-updated: 2019-01-01T10:28:35.301789945-08:00
+hash: c586ded9b86b20c0cb6c56a085aa7d30ca376c962aef93feb1bac9c343d0342e
+updated: 2019-01-03T16:35:58.649901973+06:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -27,7 +27,7 @@ imports:
 - name: github.com/appscode/jsonpatch
   version: 5af499cf01c842bfdd7761a433fc90525ccd6836
 - name: github.com/appscode/kutil
-  version: 6546fe6e8bde14cda08b0415f926cbed47d66e6a
+  version: c2edb24c3c1c6f97bbe8d0616dc2eee59a11c665
   subpackages:
   - apiextensions/v1beta1
   - discovery
@@ -231,7 +231,7 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
@@ -267,7 +267,7 @@ imports:
   subpackages:
   - diskcache
 - name: github.com/grpc-ecosystem/go-grpc-prometheus
-  version: 2500245aa6110c562d17020fb31a2c133d737799
+  version: c225b8c3b01faf2899099b768856a9e916e5087b
 - name: github.com/hashicorp/errwrap
   version: 8a6fb523712970c966eefc6b39ed2c5e74880354
 - name: github.com/hashicorp/go-cleanhttp
@@ -364,7 +364,7 @@ imports:
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
-  version: f56ae9a69c89c6a91d87251f0c5453555bc89bfc
+  version: 950b4d0ce771812d82a6c71c337f157fdbda2a73
   subpackages:
   - apis
   - apis/catalog
@@ -406,7 +406,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/go-homedir
-  version: ae18d6b8b3205b561c79e8e5f69bff09736185f4
+  version: d682a8f0cf139663a984ff12528da460ca963de9
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -456,7 +456,8 @@ imports:
 - name: github.com/ryanuber/go-glob
   version: 256dc444b735e061061cf46c809487313d5b0065
 - name: github.com/sergi/go-diff
-  version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
+  version: 24e2351369ec4949b2ed0dc5c477afdd4c4034e8
+  repo: https://github.com/sergi/go-diff
   subpackages:
   - diffmatchpatch
 - name: github.com/SermoDigital/jose
@@ -478,11 +479,12 @@ imports:
   subpackages:
   - codec
 - name: github.com/yudai/gojsondiff
-  version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
+  version: e21612694bdd50975f93cd5eaccb457477128e28
   subpackages:
   - formatter
 - name: github.com/yudai/golcs
   version: d1c525dea8ce39ea9a783d33cf08932305373f2c
+  repo: https://github.com/yudai/golcs
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -544,7 +546,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/app_identity
@@ -695,7 +697,7 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 2aa1408a8c0a98b7d52911b63a98cbb7c9fd5e7c
+  version: 70f523ccd088c9dca12de68b719d9b29f8e8c7d2
   repo: https://github.com/kmodules/apiserver.git
   vcs: git
   subpackages:
@@ -979,6 +981,7 @@ imports:
   version: 0ed33881dc4355495f623c6f22e7dd0b7632b7c0
   subpackages:
   - pkg/api/legacyscheme
+  - pkg/apis/core
 - name: kmodules.xyz/custom-resources
   version: b4ef1fe08b7a09681a676c1b697cf66fd74b7ed4
   repo: https://github.com/kmodules/custom-resources.git
@@ -992,7 +995,7 @@ imports:
   - client/clientset/versioned/typed/appcatalog/v1alpha1
   - client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 - name: kmodules.xyz/monitoring-agent-api
-  version: d12289267b3d7510feb9fac1f5e451d476f23a38
+  version: e79ddf3f680a16a99b9aacb718f5607b54cef04d
   repo: https://github.com/kmodules/monitoring-agent-api.git
   vcs: git
   subpackages:

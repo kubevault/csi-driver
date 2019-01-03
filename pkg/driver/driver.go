@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/kubernetes"
@@ -26,6 +28,13 @@ const (
 	podServiceAccount = "csi.storage.k8s.io/serviceAccount.name"
 
 	TestEnvForCSIDriver = "VAULT_CSI_TEST"
+)
+
+var (
+	driverCounterMetrics = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "csi_handle_requests_total",
+		Help: "Total number of RPCs handled on the server.",
+	}, []string{"name"})
 )
 
 // Driver implements the following CSI interfaces:
@@ -46,6 +55,11 @@ type Driver struct {
 	log         *logrus.Entry
 
 	ch map[string]*vaultapi.Renewer
+}
+
+func init() {
+	prometheus.MustRegister(driverCounterMetrics)
+	driverCounterMetrics.WithLabelValues(driverName).Inc()
 }
 
 // Run starts the CSI plugin by communication over the given Endpoint
@@ -87,10 +101,15 @@ func (d *Driver) Run() error {
 		return resp, err
 	}
 
-	d.srv = grpc.NewServer(grpc.UnaryInterceptor(errHandler))
+	d.srv = grpc.NewServer(
+		grpc.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
+		grpc.UnaryInterceptor(errHandler),
+	)
 	csi.RegisterIdentityServer(d.srv, d)
 	csi.RegisterControllerServer(d.srv, d)
 	csi.RegisterNodeServer(d.srv, d)
+
+	grpc_prometheus.Register(d.srv)
 
 	d.log.WithField("addr", addr).Info("server started")
 	return d.srv.Serve(listener)

@@ -3,11 +3,13 @@ package driver
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
 	"github.com/kubevault/csi-driver/pkg/util"
 	vs "github.com/kubevault/operator/pkg/vault/secret"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,6 +19,32 @@ var (
 	InstanceNotFound = errors.New("instance not found")
 	SecretEngineKey  = "engine"
 )
+
+var (
+	nodeVolumeTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "csi_node_volume_total",
+		Help: "Total number of volume at current stage",
+	}, []string{"type"})
+
+	vaultFetchSecretTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "csi_fetch_secret_total",
+		Help: "Total number of fetched secret from vault driver",
+	}, []string{"volume_name", "type"})
+
+	vaultRenewDurations = prometheus.NewSummary(prometheus.SummaryOpts{
+		Name: "csi_renew_secret_duration_seconds",
+		Help: "The time duration of renewing secret",
+	})
+
+	vaultFetchSecretDurations = prometheus.NewSummary(prometheus.SummaryOpts{
+		Name: "csi_fetch_secret_duration_seconds",
+		Help: "The time duration of fetching secret",
+	})
+)
+
+func init() {
+	prometheus.MustRegister(nodeVolumeTotal, vaultFetchSecretTotal)
+}
 
 // NodeStageVolume mounts the volume to a staging path on the node. This is
 // called by the CO before NodePublishVolume and is used to temporary mount the
@@ -84,6 +112,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	}
 
 	ll.Info("formatting and mounting stage volume is finished")
+	nodeVolumeTotal.WithLabelValues("stage").Inc()
 	return &csi.NodeStageVolumeResponse{}, nil
 }
 
@@ -101,7 +130,7 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		"method":  "node_unstage_volume",
 	}).Info("node unstage volume called")
 	err := d.mounter.VaultUnmount(req.StagingTargetPath)
-
+	nodeVolumeTotal.WithLabelValues("unstage").Inc()
 	return &csi.NodeUnstageVolumeResponse{}, err
 }
 
@@ -175,10 +204,13 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 		return nil, errors.Errorf("Empty engine name")
 	}
 
+	now := time.Now()
 	secretData, err := util.FetchSecret(engineName, authClient, options, target)
 	if err != nil {
 		return nil, err
 	}
+	vaultFetchSecretDurations.Observe(float64(time.Since(now).Nanoseconds() / int64(time.Microsecond)))
+	vaultFetchSecretTotal.WithLabelValues(req.VolumeId, "Fetch").Inc()
 
 	ll.Info("mounting the volume with ro")
 	if err := d.mounter.Mount("tmpfs", target, fsType, []string{"remount,ro"}...); err != nil {
@@ -187,14 +219,18 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 
 	if _, found := d.ch[req.VolumeId]; !found {
 		if secretData.Renewable {
+			vaultFetchSecretTotal.WithLabelValues(req.VolumeId, "Renew").Inc()
+			start := time.Now()
 			renewer, err := util.SetRenewal(authClient, secretData)
 			if err != nil {
 				return nil, err
 			}
-
 			d.ch[req.VolumeId] = renewer
+
+			vaultRenewDurations.Observe(float64(time.Since(start).Nanoseconds() / int64(time.Microsecond)))
 		}
 	}
+	nodeVolumeTotal.WithLabelValues("publish").Inc()
 
 	ll.Info("bind mounting the volume is finished")
 	return &csi.NodePublishVolumeResponse{}, nil
@@ -233,9 +269,11 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 	}
 
 	if _, found := d.ch[req.VolumeId]; found {
+		vaultFetchSecretTotal.WithLabelValues(req.VolumeId, "Renew").Desc()
 		util.StopRenew(d.ch[req.VolumeId])
 	}
 
+	nodeVolumeTotal.WithLabelValues("unpublish").Inc()
 	ll.Info("unmounting volume is finished")
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
