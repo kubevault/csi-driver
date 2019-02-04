@@ -1,5 +1,5 @@
-hash: c586ded9b86b20c0cb6c56a085aa7d30ca376c962aef93feb1bac9c343d0342e
-updated: 2019-01-03T16:35:58.649901973+06:00
+hash: 4ab484a3a050801c1f4f6fe27dc7ec65c7d99f0d93a4be133b870ad7d501079a
+updated: 2019-02-04T12:21:19.50447485-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -8,7 +8,7 @@ imports:
   subpackages:
   - compute/metadata
 - name: github.com/appscode/go
-  version: 584aaa73af837f112c0a471be398ea837341c330
+  version: 52eaa8008e2e5fe8df77ac6fb2fd45e3ea2ae47c
   subpackages:
   - analytics
   - context
@@ -25,9 +25,9 @@ imports:
 - name: github.com/appscode/go-version
   version: 7aba545c679b0f45679eeb406dc662d2c8a04c26
 - name: github.com/appscode/jsonpatch
-  version: 5af499cf01c842bfdd7761a433fc90525ccd6836
+  version: 7c0e3b262f30165a8ec3d0b4c6059fd92703bfb2
 - name: github.com/appscode/kutil
-  version: c2edb24c3c1c6f97bbe8d0616dc2eee59a11c665
+  version: b5b6fa2ff0180040757643f9a498ea84d7bd8dd6
   subpackages:
   - apiextensions/v1beta1
   - discovery
@@ -266,6 +266,8 @@ imports:
   version: 787624de3eb7bd915c329cba748687a3b22666a6
   subpackages:
   - diskcache
+- name: github.com/grpc-ecosystem/go-grpc-middleware
+  version: c250d6563d4d4c20252cd865923440e829844f4e
 - name: github.com/grpc-ecosystem/go-grpc-prometheus
   version: c225b8c3b01faf2899099b768856a9e916e5087b
 - name: github.com/hashicorp/errwrap
@@ -273,25 +275,25 @@ imports:
 - name: github.com/hashicorp/go-cleanhttp
   version: e8ab9daed8d1ddd2d3c4efba338fe2eeae2e4f18
 - name: github.com/hashicorp/go-hclog
-  version: 61d530d6c27f994fb6c83b80f99a69c54125ec8a
+  version: 4783caec6f2e5cdd47fab8b2bb47ce2ce5c546b7
 - name: github.com/hashicorp/go-immutable-radix
   version: 27df80928bb34bb1b0d6d0e01b9e679902e7a6b5
 - name: github.com/hashicorp/go-multierror
   version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/hashicorp/go-plugin
-  version: f444068e8f5a19853177f7aa0aea7e7d95b5b528
+  version: 362c99b11937c6a84686ee5726a8170e921ab406
   subpackages:
   - internal/proto
 - name: github.com/hashicorp/go-retryablehttp
-  version: d3a63d3c72068412f9ecd7c36faafd874d2e2888
+  version: 73489d0a1476f0c9e6fb03f9c39241523a496dfd
 - name: github.com/hashicorp/go-rootcerts
-  version: 6bb64b370b90e7ef1fa532be9e591a81c3493e00
+  version: 63503fb4e1eca22f9ae0f90b49c5d5538a0e87eb
 - name: github.com/hashicorp/go-sockaddr
-  version: 6d291a969b86c4b633730bfc6b8b9d64c3aafed9
+  version: 3aed17b5ee41761cc2b04f2a94c7107d428967e5
 - name: github.com/hashicorp/go-uuid
   version: 4f571afc59f3043a65f8fe6bf46d887b10a01d43
 - name: github.com/hashicorp/go-version
-  version: b5a281d3160aa11950a6182bd9a9dc2cb1e02d50
+  version: d40cf49b3a77bba84a7afdbd7f1dc295d114efb1
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
@@ -364,7 +366,7 @@ imports:
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
-  version: 950b4d0ce771812d82a6c71c337f157fdbda2a73
+  version: 29aae774927b79bc18db7a863c639086e2e9f2fc
   subpackages:
   - apis
   - apis/catalog
@@ -406,7 +408,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/go-homedir
-  version: d682a8f0cf139663a984ff12528da460ca963de9
+  version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -424,7 +426,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pierrec/lz4
-  version: 623b5a2f4d2a41e411730dcdfbfdaeb5c0c4564e
+  version: 473cd7ce01a1113208073166464b98819526150e
   subpackages:
   - internal/xxh32
 - name: github.com/pkg/errors
@@ -454,10 +456,9 @@ imports:
 - name: github.com/russross/blackfriday
   version: 05f3235734ad95d0016f6a23902f06461fcf567a
 - name: github.com/ryanuber/go-glob
-  version: 256dc444b735e061061cf46c809487313d5b0065
+  version: 51a8f68e6c24dc43f1e371749c89a267de4ebc53
 - name: github.com/sergi/go-diff
-  version: 24e2351369ec4949b2ed0dc5c477afdd4c4034e8
-  repo: https://github.com/sergi/go-diff
+  version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
   subpackages:
   - diffmatchpatch
 - name: github.com/SermoDigital/jose
@@ -479,12 +480,11 @@ imports:
   subpackages:
   - codec
 - name: github.com/yudai/gojsondiff
-  version: e21612694bdd50975f93cd5eaccb457477128e28
+  version: 7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6
   subpackages:
   - formatter
 - name: github.com/yudai/golcs
   version: d1c525dea8ce39ea9a783d33cf08932305373f2c
-  repo: https://github.com/yudai/golcs
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -546,7 +546,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
+  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
   subpackages:
   - internal
   - internal/app_identity
@@ -697,7 +697,7 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 70f523ccd088c9dca12de68b719d9b29f8e8c7d2
+  version: 2aa1408a8c0a98b7d52911b63a98cbb7c9fd5e7c
   repo: https://github.com/kmodules/apiserver.git
   vcs: git
   subpackages:
