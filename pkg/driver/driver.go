@@ -13,7 +13,6 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/kubernetes"
@@ -29,13 +28,6 @@ const (
 	podServiceAccount = "csi.storage.k8s.io/serviceAccount.name"
 
 	TestEnvForCSIDriver = "VAULT_CSI_TEST"
-)
-
-var (
-	driverCounterMetrics = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "csi_handle_requests_total",
-		Help: "Total number of RPCs handled on the server.",
-	}, []string{"name"})
 )
 
 // Driver implements the following CSI interfaces:
@@ -56,11 +48,6 @@ type Driver struct {
 	log         *logrus.Entry
 
 	ch map[string]*vaultapi.Renewer
-}
-
-func init() {
-	prometheus.MustRegister(driverCounterMetrics)
-	driverCounterMetrics.WithLabelValues(driverName).Inc()
 }
 
 // Run starts the CSI plugin by communication over the given Endpoint

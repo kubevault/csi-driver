@@ -24,7 +24,7 @@ var (
 	nodeVolumeTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "csi_node_volume_total",
 		Help: "Total number of volume at current stage",
-	}, []string{"type"})
+	}, []string{"volume_name", "type"})
 
 	vaultFetchSecretTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "csi_fetch_secret_total",
@@ -32,18 +32,18 @@ var (
 	}, []string{"volume_name", "type"})
 
 	vaultRenewDurations = prometheus.NewSummary(prometheus.SummaryOpts{
-		Name: "csi_renew_secret_duration_seconds",
+		Name: "vault_renew_secret_duration_seconds",
 		Help: "The time duration of renewing secret",
 	})
 
 	vaultFetchSecretDurations = prometheus.NewSummary(prometheus.SummaryOpts{
-		Name: "csi_fetch_secret_duration_seconds",
+		Name: "vault_fetch_secret_duration_seconds",
 		Help: "The time duration of fetching secret",
 	})
 )
 
 func init() {
-	prometheus.MustRegister(nodeVolumeTotal, vaultFetchSecretTotal)
+	prometheus.MustRegister(nodeVolumeTotal, vaultFetchSecretTotal, vaultRenewDurations, vaultFetchSecretDurations)
 }
 
 // NodeStageVolume mounts the volume to a staging path on the node. This is
@@ -112,7 +112,7 @@ func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRe
 	}
 
 	ll.Info("formatting and mounting stage volume is finished")
-	nodeVolumeTotal.WithLabelValues("stage").Inc()
+	nodeVolumeTotal.WithLabelValues(req.VolumeId, "stage").Inc()
 	return &csi.NodeStageVolumeResponse{}, nil
 }
 
@@ -130,7 +130,7 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		"method":  "node_unstage_volume",
 	}).Info("node unstage volume called")
 	err := d.mounter.VaultUnmount(req.StagingTargetPath)
-	nodeVolumeTotal.WithLabelValues("unstage").Inc()
+	nodeVolumeTotal.WithLabelValues(req.VolumeId, "unstage").Inc()
 	return &csi.NodeUnstageVolumeResponse{}, err
 }
 
@@ -230,7 +230,7 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 			vaultRenewDurations.Observe(float64(time.Since(start).Nanoseconds() / int64(time.Microsecond)))
 		}
 	}
-	nodeVolumeTotal.WithLabelValues("publish").Inc()
+	nodeVolumeTotal.WithLabelValues(req.VolumeId, "publish").Inc()
 
 	ll.Info("bind mounting the volume is finished")
 	return &csi.NodePublishVolumeResponse{}, nil
@@ -273,7 +273,7 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 		util.StopRenew(d.ch[req.VolumeId])
 	}
 
-	nodeVolumeTotal.WithLabelValues("unpublish").Inc()
+	nodeVolumeTotal.WithLabelValues(req.VolumeId, "unpublish").Inc()
 	ll.Info("unmounting volume is finished")
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
