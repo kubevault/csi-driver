@@ -134,6 +134,7 @@ export CSI_VAULT_UNINSTALL=0
 export CSI_VAULT_PURGE=0
 export CSI_REQUIRED_ATTACHMENT=false
 export REQUIRED_APPBINDING_INSTALL=true
+export CSI_VAULT_PRIORITY_CLASS=system-cluster-critical
 
 export APPSCODE_ENV=${APPSCODE_ENV:-prod}
 export SCRIPT_LOCATION="curl -fsSL https://raw.githubusercontent.com/kubevault/csi-driver/0.1.0/"
@@ -347,6 +348,10 @@ while test $# -gt 0; do
 done
 
 export PROMETHEUS_NAMESPACE=${PROMETHEUS_NAMESPACE:-$CSI_VAULT_NAMESPACE}
+
+if [ "$CSI_VAULT_NAMESPACE" != "kube-system" ]; then
+    export CSI_VAULT_PRIORITY_CLASS=""
+fi
 
 if [ "$CSI_VAULT_UNINSTALL" -eq 1 ]; then
   kubectl delete csidrivers.csi.storage.k8s.io ${CSI_VAULT_DRIVER_NAME}
