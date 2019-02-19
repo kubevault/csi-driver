@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -87,10 +89,17 @@ func (d *Driver) Run() error {
 		return resp, err
 	}
 
-	d.srv = grpc.NewServer(grpc.UnaryInterceptor(errHandler))
+	d.srv = grpc.NewServer(
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_prometheus.UnaryServerInterceptor,
+			errHandler,
+		)),
+	)
 	csi.RegisterIdentityServer(d.srv, d)
 	csi.RegisterControllerServer(d.srv, d)
 	csi.RegisterNodeServer(d.srv, d)
+
+	grpc_prometheus.Register(d.srv)
 
 	d.log.WithField("addr", addr).Info("server started")
 	return d.srv.Serve(listener)

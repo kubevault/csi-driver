@@ -82,6 +82,10 @@ import:
   repo: https://github.com/kmodules/offshoot-api.git
   vcs: git
   version: release-9.0
+- package: github.com/grpc-ecosystem/go-grpc-middleware
+  version: v1.0.0
+- package: github.com/grpc-ecosystem/go-grpc-prometheus
+  version: v1.2.0
 testImport:
 - package: github.com/kubernetes-csi/csi-test
   repo: https://github.com/kubevault/csi-test.git

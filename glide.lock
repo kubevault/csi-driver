@@ -1,5 +1,5 @@
-hash: 3acf0f5ac140c5d10d93c902561fad23629d1c0aefd1238da52fdea6798fdf1e
-updated: 2019-01-01T10:28:35.301789945-08:00
+hash: 4ab484a3a050801c1f4f6fe27dc7ec65c7d99f0d93a4be133b870ad7d501079a
+updated: 2019-02-19T01:37:46.433946276-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -8,7 +8,7 @@ imports:
   subpackages:
   - compute/metadata
 - name: github.com/appscode/go
-  version: 584aaa73af837f112c0a471be398ea837341c330
+  version: 52eaa8008e2e5fe8df77ac6fb2fd45e3ea2ae47c
   subpackages:
   - analytics
   - context
@@ -25,9 +25,9 @@ imports:
 - name: github.com/appscode/go-version
   version: 7aba545c679b0f45679eeb406dc662d2c8a04c26
 - name: github.com/appscode/jsonpatch
-  version: 5af499cf01c842bfdd7761a433fc90525ccd6836
+  version: 7c0e3b262f30165a8ec3d0b4c6059fd92703bfb2
 - name: github.com/appscode/kutil
-  version: 6546fe6e8bde14cda08b0415f926cbed47d66e6a
+  version: 963f95c3833ac1630834cb574a30fac82234a3bd
   subpackages:
   - apiextensions/v1beta1
   - discovery
@@ -231,11 +231,11 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
-  version: 2248b49eaa8e1c8c0963ee77b40841adbc19d4ca
+  version: 3af367b6b30c263d47e8895973edcca9a49cf029
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -266,32 +266,34 @@ imports:
   version: 787624de3eb7bd915c329cba748687a3b22666a6
   subpackages:
   - diskcache
+- name: github.com/grpc-ecosystem/go-grpc-middleware
+  version: c250d6563d4d4c20252cd865923440e829844f4e
 - name: github.com/grpc-ecosystem/go-grpc-prometheus
-  version: 2500245aa6110c562d17020fb31a2c133d737799
+  version: c225b8c3b01faf2899099b768856a9e916e5087b
 - name: github.com/hashicorp/errwrap
   version: 8a6fb523712970c966eefc6b39ed2c5e74880354
 - name: github.com/hashicorp/go-cleanhttp
   version: e8ab9daed8d1ddd2d3c4efba338fe2eeae2e4f18
 - name: github.com/hashicorp/go-hclog
-  version: 61d530d6c27f994fb6c83b80f99a69c54125ec8a
+  version: 90f2fbc4844c54471c74c1395e1d06ce0582ec59
 - name: github.com/hashicorp/go-immutable-radix
   version: 27df80928bb34bb1b0d6d0e01b9e679902e7a6b5
 - name: github.com/hashicorp/go-multierror
   version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/hashicorp/go-plugin
-  version: f444068e8f5a19853177f7aa0aea7e7d95b5b528
+  version: b838ffee39ce7c7c38226c1413aa4ecae61b4d27
   subpackages:
-  - internal/proto
+  - internal/plugin
 - name: github.com/hashicorp/go-retryablehttp
-  version: d3a63d3c72068412f9ecd7c36faafd874d2e2888
+  version: 73489d0a1476f0c9e6fb03f9c39241523a496dfd
 - name: github.com/hashicorp/go-rootcerts
-  version: 6bb64b370b90e7ef1fa532be9e591a81c3493e00
+  version: 63503fb4e1eca22f9ae0f90b49c5d5538a0e87eb
 - name: github.com/hashicorp/go-sockaddr
-  version: 6d291a969b86c4b633730bfc6b8b9d64c3aafed9
+  version: 3aed17b5ee41761cc2b04f2a94c7107d428967e5
 - name: github.com/hashicorp/go-uuid
   version: 4f571afc59f3043a65f8fe6bf46d887b10a01d43
 - name: github.com/hashicorp/go-version
-  version: b5a281d3160aa11950a6182bd9a9dc2cb1e02d50
+  version: d40cf49b3a77bba84a7afdbd7f1dc295d114efb1
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
@@ -344,11 +346,11 @@ imports:
 - name: github.com/json-iterator/go
   version: 1624edc4454b8682399def8740d46db5e4362ba4
 - name: github.com/juju/errors
-  version: 089d3ea4e4d597bd98acac068193d341983326a3
+  version: e65537c515d77e35697c471d6c2755375cb3adc4
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/kubedb/apimachinery
-  version: 6319e29148b40f1ac9a7ea312394754e83feba8e
+  version: a307434ffe887287826f1197ca7221213905900b
   subpackages:
   - apis
   - apis/authorization
@@ -364,7 +366,7 @@ imports:
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
-  version: f56ae9a69c89c6a91d87251f0c5453555bc89bfc
+  version: 7bd8ff88332ea64c4b4019cdc14506bc5b0789b9
   subpackages:
   - apis
   - apis/catalog
@@ -406,7 +408,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/go-homedir
-  version: ae18d6b8b3205b561c79e8e5f69bff09736185f4
+  version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/mitchellh/go-testing-interface
   version: 6d0b8010fcc857872e42fc6c931227569016843c
 - name: github.com/mitchellh/mapstructure
@@ -424,7 +426,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pierrec/lz4
-  version: 623b5a2f4d2a41e411730dcdfbfdaeb5c0c4564e
+  version: 7f42fed96396aa858623e7e51628123cda496462
   subpackages:
   - internal/xxh32
 - name: github.com/pkg/errors
@@ -454,7 +456,7 @@ imports:
 - name: github.com/russross/blackfriday
   version: 05f3235734ad95d0016f6a23902f06461fcf567a
 - name: github.com/ryanuber/go-glob
-  version: 256dc444b735e061061cf46c809487313d5b0065
+  version: 51a8f68e6c24dc43f1e371749c89a267de4ebc53
 - name: github.com/sergi/go-diff
   version: 97b2266dfe4bd4ea1b81a463322f04f8b724801e
   subpackages:
@@ -979,6 +981,7 @@ imports:
   version: 0ed33881dc4355495f623c6f22e7dd0b7632b7c0
   subpackages:
   - pkg/api/legacyscheme
+  - pkg/apis/core
 - name: kmodules.xyz/custom-resources
   version: b4ef1fe08b7a09681a676c1b697cf66fd74b7ed4
   repo: https://github.com/kmodules/custom-resources.git
@@ -992,15 +995,11 @@ imports:
   - client/clientset/versioned/typed/appcatalog/v1alpha1
   - client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 - name: kmodules.xyz/monitoring-agent-api
-  version: d12289267b3d7510feb9fac1f5e451d476f23a38
-  repo: https://github.com/kmodules/monitoring-agent-api.git
-  vcs: git
+  version: e79ddf3f680a16a99b9aacb718f5607b54cef04d
   subpackages:
   - api/v1
 - name: kmodules.xyz/objectstore-api
   version: ebe27c957a5bf41e0680776e3626b5507087f4c3
-  repo: https://github.com/kmodules/objectstore-api.git
-  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/offshoot-api
