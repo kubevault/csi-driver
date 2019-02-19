@@ -1,5 +1,5 @@
 hash: 4ab484a3a050801c1f4f6fe27dc7ec65c7d99f0d93a4be133b870ad7d501079a
-updated: 2019-02-04T12:21:19.50447485-08:00
+updated: 2019-02-19T01:37:46.433946276-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -27,7 +27,7 @@ imports:
 - name: github.com/appscode/jsonpatch
   version: 7c0e3b262f30165a8ec3d0b4c6059fd92703bfb2
 - name: github.com/appscode/kutil
-  version: b5b6fa2ff0180040757643f9a498ea84d7bd8dd6
+  version: 963f95c3833ac1630834cb574a30fac82234a3bd
   subpackages:
   - apiextensions/v1beta1
   - discovery
@@ -235,7 +235,7 @@ imports:
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
-  version: 2248b49eaa8e1c8c0963ee77b40841adbc19d4ca
+  version: 3af367b6b30c263d47e8895973edcca9a49cf029
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -275,15 +275,15 @@ imports:
 - name: github.com/hashicorp/go-cleanhttp
   version: e8ab9daed8d1ddd2d3c4efba338fe2eeae2e4f18
 - name: github.com/hashicorp/go-hclog
-  version: 4783caec6f2e5cdd47fab8b2bb47ce2ce5c546b7
+  version: 90f2fbc4844c54471c74c1395e1d06ce0582ec59
 - name: github.com/hashicorp/go-immutable-radix
   version: 27df80928bb34bb1b0d6d0e01b9e679902e7a6b5
 - name: github.com/hashicorp/go-multierror
   version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/hashicorp/go-plugin
-  version: 362c99b11937c6a84686ee5726a8170e921ab406
+  version: b838ffee39ce7c7c38226c1413aa4ecae61b4d27
   subpackages:
-  - internal/proto
+  - internal/plugin
 - name: github.com/hashicorp/go-retryablehttp
   version: 73489d0a1476f0c9e6fb03f9c39241523a496dfd
 - name: github.com/hashicorp/go-rootcerts
@@ -346,11 +346,11 @@ imports:
 - name: github.com/json-iterator/go
   version: 1624edc4454b8682399def8740d46db5e4362ba4
 - name: github.com/juju/errors
-  version: 089d3ea4e4d597bd98acac068193d341983326a3
+  version: e65537c515d77e35697c471d6c2755375cb3adc4
 - name: github.com/konsorten/go-windows-terminal-sequences
   version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/kubedb/apimachinery
-  version: 6319e29148b40f1ac9a7ea312394754e83feba8e
+  version: a307434ffe887287826f1197ca7221213905900b
   subpackages:
   - apis
   - apis/authorization
@@ -366,7 +366,7 @@ imports:
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
-  version: 29aae774927b79bc18db7a863c639086e2e9f2fc
+  version: 7bd8ff88332ea64c4b4019cdc14506bc5b0789b9
   subpackages:
   - apis
   - apis/catalog
@@ -426,7 +426,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pierrec/lz4
-  version: 473cd7ce01a1113208073166464b98819526150e
+  version: 7f42fed96396aa858623e7e51628123cda496462
   subpackages:
   - internal/xxh32
 - name: github.com/pkg/errors
@@ -996,14 +996,10 @@ imports:
   - client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 - name: kmodules.xyz/monitoring-agent-api
   version: e79ddf3f680a16a99b9aacb718f5607b54cef04d
-  repo: https://github.com/kmodules/monitoring-agent-api.git
-  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/objectstore-api
   version: ebe27c957a5bf41e0680776e3626b5507087f4c3
-  repo: https://github.com/kmodules/objectstore-api.git
-  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/offshoot-api
