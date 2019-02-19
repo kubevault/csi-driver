@@ -192,4 +192,4 @@ spec:
       tolerations:
       - key: CriticalAddonsOnly
         operator: Exists
-      priorityClassName: system-cluster-critical
+      priorityClassName: ${CSI_VAULT_PRIORITY_CLASS}
