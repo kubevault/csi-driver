@@ -137,6 +137,15 @@ spec:
       labels:
         {{- include "csi-vault.labels" . | nindent 8}}
         component: {{ .Values.attacher.name }}
+{{- if or .Values.annotations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
+      annotations:
+{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+{{- end }}
+{{- if .Values.annotations }}
+{{ toYaml .Values.annotations | indent 8 }}
+{{- end }}
+{{- end }}
     spec:
       serviceAccount: {{ template "csi-vault.attacher.fullname" . }}
       {{- if .Values.imagePullSecrets }}
