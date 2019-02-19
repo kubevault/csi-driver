@@ -30,6 +30,10 @@ registrar:
 
 logLevel: 3
 
+## Annotations passed to operator pod(s).
+##
+annotations: {}
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -74,6 +78,11 @@ tolerations: {}
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 ##
 affinity: {}
+
+## Install Default RBAC roles and bindings
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
 
 apiserver:
   # If true, uses kube-apiserver FQDN for AKS cluster to workaround https://github.com/Azure/AKS/issues/522 (default true)
