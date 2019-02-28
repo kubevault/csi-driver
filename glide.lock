@@ -1,5 +1,5 @@
-hash: 4ab484a3a050801c1f4f6fe27dc7ec65c7d99f0d93a4be133b870ad7d501079a
-updated: 2019-02-19T01:37:46.433946276-08:00
+hash: 7ec84510e5bc530af9da73fe5d63a1e7434b86a97100c7dcba347f16ad6eae32
+updated: 2019-02-28T01:07:01.078753992-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -231,7 +231,7 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/golang/snappy
-  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
+  version: 2a8bb927dd31d8daada140a5d09578521ce5c36a
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/go-cmp
@@ -275,13 +275,13 @@ imports:
 - name: github.com/hashicorp/go-cleanhttp
   version: e8ab9daed8d1ddd2d3c4efba338fe2eeae2e4f18
 - name: github.com/hashicorp/go-hclog
-  version: 90f2fbc4844c54471c74c1395e1d06ce0582ec59
+  version: 2f91710694ab9472cc9e085a9c74565082063354
 - name: github.com/hashicorp/go-immutable-radix
   version: 27df80928bb34bb1b0d6d0e01b9e679902e7a6b5
 - name: github.com/hashicorp/go-multierror
   version: 886a7fbe3eb1c874d46f623bfa70af45f425b3d1
 - name: github.com/hashicorp/go-plugin
-  version: b838ffee39ce7c7c38226c1413aa4ecae61b4d27
+  version: 3f118e8ee104b6f22aeb12453fab56aed1356186
   subpackages:
   - internal/plugin
 - name: github.com/hashicorp/go-retryablehttp
@@ -348,7 +348,7 @@ imports:
 - name: github.com/juju/errors
   version: e65537c515d77e35697c471d6c2755375cb3adc4
 - name: github.com/konsorten/go-windows-terminal-sequences
-  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
+  version: f55edac94c9bbba5d6182a4be46d86a2c9b5b50e
 - name: github.com/kubedb/apimachinery
   version: a307434ffe887287826f1197ca7221213905900b
   subpackages:
@@ -366,7 +366,7 @@ imports:
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
-  version: 7bd8ff88332ea64c4b4019cdc14506bc5b0789b9
+  version: 6ed8a33e4d1f91c2d4ce3ef672c51305207321ce
   subpackages:
   - apis
   - apis/catalog
@@ -426,7 +426,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pierrec/lz4
-  version: 7f42fed96396aa858623e7e51628123cda496462
+  version: 062282ea0dcff40c9fb8525789eef9644b1fbd6e
   subpackages:
   - internal/xxh32
 - name: github.com/pkg/errors
@@ -546,7 +546,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  version: 54a98f90d1c46b7731eb8fb305d2a321c30ef610
   subpackages:
   - internal
   - internal/app_identity
@@ -984,8 +984,6 @@ imports:
   - pkg/apis/core
 - name: kmodules.xyz/custom-resources
   version: b4ef1fe08b7a09681a676c1b697cf66fd74b7ed4
-  repo: https://github.com/kmodules/custom-resources.git
-  vcs: git
   subpackages:
   - apis/appcatalog
   - apis/appcatalog/v1alpha1
@@ -1003,9 +1001,7 @@ imports:
   subpackages:
   - api/v1
 - name: kmodules.xyz/offshoot-api
-  version: 2ab6d9decb219e8465875d80be5d6bc754052bd9
-  repo: https://github.com/kmodules/offshoot-api.git
-  vcs: git
+  version: bfce3a53c777ee56eb43e3314611c001f46a6e87
   subpackages:
   - api/v1
 - name: sigs.k8s.io/yaml
