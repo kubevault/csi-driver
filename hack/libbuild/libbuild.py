@@ -432,7 +432,7 @@ DEP_LIST = [
       "version": "master"
     },
     {
-      "package": "github.com/appscode/kutil",
+      "package": kutil "kmodules.xyz/client-go",
       "version": "release-8.0"
     },
     {

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	logs "github.com/appscode/go/log/golog"
+	"kmodules.xyz/client-go/logs"
 	"github.com/kubevault/csi-driver/pkg/cmds"
 )
 
@@ -14,5 +14,4 @@ func main() {
 	if err := cmds.NewRootCmd().Execute(); err != nil {
 		os.Exit(1)
 	}
-	os.Exit(0)
 }

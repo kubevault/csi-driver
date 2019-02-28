@@ -1,9 +1,9 @@
 package: github.com/kubevault/csi-driver
 import:
+- package: github.com/Azure/go-autorest
+  version: v11.1.0
 - package: github.com/appscode/go
   version: master
-- package: github.com/appscode/kutil
-  version: release-9.0
 - package: github.com/container-storage-interface/spec
   version: v0.3.0
 - package: github.com/cpuguy83/go-md2man
@@ -17,6 +17,10 @@ import:
   version: v1.1.0
 - package: github.com/gorilla/websocket
   version: v1.4.0
+- package: github.com/grpc-ecosystem/go-grpc-middleware
+  version: v1.0.0
+- package: github.com/grpc-ecosystem/go-grpc-prometheus
+  version: v1.2.0
 - package: github.com/hashicorp/vault
   version: v0.11.3
 - package: github.com/imdario/mergo
@@ -27,7 +31,9 @@ import:
 - package: github.com/kubernetes-csi/livenessprobe
   version: release-0.4
 - package: github.com/kubevault/operator
-  version: 0.1.0
+  version: master
+- package: github.com/mailru/easyjson
+  version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
 - package: github.com/mitchellh/mapstructure
   version: v1.1.2
 - package: github.com/pkg/errors
@@ -43,7 +49,7 @@ import:
 - package: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
 - package: golang.org/x/net
-  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
+  version: 0ed95abb35c445290478a5348a7b38bb154135fd
 - package: golang.org/x/sys
   version: 95c6576299259db960f6c5b9b69ea52422860fce
 - package: golang.org/x/text
@@ -57,31 +63,29 @@ import:
 - package: gopkg.in/yaml.v2
   version: v2.2.1
 - package: k8s.io/api
-  version: kubernetes-1.12.0
+  version: kubernetes-1.13.0
 - package: k8s.io/apiextensions-apiserver
-  version: kubernetes-1.12.0
+  version: kubernetes-1.13.0
 - package: k8s.io/apimachinery
   repo: https://github.com/kmodules/apimachinery.git
   vcs: git
-  version: ac-1.12.0
+  version: ac-1.13.0
 - package: k8s.io/apiserver
   repo: https://github.com/kmodules/apiserver.git
   vcs: git
-  version: ac-1.12.0
+  version: ac-1.13.0
 - package: k8s.io/client-go
-  version: v9.0.0
+  version: v10.0.0
 - package: k8s.io/kube-aggregator
-  version: kubernetes-1.12.0
+  version: kubernetes-1.13.0
 - package: k8s.io/kube-openapi
-  version: 0cf8f7e6ed1d2e3d47d02e3b6e559369af24d803
+  version: c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d
+- package: kmodules.xyz/client-go
+  version: release-10.0
 - package: kmodules.xyz/custom-resources
-  version: release-9.0
+  version: release-10.0
 - package: kmodules.xyz/offshoot-api
-  version: release-9.0
-- package: github.com/grpc-ecosystem/go-grpc-middleware
-  version: v1.0.0
-- package: github.com/grpc-ecosystem/go-grpc-prometheus
-  version: v1.2.0
+  version: release-10.0
 testImport:
 - package: github.com/kubernetes-csi/csi-test
   repo: https://github.com/kubevault/csi-test.git
