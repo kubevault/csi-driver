@@ -166,7 +166,6 @@ spec:
       imagePullSecrets:
             {{ toYaml .Values.imagePullSecrets | indent 6 }}
             {{- end }}
-      hostNetwork: true
       containers:
       - name: node-driver-registrar
         image: {{ .Values.nodeRegistrar.registry}}/{{ .Values.nodeRegistrar.repository }}:{{ .Values.nodeRegistrar.tag }}

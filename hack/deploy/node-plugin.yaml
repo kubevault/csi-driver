@@ -131,7 +131,6 @@ spec:
     spec:
       priorityClassName: system-node-critical
       serviceAccount: csi-vault-node
-      hostNetwork: true
       containers:
       - name: node-driver-registrar
         image: ${CSI_NODE_REGISTRAR_DOCKER_REGISTRY}/${CSI_NODE_REGISTRAR_DOCKER_REPOSITORY}:${CSI_NODE_REGISTRAR_IMAGE_TAG}
