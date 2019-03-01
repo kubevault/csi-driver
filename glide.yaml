@@ -31,7 +31,7 @@ import:
 - package: github.com/kubernetes-csi/livenessprobe
   version: v1.0.1
 - package: github.com/kubevault/operator
-  version: master
+  version: 0.2.0
 - package: github.com/mailru/easyjson
   version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
 - package: github.com/mitchellh/mapstructure

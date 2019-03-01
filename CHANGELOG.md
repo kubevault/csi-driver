@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.2.0](https://github.com/kubevault/csi-driver/tree/0.2.0) (2019-03-01)
+[Full Changelog](https://github.com/kubevault/csi-driver/compare/0.1.0...0.2.0)
+
+**Merged pull requests:**
+
+- Update Kubernetes client libraries to 1.13.0 [\#38](https://github.com/kubevault/csi-driver/pull/38) ([tamalsaha](https://github.com/tamalsaha))
+- Update CSI Spec 1.0.0 [\#21](https://github.com/kubevault/csi-driver/pull/21) ([sanjid133](https://github.com/sanjid133))
+
 ## [0.1.0](https://github.com/kubevault/csi-driver/tree/0.1.0) (2019-02-28)
 **Merged pull requests:**
 

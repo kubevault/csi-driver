@@ -1,5 +1,5 @@
-hash: 35ed2001ad3108b120a78174153ef144cdaa32d8b4183205fe14af9a5950fcb3
-updated: 2019-02-28T09:28:13.441591305-08:00
+hash: cf32ccad9089e658aba4723a845474277890711fd5ca63dc62f9c51538be064f
+updated: 2019-02-28T23:23:41.848429312-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -367,7 +367,7 @@ imports:
   subpackages:
   - pkg/connection
 - name: github.com/kubevault/operator
-  version: e3c713de837b384cfcabd27e82b63c4b7457675e
+  version: 061259e8b85ffc9faaa3a7012d15d26f7e70b33e
   subpackages:
   - apis
   - apis/catalog
@@ -975,7 +975,7 @@ imports:
   - util/jsonpath
   - util/retry
 - name: k8s.io/klog
-  version: 8139d8cb77af419532b33dfa7dd09fbc5f1d344f
+  version: a5bc97fbc634d635061f3146511332c7e313a55a
 - name: k8s.io/kube-aggregator
   version: 71ff10f5febb8733ad25fc112736ff5f8cd97beb
 - name: k8s.io/kube-openapi
@@ -1014,10 +1014,14 @@ imports:
   - client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 - name: kmodules.xyz/monitoring-agent-api
   version: e79ddf3f680a16a99b9aacb718f5607b54cef04d
+  repo: https://github.com/kmodules/monitoring-agent-api.git
+  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/objectstore-api
   version: ebe27c957a5bf41e0680776e3626b5507087f4c3
+  repo: https://github.com/kmodules/objectstore-api.git
+  vcs: git
   subpackages:
   - api/v1
 - name: kmodules.xyz/offshoot-api
