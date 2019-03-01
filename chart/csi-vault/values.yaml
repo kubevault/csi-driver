@@ -14,7 +14,7 @@ plugin:
   name: plugin
   registry: kubevault
   repository: csi-vault
-  tag: csi-v1.0.0
+  tag: 0.2.0
   pullPolicy: Always
 provisioner:
   name: provisioner
