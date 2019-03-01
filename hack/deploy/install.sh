@@ -415,11 +415,6 @@ if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
   }
 fi
 
-${SCRIPT_LOCATION}hack/deploy/appcatalog-user-roles.yaml | $ONESSL envsubst | kubectl auth reconcile -f -
-${SCRIPT_LOCATION}hack/deploy/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
-${SCRIPT_LOCATION}hack/deploy/controller-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
-${SCRIPT_LOCATION}hack/deploy/node-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
-
 # create necessary TLS certificates:
 # - a local CA key and cert
 # - a webhook server key and cert signed by the local CA
@@ -428,6 +423,11 @@ $ONESSL create server-cert server --domains=csi-vault-controller.$CSI_VAULT_NAME
 export SERVICE_SERVING_CERT_CA=$(cat ca.crt | $ONESSL base64)
 export TLS_SERVING_CERT=$(cat server.crt | $ONESSL base64)
 export TLS_SERVING_KEY=$(cat server.key | $ONESSL base64)
+
+${SCRIPT_LOCATION}hack/deploy/appcatalog-user-roles.yaml | $ONESSL envsubst | kubectl auth reconcile -f -
+${SCRIPT_LOCATION}hack/deploy/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
+${SCRIPT_LOCATION}hack/deploy/controller-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
+${SCRIPT_LOCATION}hack/deploy/node-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
 
 # configure prometheus monitoring
 if [ "$MONITORING_AGENT" != "$MONITORING_AGENT_NONE" ]; then
