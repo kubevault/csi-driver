@@ -145,7 +145,7 @@ export CSI_VAULT_USE_KUBEAPISERVER_FQDN_FOR_AKS=false
 export CSI_VAULT_ENABLE_ANALYTICS=false
 
 export APPSCODE_ENV=${APPSCODE_ENV:-prod}
-export SCRIPT_LOCATION="curl -fsSL https://raw.githubusercontent.com/kubevault/csi-driver/0.1.0/"
+export SCRIPT_LOCATION="curl -fsSL https://raw.githubusercontent.com/kubevault/csi-driver/0.2.0/"
 if [ "$APPSCODE_ENV" = "dev" ]; then
   detect_tag
   export SCRIPT_LOCATION="cat "
