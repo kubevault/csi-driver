@@ -132,7 +132,6 @@ spec:
         component: plugin
     spec:
       serviceAccount: csi-vaultplugin
-      hostNetwork: true
       containers:
       - name: driver-registrar
         image: ${CSI_REGISTRAR_DOCKER_REGISTRY}/${CSI_REGISTRAR_DOCKER_REPOSITORY}:${CSI_REGISTRAR_IMAGE_TAG}
