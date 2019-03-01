@@ -39,17 +39,31 @@ release: {{ .Release.Name | quote}}
 heritage: "{{ .Release.Service }}"
 {{- end -}}
 
+
 {{- define "csi-vault.attacher.fullname" -}}
 {{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.attacher.name | trunc 63 | trimSuffix "-" -}}
 {{ end }}
 
-{{- define "csi-vault.provisioner.fullname" -}}
-{{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.provisioner.name | trunc 63 | trimSuffix "-" -}}
+{{- define "csi-vault.node-registrar.fullname" -}}
+{{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.nodeRegistrar.name | trunc 63 | trimSuffix "-" -}}
+{{ end }}
+
+
+{{- define "csi-vault.controller.fullname" -}}
+{{- printf "%s-%s" (include "csi-vault.fullname" .) "controller" | trunc 63 | trimSuffix "-" -}}
+{{ end }}
+
+{{- define "csi-vault.controller.name" -}}
+{{- printf "%s-%s" .Release.Name "controller" | trunc 63 | trimSuffix "-" -}}
+{{ end }}
+
+{{- define "csi-vault.node.fullname" -}}
+{{- printf "%s-%s" (include "csi-vault.fullname" .) "node" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define  "csi-vault.plugin.fullname" -}}
-{{- printf "%s-%s" (include "csi-vault.fullname" .) .Values.plugin.name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- define "csi-vault.node.name" -}}
+{{- printf "%s-%s" .Release.Name "node" | trunc 63 | trimSuffix "-" -}}
+{{ end }}
 
 {{- define "csi-vault.node" -}}
 valueFrom:

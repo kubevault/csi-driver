@@ -7,8 +7,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 
-	"github.com/container-storage-interface/spec/lib/go/csi/v0"
+	"github.com/container-storage-interface/spec/lib/go/csi"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	vaultapi "github.com/hashicorp/vault/api"
@@ -20,14 +21,12 @@ import (
 )
 
 const (
-	driverName        = "com.kubevault.csi.secrets"
-	vendorVersion     = "0.1.1"
+	driverName        = "secrets.csi.kubevault.com"
+	vendorVersion     = "1.0.0"
 	podName           = "csi.storage.k8s.io/pod.name"
 	podNamespace      = "csi.storage.k8s.io/pod.namespace"
 	podUID            = "csi.storage.k8s.io/pod.uid"
 	podServiceAccount = "csi.storage.k8s.io/serviceAccount.name"
-
-	TestEnvForCSIDriver = "VAULT_CSI_TEST"
 )
 
 // Driver implements the following CSI interfaces:
@@ -48,6 +47,11 @@ type Driver struct {
 	log         *logrus.Entry
 
 	ch map[string]*vaultapi.Renewer
+
+	// ready defines whether the driver is ready to function. This value will
+	// be used by the `Identity` service via the `Probe()` method.
+	readyMu sync.Mutex // protects ready
+	ready   bool
 }
 
 // Run starts the CSI plugin by communication over the given Endpoint
@@ -98,7 +102,7 @@ func (d *Driver) Run() error {
 	csi.RegisterIdentityServer(d.srv, d)
 	csi.RegisterControllerServer(d.srv, d)
 	csi.RegisterNodeServer(d.srv, d)
-
+	d.ready = true
 	grpc_prometheus.Register(d.srv)
 
 	d.log.WithField("addr", addr).Info("server started")
@@ -107,6 +111,10 @@ func (d *Driver) Run() error {
 
 // Stop stops the plugin
 func (d *Driver) Stop() {
+	d.readyMu.Lock()
+	d.ready = false
+	d.readyMu.Unlock()
+
 	d.log.Info("server stopped")
 	d.srv.Stop()
 }

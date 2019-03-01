@@ -1,12 +1,10 @@
 {{- $ca := genCA "ca" 3650 }}
 {{- $cn := include "csi-vault.fullname" . -}}
-{{- $altName1 := printf "%s.%s"     (include "csi-vault.attacher.fullname" .)    .Release.Namespace }}
-{{- $altName2 := printf "%s.%s.svc" (include "csi-vault.attacher.fullname" .)    .Release.Namespace }}
-{{- $altName3 := printf "%s.%s"     (include "csi-vault.plugin.fullname" .)      .Release.Namespace }}
-{{- $altName4 := printf "%s.%s.svc" (include "csi-vault.plugin.fullname" .)      .Release.Namespace }}
-{{- $altName5 := printf "%s.%s"     (include "csi-vault.provisioner.fullname" .) .Release.Namespace }}
-{{- $altName6 := printf "%s.%s.svc" (include "csi-vault.provisioner.fullname" .) .Release.Namespace }}
-{{- $cert := genSignedCert $cn nil (list $altName1 $altName2 $altName3 $altName4 $altName5 $altName6) 3650 $ca }}
+{{- $altName1 := printf "%s.%s"     (include "csi-vault.controller.fullname" .)    .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" (include "csi-vault.controller.fullname" .)    .Release.Namespace }}
+{{- $altName3 := printf "%s.%s"     (include "csi-vault.node.fullname" .)      .Release.Namespace }}
+{{- $altName4 := printf "%s.%s.svc" (include "csi-vault.node.fullname" .)      .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2 $altName3 $altName4 ) 3650 $ca }}
 apiVersion: v1
 kind: Secret
 metadata:

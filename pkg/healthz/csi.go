@@ -39,7 +39,7 @@ func (p probe) Check(_ *http.Request) error {
 	return p.runProbe(ctx, csiConn)
 }
 
-// ref: https://github.com/kubernetes-csi/livenessprobe/blob/release-0.4/cmd/main.go#L44
+// ref: https://github.com/kubernetes-csi/livenessprobe/blob/v1.0.1/cmd/main.go#L44
 
 func (p probe) getCSIConnection() (connection.CSIConnection, error) {
 	// Connect to CSI.
@@ -59,14 +59,6 @@ func (p probe) runProbe(ctx context.Context, csiConn connection.CSIConnection) e
 		return err
 	}
 	glog.Infof("CSI driver name: %q", csiDriverName)
-
-	// Get CSI Driver Node ID
-	glog.Infof("Calling CSI driver to discover node ID.")
-	csiDriverNodeID, err := csiConn.NodeGetId(ctx)
-	if err != nil {
-		return err
-	}
-	glog.Infof("CSI driver node ID: %q", csiDriverNodeID)
 
 	// Sending Probe request
 	glog.Infof("Sending probe request to CSI driver.")

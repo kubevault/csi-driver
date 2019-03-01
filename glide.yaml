@@ -5,7 +5,7 @@ import:
 - package: github.com/appscode/go
   version: master
 - package: github.com/container-storage-interface/spec
-  version: v0.3.0
+  version: v1.0.0
 - package: github.com/cpuguy83/go-md2man
   version: v1.0.8
 - package: github.com/davecgh/go-spew
@@ -29,7 +29,7 @@ import:
   version: 1.1.5
 - package: github.com/juju/errors
 - package: github.com/kubernetes-csi/livenessprobe
-  version: release-0.4
+  version: v1.0.1
 - package: github.com/kubevault/operator
   version: master
 - package: github.com/mailru/easyjson
@@ -90,4 +90,4 @@ testImport:
 - package: github.com/kubernetes-csi/csi-test
   repo: https://github.com/kubevault/csi-test.git
   vcs: git
-  version: vcsi0.3.0-2
+  version: vcsi1.0.2
