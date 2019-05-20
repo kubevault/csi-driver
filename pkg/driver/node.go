@@ -324,3 +324,8 @@ func (d *Driver) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) (
 		},
 	}, nil
 }
+
+func (d *Driver) NodeExpandVolume(ctx context.Context, req *csi.NodeExpandVolumeRequest) (*csi.NodeExpandVolumeResponse, error) {
+	d.log.WithField("method", "node_expand_volume").Info("node expand volume called")
+	return nil, status.Error(codes.Unimplemented, "NodeExpandVolume is not implemented")
+}

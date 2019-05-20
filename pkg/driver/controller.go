@@ -253,3 +253,10 @@ func (d *Driver) ListSnapshots(ctx context.Context, req *csi.ListSnapshotsReques
 	}).Info("list snapshot called")
 	return &csi.ListSnapshotsResponse{}, status.Error(codes.Unimplemented, "ListSnapshots is not implemented")
 }
+
+func (d *Driver) ControllerExpandVolume(ctx context.Context, req *csi.ControllerExpandVolumeRequest) (*csi.ControllerExpandVolumeResponse, error) {
+	d.log.WithFields(logrus.Fields{
+		"method": "expand_volume",
+	}).Info("expand volume called")
+	return &csi.ControllerExpandVolumeResponse{}, status.Error(codes.Unimplemented, "ControllerExpandVolume is not implemented")
+}

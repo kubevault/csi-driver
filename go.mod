@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/appscode/go v0.0.0-20190424183524-60025f1135c9
 	github.com/appscode/pat v0.0.0-20170521084856-48ff78925b79
-	github.com/container-storage-interface/spec v1.0.0
+	github.com/container-storage-interface/spec v1.1.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.3.1
 	github.com/gophercloud/gophercloud v0.0.0-20190509032623-7892efa714f1 // indirect
