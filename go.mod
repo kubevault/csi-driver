@@ -40,7 +40,7 @@ require (
 
 replace (
 	github.com/graymeta/stow => github.com/appscode/stow v0.0.0-20190506085026-ca5baa008ea3
-	github.com/kubernetes-csi/csi-test => github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb
+	github.com/kubernetes-csi/csi-test => github.com/kubevault/csi-test v2.0.0+incompatible
 	gopkg.in/robfig/cron.v2 => github.com/appscode/cron v0.0.0-20170717094345-ca60c6d796d4
 	k8s.io/api => k8s.io/api v0.0.0-20190313235455-40a48860b5ab
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190315093550-53c4693659ed

@@ -267,8 +267,8 @@ github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf/go.mo
 github.com/kubernetes-csi/livenessprobe v1.0.1 h1:vFXfYxX/LYzWY94wO5evWp8Nu1ajQUJEdBQCXH7Gzrk=
 github.com/kubernetes-csi/livenessprobe v1.0.1/go.mod h1:y1ewo6k4OqB1niWsp2FPiXkiMf5HuKp7D/ui7R9akNM=
 github.com/kubernetes-incubator/service-catalog v0.1.43/go.mod h1:D0CRODiXUJs6VCZDB15TmCkesbuizkac9fYEiTA78BA=
-github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb h1:f5jNbVabh6rYF5xakZ4HhcGOB/Rs6dU2SAX1pNRFy/I=
-github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb/go.mod h1:keYHjtpZwUtcdaFBI/DT2B5HqGRfYwvjcwoepk5gxOc=
+github.com/kubevault/csi-test v2.0.0+incompatible h1:5Pd6jw1haHLI+7TexYJhMU4dxOyovxAYYYo+3qT0wsk=
+github.com/kubevault/csi-test v2.0.0+incompatible/go.mod h1:keYHjtpZwUtcdaFBI/DT2B5HqGRfYwvjcwoepk5gxOc=
 github.com/kubevault/operator v0.0.0-20190509030635-7f32eefb5188 h1:AtHcm2CIGZo4fT/mclFazc8YbmeV6fruK3rC2tpCajw=
 github.com/kubevault/operator v0.0.0-20190509030635-7f32eefb5188/go.mod h1:fFRoNsp1wgKb58tU5M3EMSbqAXR5R4cUynlK+vIRELM=
 github.com/lib/pq v0.0.0-20180201184707-88edab080323 h1:Ou506ViB5uo2GloKFWIYi5hwRJn4AAOXuLVv8RMY9+4=
