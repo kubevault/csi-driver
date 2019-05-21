@@ -125,17 +125,26 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 	if req.StagingTargetPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "NodeUnstageVolume Staging Target Path must be provided")
 	}
-	d.log.WithFields(logrus.Fields{
+	ll := d.log.WithFields(logrus.Fields{
 		"request": req,
 		"method":  "node_unstage_volume",
-	}).Info("node unstage volume called")
+	})
+	ll.Info("node unstage volume called")
 	resp := &csi.NodeUnstageVolumeResponse{}
-	err := d.mounter.VaultUnmount(req.StagingTargetPath)
+
+	mounted, err := d.mounter.IsMounted("", req.StagingTargetPath)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
-	if _, err = os.Stat(req.StagingTargetPath); err == nil {
-		err = os.RemoveAll(req.StagingTargetPath)
+
+	if mounted {
+		ll.Info("unmounting the staging target path")
+		err := d.mounter.VaultUnmount(req.StagingTargetPath)
+		if err != nil {
+			return resp, err
+		}
+	} else {
+		ll.Info("staging target path is already unmounted")
 	}
 	nodeVolumeTotal.WithLabelValues(req.VolumeId, "unstage").Inc()
 	return &csi.NodeUnstageVolumeResponse{}, err

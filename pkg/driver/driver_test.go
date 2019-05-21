@@ -70,9 +70,14 @@ func TestDriverSuite(t *testing.T) {
 
 	go driver.Run()
 
+	tp := os.TempDir() + "/csi-target"
+	sp := os.TempDir() + "/csi-staging"
+	defer os.RemoveAll(tp)
+	defer os.RemoveAll(sp)
+
 	cfg := &sanity.Config{
-		TargetPath:  os.TempDir() + "/csi-target",
-		StagingPath: os.TempDir() + "/csi-staging",
+		TargetPath:  tp,
+		StagingPath: sp,
 		Address:     endpoint,
 	}
 
