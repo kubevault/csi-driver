@@ -143,6 +143,7 @@ func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolu
 		if err != nil {
 			return resp, err
 		}
+
 	} else {
 		ll.Info("staging target path is already unmounted")
 	}
@@ -279,6 +280,9 @@ func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublish
 		err := d.mounter.Unmount(req.TargetPath)
 		if err != nil {
 			return nil, err
+		}
+		if _, err := os.Stat(req.TargetPath); err == nil {
+			os.RemoveAll(req.TargetPath)
 		}
 	} else {
 		ll.Info("target path is already unmounted")
