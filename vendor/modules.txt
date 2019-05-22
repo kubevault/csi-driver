@@ -266,7 +266,7 @@ github.com/kubedb/apimachinery/apis/catalog
 github.com/kubedb/apimachinery/apis/kubedb
 # github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf
 github.com/kubernetes-csi/csi-lib-utils/protosanitizer
-# github.com/kubernetes-csi/csi-test v2.0.0+incompatible => github.com/kubevault/csi-test v2.0.0+incompatible
+# github.com/kubernetes-csi/csi-test v2.0.0+incompatible => github.com/kubevault/csi-test v2.0.1-0.20190520112505-d88b429c7476+incompatible
 github.com/kubernetes-csi/csi-test/pkg/sanity
 github.com/kubernetes-csi/csi-test/utils
 # github.com/kubernetes-csi/livenessprobe v1.0.1
