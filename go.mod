@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/appscode/go v0.0.0-20190424183524-60025f1135c9
 	github.com/appscode/pat v0.0.0-20170521084856-48ff78925b79
-	github.com/container-storage-interface/spec v1.0.0
+	github.com/container-storage-interface/spec v1.1.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.3.1
 	github.com/gophercloud/gophercloud v0.0.0-20190509032623-7892efa714f1 // indirect
@@ -40,7 +40,7 @@ require (
 
 replace (
 	github.com/graymeta/stow => github.com/appscode/stow v0.0.0-20190506085026-ca5baa008ea3
-	github.com/kubernetes-csi/csi-test => github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb
+	github.com/kubernetes-csi/csi-test => github.com/kubevault/csi-test v2.0.1-0.20190520112505-d88b429c7476+incompatible
 	gopkg.in/robfig/cron.v2 => github.com/appscode/cron v0.0.0-20170717094345-ca60c6d796d4
 	k8s.io/api => k8s.io/api v0.0.0-20190313235455-40a48860b5ab
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190315093550-53c4693659ed

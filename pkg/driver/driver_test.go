@@ -7,8 +7,6 @@ import (
 	"github.com/appscode/pat"
 	"k8s.io/client-go/kubernetes"
 
-	//"github.com/kubevault/operator/pkg/vault"
-	"io/ioutil"
 	//"k8s.io/client-go/kubernetes"
 	"math/rand"
 	"net/http"
@@ -72,21 +70,14 @@ func TestDriverSuite(t *testing.T) {
 
 	go driver.Run()
 
-	mntDir, err := ioutil.TempDir("", "mnt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(mntDir)
-
-	mntStageDir, err := ioutil.TempDir("", "mnt-stage")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(mntStageDir)
+	tp := os.TempDir() + "/csi-target"
+	sp := os.TempDir() + "/csi-staging"
+	defer os.RemoveAll(tp)
+	defer os.RemoveAll(sp)
 
 	cfg := &sanity.Config{
-		StagingPath: mntStageDir,
-		TargetPath:  mntDir,
+		TargetPath:  tp,
+		StagingPath: sp,
 		Address:     endpoint,
 	}
 

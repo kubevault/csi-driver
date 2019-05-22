@@ -56,8 +56,8 @@ github.com/cheekybits/is v0.0.0-20150225183255-68e9c0620927/go.mod h1:h/aW8ynjgk
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0/go.mod h1:4Zcjuz89kmFXt9morQgcfYZAYZ5n8WHjt81YYWIwtTM=
 github.com/codeskyblue/go-sh v0.0.0-20190412065543-76bd3d59ff27/go.mod h1:VQx0hjo2oUeQkQUET7wRwradO6f+fN5jzXgB/zROxxE=
-github.com/container-storage-interface/spec v1.0.0 h1:3DyXuJgf9MU6kyULESegQUmozsSxhpyrrv9u5bfwA3E=
-github.com/container-storage-interface/spec v1.0.0/go.mod h1:6URME8mwIBbpVyZV93Ce5St17xBiQJQY67NDsuohiy4=
+github.com/container-storage-interface/spec v1.1.0 h1:qPsTqtR1VUPvMPeK0UnCZMtXaKGyyLPG8gj/wG6VqMs=
+github.com/container-storage-interface/spec v1.1.0/go.mod h1:6URME8mwIBbpVyZV93Ce5St17xBiQJQY67NDsuohiy4=
 github.com/coreos/bbolt v1.3.2 h1:wZwiHHUieZCquLkDL0B8UhzreNWsPHooDAG3q34zk0s=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.13+incompatible h1:8F3hqu9fGYLBifCmRCJsicFqDx/D68Rt3q1JMazcgBQ=
@@ -267,8 +267,8 @@ github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf/go.mo
 github.com/kubernetes-csi/livenessprobe v1.0.1 h1:vFXfYxX/LYzWY94wO5evWp8Nu1ajQUJEdBQCXH7Gzrk=
 github.com/kubernetes-csi/livenessprobe v1.0.1/go.mod h1:y1ewo6k4OqB1niWsp2FPiXkiMf5HuKp7D/ui7R9akNM=
 github.com/kubernetes-incubator/service-catalog v0.1.43/go.mod h1:D0CRODiXUJs6VCZDB15TmCkesbuizkac9fYEiTA78BA=
-github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb h1:f5jNbVabh6rYF5xakZ4HhcGOB/Rs6dU2SAX1pNRFy/I=
-github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb/go.mod h1:keYHjtpZwUtcdaFBI/DT2B5HqGRfYwvjcwoepk5gxOc=
+github.com/kubevault/csi-test v2.0.1-0.20190520112505-d88b429c7476+incompatible h1:FvFBBPUhNdlkpawEpBRpWEDVFIP2ueXSiwijBZ7zn/M=
+github.com/kubevault/csi-test v2.0.1-0.20190520112505-d88b429c7476+incompatible/go.mod h1:keYHjtpZwUtcdaFBI/DT2B5HqGRfYwvjcwoepk5gxOc=
 github.com/kubevault/operator v0.0.0-20190509030635-7f32eefb5188 h1:AtHcm2CIGZo4fT/mclFazc8YbmeV6fruK3rC2tpCajw=
 github.com/kubevault/operator v0.0.0-20190509030635-7f32eefb5188/go.mod h1:fFRoNsp1wgKb58tU5M3EMSbqAXR5R4cUynlK+vIRELM=
 github.com/lib/pq v0.0.0-20180201184707-88edab080323 h1:Ou506ViB5uo2GloKFWIYi5hwRJn4AAOXuLVv8RMY9+4=

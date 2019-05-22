@@ -78,7 +78,7 @@ github.com/census-instrumentation/opencensus-proto/gen-go/agent/trace/v1
 github.com/census-instrumentation/opencensus-proto/gen-go/metrics/v1
 github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1
 github.com/census-instrumentation/opencensus-proto/gen-go/trace/v1
-# github.com/container-storage-interface/spec v1.0.0
+# github.com/container-storage-interface/spec v1.1.0
 github.com/container-storage-interface/spec/lib/go/csi
 # github.com/coreos/etcd v3.3.13+incompatible
 github.com/coreos/etcd/clientv3
@@ -266,7 +266,7 @@ github.com/kubedb/apimachinery/apis/catalog
 github.com/kubedb/apimachinery/apis/kubedb
 # github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf
 github.com/kubernetes-csi/csi-lib-utils/protosanitizer
-# github.com/kubernetes-csi/csi-test v2.0.0+incompatible => github.com/kubevault/csi-test v1.0.0-1.0.20181220095455-5d949466a9fb
+# github.com/kubernetes-csi/csi-test v2.0.0+incompatible => github.com/kubevault/csi-test v2.0.1-0.20190520112505-d88b429c7476+incompatible
 github.com/kubernetes-csi/csi-test/pkg/sanity
 github.com/kubernetes-csi/csi-test/utils
 # github.com/kubernetes-csi/livenessprobe v1.0.1
@@ -327,6 +327,7 @@ github.com/munnerz/goautoneg
 github.com/oklog/run
 # github.com/onsi/ginkgo v1.8.0
 github.com/onsi/ginkgo
+github.com/onsi/ginkgo/reporters
 github.com/onsi/ginkgo/config
 github.com/onsi/ginkgo/internal/codelocation
 github.com/onsi/ginkgo/internal/failer
@@ -334,7 +335,6 @@ github.com/onsi/ginkgo/internal/remote
 github.com/onsi/ginkgo/internal/suite
 github.com/onsi/ginkgo/internal/testingtproxy
 github.com/onsi/ginkgo/internal/writer
-github.com/onsi/ginkgo/reporters
 github.com/onsi/ginkgo/reporters/stenographer
 github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable
 github.com/onsi/ginkgo/types
