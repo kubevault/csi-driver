@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"kmodules.xyz/client-go/logs"
 	"github.com/kubevault/csi-driver/pkg/cmds"
+	"kmodules.xyz/client-go/logs"
 )
 
 func main() {

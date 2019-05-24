@@ -3,16 +3,18 @@ module github.com/kubevault/csi-driver
 go 1.12
 
 require (
-	github.com/appscode/go v0.0.0-20190424183524-60025f1135c9
+	github.com/appscode/go v0.0.0-20190523031839-1468ee3a76e8
 	github.com/appscode/pat v0.0.0-20170521084856-48ff78925b79
+	github.com/aws/aws-sdk-go v1.19.37 // indirect
 	github.com/container-storage-interface/spec v1.1.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.3.1
 	github.com/gophercloud/gophercloud v0.0.0-20190509032623-7892efa714f1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/hashicorp/go-hclog v0.9.2 // indirect
 	github.com/hashicorp/go-version v1.2.0 // indirect
-	github.com/hashicorp/vault v1.0.1
+	github.com/hashicorp/vault v1.0.3
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7
 	github.com/juju/loggo v0.0.0-20190212223446-d976af380377 // indirect
 	github.com/juju/testing v0.0.0-20190429233213-dfc56b8c09fc // indirect
@@ -20,11 +22,11 @@ require (
 	github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf // indirect
 	github.com/kubernetes-csi/csi-test v2.0.0+incompatible
 	github.com/kubernetes-csi/livenessprobe v1.0.1
-	github.com/kubevault/operator v0.0.0-20190509030635-7f32eefb5188
+	github.com/kubevault/operator v0.0.0-20190524154841-2aaf3780a15b
 	github.com/pkg/errors v0.8.1
-	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
-	github.com/sirupsen/logrus v1.4.1
-	github.com/spf13/cobra v0.0.3
+	github.com/prometheus/client_golang v0.9.3
+	github.com/sirupsen/logrus v1.4.2
+	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.3
 	google.golang.org/grpc v1.20.1
 	k8s.io/api v0.0.0-20190503110853-61630f889b3c
@@ -33,8 +35,8 @@ require (
 	k8s.io/apiserver v0.0.0-20190509063909-3b296809833b
 	k8s.io/client-go v11.0.0+incompatible
 	k8s.io/component-base v0.0.0-20190509023737-8de8845fb642 // indirect
-	k8s.io/kubernetes v1.14.1
-	kmodules.xyz/client-go v0.0.0-20190508091620-0d215c04352f
+	k8s.io/kubernetes v1.14.2
+	kmodules.xyz/client-go v0.0.0-20190524133821-9c8a87771aea
 	kmodules.xyz/custom-resources v0.0.0-20190508103408-464e8324c3ec
 )
 
