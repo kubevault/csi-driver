@@ -20,7 +20,7 @@ github.com/SermoDigital/jose/jws
 github.com/SermoDigital/jose
 github.com/SermoDigital/jose/crypto
 github.com/SermoDigital/jose/jwt
-# github.com/appscode/go v0.0.0-20190424183524-60025f1135c9
+# github.com/appscode/go v0.0.0-20190523031839-1468ee3a76e8
 github.com/appscode/go/version
 github.com/appscode/go/runtime
 github.com/appscode/go/flags
@@ -39,7 +39,7 @@ github.com/appscode/jsonpatch
 github.com/appscode/pat
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.19.27
+# github.com/aws/aws-sdk-go v1.19.37
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/credentials
 github.com/aws/aws-sdk-go/aws/session
@@ -68,6 +68,7 @@ github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/internal/sdkuri
+github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
 github.com/aws/aws-sdk-go/private/protocol
 # github.com/beorn7/perks v1.0.0
 github.com/beorn7/perks/quantile
@@ -97,7 +98,7 @@ github.com/cpuguy83/go-md2man/md2man
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/emicklei/go-restful v2.9.3+incompatible
+# github.com/emicklei/go-restful v2.9.5+incompatible
 github.com/emicklei/go-restful
 github.com/emicklei/go-restful/log
 # github.com/evanphx/json-patch v4.2.0+incompatible
@@ -178,9 +179,9 @@ github.com/grpc-ecosystem/grpc-gateway/internal
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-hclog v0.9.0
+# github.com/hashicorp/go-hclog v0.9.2
 github.com/hashicorp/go-hclog
-# github.com/hashicorp/go-immutable-radix v1.0.0
+# github.com/hashicorp/go-immutable-radix v1.1.0
 github.com/hashicorp/go-immutable-radix
 # github.com/hashicorp/go-multierror v1.0.0
 github.com/hashicorp/go-multierror
@@ -210,7 +211,7 @@ github.com/hashicorp/hcl/hcl/scanner
 github.com/hashicorp/hcl/hcl/strconv
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/hashicorp/vault v1.0.1
+# github.com/hashicorp/vault v1.0.3
 github.com/hashicorp/vault/api
 github.com/hashicorp/vault/helper/consts
 github.com/hashicorp/vault/helper/hclutil
@@ -232,6 +233,7 @@ github.com/hashicorp/vault/version
 github.com/hashicorp/vault/helper/locksutil
 github.com/hashicorp/vault/helper/pathmanager
 github.com/hashicorp/vault/helper/errutil
+github.com/hashicorp/vault/helper/cryptoutil
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
 # github.com/hpcloud/tail v1.0.0
@@ -271,7 +273,7 @@ github.com/kubernetes-csi/csi-test/pkg/sanity
 github.com/kubernetes-csi/csi-test/utils
 # github.com/kubernetes-csi/livenessprobe v1.0.1
 github.com/kubernetes-csi/livenessprobe/pkg/connection
-# github.com/kubevault/operator v0.0.0-20190509030635-7f32eefb5188
+# github.com/kubevault/operator v0.0.0-20190524154841-2aaf3780a15b
 github.com/kubevault/operator/client/clientset/versioned/scheme
 github.com/kubevault/operator/pkg/vault/secret
 github.com/kubevault/operator/apis/config/v1alpha1
@@ -285,6 +287,7 @@ github.com/kubevault/operator/apis/config
 github.com/kubevault/operator/pkg/vault/auth
 github.com/kubevault/operator/pkg/vault/util
 github.com/kubevault/operator/pkg/vault/secret/engines/aws
+github.com/kubevault/operator/pkg/vault/secret/engines/azure
 github.com/kubevault/operator/pkg/vault/secret/engines/database
 github.com/kubevault/operator/pkg/vault/secret/engines/gcp
 github.com/kubevault/operator/pkg/vault/secret/engines/kv
@@ -295,6 +298,7 @@ github.com/kubevault/operator/apis/engine
 github.com/kubevault/operator/apis/kubevault
 github.com/kubevault/operator/apis/policy
 github.com/kubevault/operator/pkg/vault/auth/aws
+github.com/kubevault/operator/pkg/vault/auth/azure
 github.com/kubevault/operator/pkg/vault/auth/cert
 github.com/kubevault/operator/pkg/vault/auth/gcp
 github.com/kubevault/operator/pkg/vault/auth/kubernetes
@@ -311,7 +315,7 @@ github.com/mailru/easyjson/jwriter
 github.com/mailru/easyjson/buffer
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/mitchellh/go-homedir v1.0.0
+# github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-testing-interface v1.0.0
 github.com/mitchellh/go-testing-interface
@@ -366,12 +370,12 @@ github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
-# github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
+# github.com/prometheus/client_golang v0.9.3
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
 # github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.4.0
+# github.com/prometheus/common v0.4.1
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/model
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
@@ -384,9 +388,9 @@ github.com/russross/blackfriday
 github.com/ryanuber/go-glob
 # github.com/sergi/go-diff v1.0.0
 github.com/sergi/go-diff/diffmatchpatch
-# github.com/sirupsen/logrus v1.4.1
+# github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
-# github.com/spf13/cobra v0.0.3
+# github.com/spf13/cobra v0.0.4
 github.com/spf13/cobra/doc
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3
@@ -417,6 +421,7 @@ go.opencensus.io/internal
 go.opencensus.io/trace/internal
 # golang.org/x/crypto v0.0.0-20190506204251-e1dfcc566284
 golang.org/x/crypto/ssh/terminal
+golang.org/x/crypto/blake2b
 # golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c
 golang.org/x/net/http2
 golang.org/x/net/context
@@ -441,6 +446,7 @@ golang.org/x/sync/semaphore
 # golang.org/x/sys v0.0.0-20190508220229-2d0786266e9c
 golang.org/x/sys/unix
 golang.org/x/sys/windows
+golang.org/x/sys/cpu
 # golang.org/x/text v0.3.2
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
@@ -938,7 +944,7 @@ k8s.io/client-go/listers/storage/v1beta1
 k8s.io/client-go/third_party/forked/golang/template
 # k8s.io/component-base v0.0.0-20190509023737-8de8845fb642 => k8s.io/component-base v0.0.0-20190314000054-4a91899592f4
 k8s.io/component-base/cli/flag
-# k8s.io/klog v0.3.0 => k8s.io/klog v0.3.0
+# k8s.io/klog v0.3.1 => k8s.io/klog v0.3.0
 k8s.io/klog
 # k8s.io/kube-openapi v0.0.0-20190502190224-411b2483e503 => k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30
 k8s.io/kube-openapi/pkg/builder
@@ -947,14 +953,14 @@ k8s.io/kube-openapi/pkg/handler
 k8s.io/kube-openapi/pkg/util
 k8s.io/kube-openapi/pkg/util/proto
 k8s.io/kube-openapi/pkg/schemaconv
-# k8s.io/kubernetes v1.14.1
+# k8s.io/kubernetes v1.14.2
 k8s.io/kubernetes/pkg/api/legacyscheme
 k8s.io/kubernetes/pkg/apis/core
 # k8s.io/utils v0.0.0-20190506122338-8fab8cb257d5 => k8s.io/utils v0.0.0-20190221042446-c2654d5206da
 k8s.io/utils/integer
 k8s.io/utils/trace
 k8s.io/utils/buffer
-# kmodules.xyz/client-go v0.0.0-20190508091620-0d215c04352f
+# kmodules.xyz/client-go v0.0.0-20190524133821-9c8a87771aea
 kmodules.xyz/client-go/logs
 kmodules.xyz/client-go/tools/cli
 kmodules.xyz/client-go/meta
