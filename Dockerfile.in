@@ -1,5 +1,9 @@
+FROM alpine as certs
+RUN apk add --update ca-certificates
+
 FROM {ARG_FROM}
 
+COPY --from=certs /etc/ssl/certs /etc/ssl/certs
 ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
 
 # This would be nicer as `nobody:nobody` but distroless has no such entries.
