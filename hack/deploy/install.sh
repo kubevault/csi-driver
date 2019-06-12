@@ -22,46 +22,6 @@ function cleanup() {
 export APPSCODE_ENV=${APPSCODE_ENV:-prod}
 trap cleanup EXIT
 
-# ref: https://github.com/appscodelabs/libbuild/blob/master/common/lib.sh#L55
-inside_git_repo() {
-  git rev-parse --is-inside-work-tree >/dev/null 2>&1
-  inside_git=$?
-  if [ "$inside_git" -ne 0 ]; then
-    echo "Not inside a git repository"
-    exit 1
-  fi
-}
-
-detect_tag() {
-  inside_git_repo
-
-  # http://stackoverflow.com/a/1404862/3476121
-  git_tag=$(git describe --exact-match --abbrev=0 2>/dev/null || echo '')
-
-  commit_hash=$(git rev-parse --verify HEAD)
-  git_branch=$(git rev-parse --abbrev-ref HEAD)
-  commit_timestamp=$(git show -s --format=%ct)
-
-  if [ "$git_tag" != '' ]; then
-    TAG=$git_tag
-    TAG_STRATEGY='git_tag'
-  elif [ "$git_branch" != 'master' ] && [ "$git_branch" != 'HEAD' ] && [[ "$git_branch" != release-* ]]; then
-    TAG=$git_branch
-    TAG_STRATEGY='git_branch'
-  else
-    hash_ver=$(git describe --tags --always --dirty)
-    TAG="${hash_ver}"
-    TAG_STRATEGY='commit_hash'
-  fi
-
-  export TAG
-  export TAG_STRATEGY
-  export git_tag
-  export git_branch
-  export commit_hash
-  export commit_timestamp
-}
-
 onessl_found() {
   # https://stackoverflow.com/a/677212/244009
   if [ -x "$(command -v onessl)" ]; then
@@ -114,12 +74,12 @@ onessl_found || {
 # ref: http://tldp.org/LDP/abs/html/comparison-ops.html
 
 export CSI_VAULT_NAMESPACE=kube-system
-export CSI_VAULT_DOCKER_REGISTRY=kubevault
+export CSI_VAULT_DOCKER_REGISTRY=${CSI_VAULT_DOCKER_REGISTRY:-kubevault}
 export CSI_VAULT_DOCKER_REPOSITORY=csi-vault
-export CSI_VAULT_IMAGE_TAG=0.2.0
+export CSI_VAULT_IMAGE_TAG=${CSI_VAULT_IMAGE_TAG:-0.2.0}
 export CSI_VAULT_IMAGE_PULL_SECRET=
 export CSI_VAULT_IMAGE_PULL_POLICY=IfNotPresent
-export CSI_ATTACHER_DOCKER_REGISTRY=quay.io/k8scsi
+export CSI_ATTACHER_DOCKER_REGISTRY=${CSI_ATTACHER_DOCKER_REGISTRY:-quay.io/k8scsi}
 export CSI_ATTACHER_DOCKER_REPOSITORY=csi-attacher
 export CSI_ATTACHER_IMAGE_TAG=v1.0.1
 export CSI_ATTACHER_IMAGE_PULL_SECRET=
@@ -152,9 +112,7 @@ export CSI_VAULT_ENABLE_ANALYTICS=false
 export APPSCODE_ENV=${APPSCODE_ENV:-prod}
 export SCRIPT_LOCATION="curl -fsSL https://raw.githubusercontent.com/kubevault/csi-driver/0.2.0/"
 if [ "$APPSCODE_ENV" = "dev" ]; then
-  detect_tag
   export SCRIPT_LOCATION="cat "
-  export CSI_VAULT_IMAGE_TAG=$TAG
   export CSI_VAULT_IMAGE_PULL_POLICY=IfNotPresent
 fi
 

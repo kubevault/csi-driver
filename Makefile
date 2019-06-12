@@ -242,6 +242,18 @@ lint: $(BUILD_DIRS)
 $(BUILD_DIRS):
 	@mkdir -p $@
 
+.PHONY: install
+install:
+	@APPSCODE_ENV=dev  CSI_VAULT_DOCKER_REGISTRY=$(REGISTRY) CSI_VAULT_IMAGE_TAG=$(TAG) ./hack/deploy/install.sh
+
+.PHONY: uninstall
+uninstall:
+	@./hack/deploy/install.sh --uninstall
+
+.PHONY: purge
+purge:
+	@./hack/deploy/install.sh --uninstall --purge
+
 .PHONY: dev
 dev: gen fmt push
 
