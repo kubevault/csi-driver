@@ -103,29 +103,6 @@ func (m *mounter) Unmount(target string) error {
 }
 
 func (m *mounter) IsFormatted(source string) (bool, error) {
-	if source == "" {
-		return false, errors.New("source is not specified")
-	}
-
-	blkidCmd := "blkid"
-	_, err := exec.LookPath(blkidCmd)
-	if err != nil {
-		if err == exec.ErrNotFound {
-			return false, errors.Errorf("%q executable not found in $PATH", blkidCmd)
-		}
-		return false, err
-	}
-
-	out, err := exec.Command(blkidCmd, source).CombinedOutput()
-	if err != nil {
-		return false, errors.Errorf("checking formatting failed: %v cmd: %q output: %q",
-			err, blkidCmd, string(out))
-	}
-
-	if strings.TrimSpace(string(out)) == "" {
-		return false, nil
-	}
-
 	return true, nil
 }
 
