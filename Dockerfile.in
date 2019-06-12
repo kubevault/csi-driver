@@ -1,12 +1,8 @@
-FROM alpine as certs
-RUN apk add --update ca-certificates
-
 FROM {ARG_FROM}
 
-COPY --from=certs /etc/ssl/certs /etc/ssl/certs
-ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
+RUN set -x \
+  && apk add --update --no-cache ca-certificates tzdata e2fsprogs findmnt
 
-# This would be nicer as `nobody:nobody` but distroless has no such entries.
-USER 65535:65535
+ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
 
 ENTRYPOINT ["/{ARG_BIN}"]
