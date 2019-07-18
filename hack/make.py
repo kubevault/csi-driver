@@ -35,7 +35,7 @@ import subprocess
 import sys
 from os.path import expandvars, join, dirname
 
-libbuild.REPO_ROOT = libbuild.GOPATH + '/src/github.com/kubevault/csi-driver'
+libbuild.REPO_ROOT = libbuild.GOPATH + '/src/kubevault.dev/csi-driver'
 BUILD_METADATA = libbuild.metadata(libbuild.REPO_ROOT)
 libbuild.BIN_MATRIX = {
     'csi-vault': {

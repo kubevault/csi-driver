@@ -5,15 +5,15 @@ import (
 	"io"
 	"net"
 
-	"github.com/kubevault/csi-driver/pkg/driver"
-	"github.com/kubevault/csi-driver/pkg/healthz"
-	"github.com/kubevault/csi-driver/pkg/server"
 	"github.com/spf13/pflag"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 	"kmodules.xyz/client-go/meta"
 	"kmodules.xyz/client-go/tools/clientcmd"
+	"kubevault.dev/csi-driver/pkg/driver"
+	"kubevault.dev/csi-driver/pkg/healthz"
+	"kubevault.dev/csi-driver/pkg/server"
 )
 
 const defaultEtcdPathPrefix = "/registry/csi.kubevault.com"

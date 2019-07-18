@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/kubevault/csi-driver/pkg/driver"
 	"github.com/spf13/pflag"
 	"k8s.io/client-go/kubernetes"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
+	"kubevault.dev/csi-driver/pkg/driver"
 )
 
 type ExtraOptions struct {

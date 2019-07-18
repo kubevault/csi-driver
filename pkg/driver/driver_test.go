@@ -18,7 +18,7 @@ import (
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
 	cr "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 
-	//"github.com/kubevault/csi-driver/vault"
+	//"kubevault.dev/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

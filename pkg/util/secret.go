@@ -7,8 +7,8 @@ import (
 	"path"
 
 	vaultapi "github.com/hashicorp/vault/api"
-	vaultEng "github.com/kubevault/operator/pkg/vault/secret/engines"
 	"github.com/pkg/errors"
+	vaultEng "kubevault.dev/operator/pkg/vault/secret/engines"
 )
 
 // FetchSecret writes the secret on specified targetPath

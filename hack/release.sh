@@ -2,7 +2,7 @@
 set -xeou pipefail
 
 GOPATH=$(go env GOPATH)
-REPO_ROOT="$GOPATH/src/github.com/kubevault/csi-driver"
+REPO_ROOT="$GOPATH/src/kubevault.dev/csi-driver"
 
 export APPSCODE_ENV=prod
 
