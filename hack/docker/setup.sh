@@ -8,27 +8,27 @@ GOPATH=$(go env GOPATH)
 SRC=$GOPATH/src
 BIN=$GOPATH/bin
 ROOT=$GOPATH
-REPO_ROOT=$GOPATH/src/github.com/kubevault/csi-driver
+REPO_ROOT=$GOPATH/src/kubevault.dev/csi-driver
 
 source "$REPO_ROOT/hack/libbuild/common/kubevault_image.sh"
 
 APPSCODE_ENV=${APPSCODE_ENV:-dev}
 IMG=csi-vault
 
-DIST=$GOPATH/src/github.com/kubevault/csi-driver/dist
+DIST=$GOPATH/src/kubevault.dev/csi-driver/dist
 mkdir -p $DIST
 if [ -f "$DIST/.tag" ]; then
   export $(cat $DIST/.tag | xargs)
 fi
 
 clean() {
-  pushd $GOPATH/src/github.com/kubevault/csi-driver/hack/docker
+  pushd $GOPATH/src/kubevault.dev/csi-driver/hack/docker
   rm csi-vault Dockerfile
   popd
 }
 
 build_binary() {
-  pushd $GOPATH/src/github.com/kubevault/csi-driver
+  pushd $GOPATH/src/kubevault.dev/csi-driver
   ./hack/builddeps.sh
   ./hack/make.py build
   detect_tag $DIST/.tag
@@ -36,7 +36,7 @@ build_binary() {
 }
 
 build_docker() {
-  pushd $GOPATH/src/github.com/kubevault/csi-driver/hack/docker
+  pushd $GOPATH/src/kubevault.dev/csi-driver/hack/docker
   cp $DIST/csi-vault/csi-vault-alpine-amd64 csi-vault
   chmod 755 csi-vault
 

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 
 	vaultapi "github.com/hashicorp/vault/api"
-	config "github.com/kubevault/operator/apis/config/v1alpha1"
-	vaultauth "github.com/kubevault/operator/pkg/vault"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
+	config "kubevault.dev/operator/apis/config/v1alpha1"
+	vaultauth "kubevault.dev/operator/pkg/vault"
 )
 
 type PodInfo struct {

@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	"github.com/kubevault/csi-driver/pkg/util"
-	vs "github.com/kubevault/operator/pkg/vault/secret"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"kubevault.dev/csi-driver/pkg/util"
+	vs "kubevault.dev/operator/pkg/vault/secret"
 )
 
 var (

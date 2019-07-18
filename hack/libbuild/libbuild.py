@@ -482,7 +482,7 @@ DEP_LIST = [
       "version": "v1.0.1"
     },
         {
-      "package": "github.com/graymeta/stow",
+      "package": "gomodules.xyz/stow",
       "repo": "https://github.com/appscode/stow.git",
       "vcs": "git",
       "version": "master"
