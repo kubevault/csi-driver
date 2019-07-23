@@ -205,21 +205,6 @@ spec:
         volumeMounts:
         - name: socket-dir
           mountPath: {{ .Values.pluginDir }}
-      - name: csi-cluster-registry
-        image: {{ .Values.clusterRegistrar.registry}}/{{ .Values.clusterRegistrar.repository }}:{{ .Values.clusterRegistrar.tag }}
-        args:
-        - --v={{ .Values.logLevel }}
-        - "--pod-info-mount-version=v1"
-        - "--csi-address=$(ADDRESS)"
-        env:
-        - name: ADDRESS
-          value: {{ .Values.pluginAddress }}
-        imagePullPolicy: {{ .Values.clusterRegistrar.pullPolicy }}
-        resources:
-              {{ toYaml .Values.resources | indent 10 }}
-        volumeMounts:
-        - mountPath: {{ .Values.pluginDir }}
-          name: socket-dir
       - name: csi-vault-plugin
         image: {{ .Values.plugin.registry }}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :

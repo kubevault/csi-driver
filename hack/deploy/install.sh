@@ -348,6 +348,7 @@ if [ "$CSI_VAULT_UNINSTALL" -eq 1 ]; then
 
    ${SCRIPT_LOCATION}hack/deploy/controller-plugin.yaml | $ONESSL envsubst  | kubectl delete -f -
    ${SCRIPT_LOCATION}hack/deploy/node-plugin.yaml | $ONESSL envsubst  | kubectl delete -f -
+   ${SCRIPT_LOCATION}hack/deploy/csi-driver.yaml | $ONESSL envsubst  | kubectl delete -f -
 
   echo
   echo "Successfully uninstalled Vault  CSI driver!"
@@ -356,16 +357,6 @@ fi
 
 env | sort | grep CSI*
 echo ""
-
-${SCRIPT_LOCATION}hack/deploy/driver-crds.yaml | $ONESSL envsubst  | kubectl apply -f -
-
-echo "waiting until CSI Driver crds are ready"
-for crd in "${driver_crds[@]}"; do
-  $ONESSL wait-until-ready crd ${crd} || {
-    echo "$crd crd failed to be ready"
-    exit 1
-  }
-done
 
 if [ "$REQUIRED_APPBINDING_INSTALL" = true ]; then
   ${SCRIPT_LOCATION}hack/deploy/appbinding-crd.yaml | $ONESSL envsubst  | kubectl apply -f -
@@ -391,6 +382,7 @@ ${SCRIPT_LOCATION}hack/deploy/appcatalog-user-roles.yaml | $ONESSL envsubst | ku
 ${SCRIPT_LOCATION}hack/deploy/apiserver-cert.yaml | $ONESSL envsubst | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/controller-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
 ${SCRIPT_LOCATION}hack/deploy/node-plugin.yaml | $ONESSL envsubst  | kubectl apply -f -
+${SCRIPT_LOCATION}hack/deploy/csi-driver.yaml | $ONESSL envsubst  | kubectl apply -f -
 
 # configure prometheus monitoring
 if [ "$MONITORING_AGENT" != "$MONITORING_AGENT_NONE" ]; then
