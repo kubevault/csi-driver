@@ -47,19 +47,6 @@ spec:
         volumeMounts:
         - name: socket-dir
           mountPath: /var/lib/csi/sockets/pluginproxy/
-      - name: csi-cluster
-        image: ${CSI_CLUSTER_REGISTRAR_DOCKER_REGISTRY}/${CSI_CLUSTER_REGISTRAR_DOCKER_REPOSITORY}:${CSI_CLUSTER_REGISTRAR_IMAGE_TAG}
-        args:
-        - "--v=3"
-        - "--pod-info-mount-version=v1"
-        - "--csi-address=$(ADDRESS)"
-        env:
-        - name: ADDRESS
-          value: /var/lib/csi/sockets/pluginproxy/csi.sock
-        imagePullPolicy: ${CSI_CLUSTER_REGISTRAR_IMAGE_PULL_POLICY}
-        volumeMounts:
-        - mountPath: /var/lib/csi/sockets/pluginproxy/
-          name: socket-dir
       - name: csi-vault-plugin
         image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
         args :

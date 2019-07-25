@@ -8,31 +8,25 @@ attacher:
   name: attacher
   registry: quay.io/k8scsi
   repository: csi-attacher
-  tag: v1.0.1
+  tag: v1.2.0
   pullPolicy: IfNotPresent
 plugin:
   name: plugin
   registry: kubevault
   repository: csi-vault
-  tag: 0.2.0
+  tag: 0.2.0 #TODO: need to be changed
   pullPolicy: Always
 provisioner:
   name: provisioner
   registry: quay.io/k8scsi
   repository: csi-provisioner
-  tag: v1.0.1
-  pullPolicy: IfNotPresent
-clusterRegistrar:
-  name: cluster-registrar
-  registry: quay.io/k8scsi
-  repository: csi-cluster-driver-registrar
-  tag: v1.0.1
+  tag: v1.3.0
   pullPolicy: IfNotPresent
 nodeRegistrar:
   name: node-registrar
   registry: quay.io/k8scsi
   repository: csi-node-driver-registrar
-  tag: v1.0.1
+  tag: v1.1.0
   pullPolicy: IfNotPresent
 
 controllerPlugin:
@@ -119,3 +113,4 @@ monitoring:
     namespace: ""
   serviceMonitor:
     labels: {}
+
