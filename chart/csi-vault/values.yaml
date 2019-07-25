@@ -114,6 +114,3 @@ monitoring:
   serviceMonitor:
     labels: {}
 
-csidriver:
-  attachRequired: true
-  podInfoOnMount: true

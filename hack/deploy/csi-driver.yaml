@@ -3,5 +3,5 @@ kind: CSIDriver
 metadata:
   name: secrets.csi.kubevault.com
 spec:
-  attachRequired: true
+  attachRequired: false
   podInfoOnMount: true
