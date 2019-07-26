@@ -4,6 +4,7 @@ import (
 	"github.com/appscode/go/encoding/json/types"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 )
 
@@ -17,6 +18,11 @@ const (
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:path=vaultpolicies,singular=vaultpolicy,shortName=vp,categories={vault,policy,appscode,all}
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.phase"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 type VaultPolicy struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -30,14 +36,20 @@ type VaultPolicySpec struct {
 	// path "secret/*" {
 	//   capabilities = ["create", "read", "update", "delete", "list"]
 	// }
-	Policy string `json:"policy"`
+	// +optional
+	PolicyDocument string `json:"policyDocument,omitempty"`
+
+	// Specifies the IAM policy in JSON format.
+	// +optional
+	Policy *runtime.RawExtension `json:"policy,omitempty"`
 
 	// Vault contains the reference of kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.AppBinding
 	// which contains information to communicate with vault
-	VaultAppRef *appcat.AppReference `json:"vaultAppRef"`
+	Ref *appcat.AppReference `json:"ref"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 type VaultPolicyList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -45,11 +57,11 @@ type VaultPolicyList struct {
 	Items           []VaultPolicy `json:"items,omitempty"`
 }
 
-type PolicyStatus string
+type PolicyPhase string
 
 const (
-	PolicySuccess PolicyStatus = "Success"
-	PolicyFailed  PolicyStatus = "Failed"
+	PolicySuccess PolicyPhase = "Success"
+	PolicyFailed  PolicyPhase = "Failed"
 )
 
 type VaultPolicyStatus struct {
@@ -58,9 +70,9 @@ type VaultPolicyStatus struct {
 	// +optional
 	ObservedGeneration *types.IntHash `json:"observedGeneration,omitempty"`
 
-	// Status indicates whether the policy successfully applied in vault or not or in progress
+	// Phase indicates whether the policy successfully applied in vault or not or in progress
 	// +optional
-	Status PolicyStatus `json:"status,omitempty"`
+	Phase PolicyPhase `json:"phase,omitempty"`
 
 	// Represents the latest available observations of a VaultPolicy.
 	// +optional

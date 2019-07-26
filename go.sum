@@ -67,6 +67,8 @@ github.com/appscode/go v0.0.0-20190424183524-60025f1135c9 h1:uIXQ61ZjsDmN6WhdBJN
 github.com/appscode/go v0.0.0-20190424183524-60025f1135c9/go.mod h1:/PrESzUKHRrwhmBMpVXfGK3e/D0tqN+/dc8nSH03llU=
 github.com/appscode/go v0.0.0-20190621064509-6b292c9166e3 h1:3V9/ZIWMUreWG6JTP34N2mii+gt2XCek7xPS66qKm90=
 github.com/appscode/go v0.0.0-20190621064509-6b292c9166e3/go.mod h1:lZoPivA2BU6pxBzZ4KssqO69zfmCV5J4bscOFLIbCEA=
+github.com/appscode/go v0.0.0-20190722173419-e454bf744023 h1:RFcQLLdIALM+/Ut8IoUPuhULmn7sdV3Y9x+aqlwfR4c=
+github.com/appscode/go v0.0.0-20190722173419-e454bf744023/go.mod h1:VHCQuszPTOu/LEgSAfVX5H7w0MkkBvddUp+7kw4JCac=
 github.com/appscode/jsonpatch v0.0.0-20190108182946-7c0e3b262f30 h1:Kn3rqvbUFqSepE2OqVu0Pn1CbDw9IuMlONapol0zuwk=
 github.com/appscode/jsonpatch v0.0.0-20190108182946-7c0e3b262f30/go.mod h1:4AJxUpXUhv4N+ziTvIcWWXgeorXpxPZOfk9HdEVr96M=
 github.com/appscode/osm v0.12.0/go.mod h1:M2dkG7yApVG4hWvRli6FgDxYItfkkN7jZditR2AAvdA=
@@ -138,6 +140,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/denisenkom/go-mssqldb v0.0.0-20190121005146-b04fd42d9952 h1:b5OnbZD49x9g+/FcYbs/vukEt8C/jUbGhCJ3uduQmu8=
 github.com/denisenkom/go-mssqldb v0.0.0-20190121005146-b04fd42d9952/go.mod h1:xN/JuLBIz4bjkxNmByTiV1IbhfnYb6oo99phBn4Eqhc=
+github.com/denisenkom/go-mssqldb v0.0.0-20190707035753-2be1aa521ff4 h1:YcpmyvADGYw5LqMnHqSkyIELsHCGF6PkrmM31V8rF7o=
+github.com/denisenkom/go-mssqldb v0.0.0-20190707035753-2be1aa521ff4/go.mod h1:zAg7JM8CkOJ43xKXIj7eRO9kmWm/TW578qo+oDO6tuM=
 github.com/dgrijalva/jwt-go v0.0.0-20161101193935-9ed569b5d1ac/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
@@ -217,6 +221,7 @@ github.com/go-xorm/builder v0.3.3/go.mod h1:v8mE3MFBgtL+RGFNfUnAMUqqfk/Y4W5KuwCF
 github.com/go-xorm/core v0.6.2/go.mod h1:bwPIfLdm/FzWgVUH8WPVlr+uJhscvNGFcaZKXsI3n2c=
 github.com/go-xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:56xuuqnHyryaerycW3BfssRdxQstACi0Epw/yC5E2xM=
 github.com/go-xorm/xorm v0.7.3/go.mod h1:npNkX0GgFcODSSKHj7nhJPobHwa5E7usBBZUFaxCsXA=
+github.com/go-xorm/xorm v0.7.4/go.mod h1:vpza5fydeRgt+stvo9qgMhSNohYqmNt0I1/D6hkCekA=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.2.1 h1:/s5zKNz0uPFCZ5hddgPdo2TK2TVrUNMn0OOX8/aZMTE=
@@ -403,8 +408,6 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/kubedb/apimachinery v0.0.0-20190506191700-871d6b5d30ee h1:E5drL4CdNcFoT6LKZahAfSv+ScSTZazcjViSAc6RsTI=
-github.com/kubedb/apimachinery v0.0.0-20190506191700-871d6b5d30ee/go.mod h1:KB3GoWnT0npL4q1h82271X0txwAkkl8ZedVfbJMy4Rg=
 github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf h1:BcEjv/TF7+SaBEKnIkefo9ARpsOuDSV2oKzEXwvZEaM=
 github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf/go.mod h1:GVmlUmxZ+SUjVLXicRFjqWUUvWez0g0Y78zNV9t7KfQ=
 github.com/kubernetes-csi/external-snapshotter v1.1.0/go.mod h1:oYfxnsuh48V1UDYORl77YQxQbbdokNy7D73phuFpksY=
@@ -642,6 +645,7 @@ golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc/go.mod h1:6SG95UA2DQfeDnf
 golang.org/x/crypto v0.0.0-20190122013713-64072686203f/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190422183909-d864b10871cd/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20190506204251-e1dfcc566284 h1:rlLehGeYg6jfoyz/eDqDU1iRXLKfR42nnNh57ytKEWo=
@@ -844,8 +848,6 @@ k8s.io/kubernetes v1.14.1 h1:I9F52h5sqVxBmoSsBlNQ0YygNcukDilkpGxUbJRoBoY=
 k8s.io/kubernetes v1.14.1/go.mod h1:ocZa8+6APFNC2tX1DZASIbocyYT5jHzqFVsY5aoB7Jk=
 k8s.io/kubernetes v1.14.2 h1:Gdq2hPpttbaJBoClIanCE6WSu4IZReA54yhkZtvPUOo=
 k8s.io/kubernetes v1.14.2/go.mod h1:ocZa8+6APFNC2tX1DZASIbocyYT5jHzqFVsY5aoB7Jk=
-k8s.io/kubernetes v1.14.3 h1:/FQkOJpjc1jGA37s7Rt3U10VwIKW685ejrgOp4UDRFE=
-k8s.io/kubernetes v1.14.3/go.mod h1:ocZa8+6APFNC2tX1DZASIbocyYT5jHzqFVsY5aoB7Jk=
 k8s.io/utils v0.0.0-20190221042446-c2654d5206da h1:ElyM7RPonbKnQqOcw7dG2IK5uvQQn3b/WPHqD5mBvP4=
 k8s.io/utils v0.0.0-20190221042446-c2654d5206da/go.mod h1:8k8uAuAQ0rXslZKaEWd0c3oVhZz7sSzSiPnVZayjIX0=
 kmodules.xyz/client-go v0.0.0-20190507204740-e4690d8026e7/go.mod h1:3meAILhyA9BTLbPQdVV2ucE4qaEjWy5dCb3S+L/1f4Y=
@@ -855,6 +857,8 @@ kmodules.xyz/client-go v0.0.0-20190715080709-7162a6c90b04 h1:17h0mshnlihkZMP6LqM
 kmodules.xyz/client-go v0.0.0-20190715080709-7162a6c90b04/go.mod h1:3h1/ZglH6fV2uv3p9AB1JnHUknhWniShJ7fBJfSf7Js=
 kmodules.xyz/custom-resources v0.0.0-20190508103408-464e8324c3ec h1:a7sxsWe1QYUZaEWxGpSuzB6ZAdXmCwNh2SyMTLQKGEI=
 kmodules.xyz/custom-resources v0.0.0-20190508103408-464e8324c3ec/go.mod h1:0C61XSEPGexAmkrayynpNnCTacvkwn4802CRAQ5tUPI=
+kmodules.xyz/custom-resources v0.0.0-20190723185639-711575c0b8a9 h1:wLeUF4rEVaQxIgXHLNcLQiTCZWzgmU78erhWCHKhKUg=
+kmodules.xyz/custom-resources v0.0.0-20190723185639-711575c0b8a9/go.mod h1:0C61XSEPGexAmkrayynpNnCTacvkwn4802CRAQ5tUPI=
 kmodules.xyz/monitoring-agent-api v0.0.0-20190513065523-186af167f817 h1:BibWdS5W/vFZyQLHYNdBu3axBJymBHB1U2GuMsOeCTs=
 kmodules.xyz/monitoring-agent-api v0.0.0-20190513065523-186af167f817/go.mod h1:ohfJV+DVctL54ybtYXE/XA0DOnGy/9KPrJht4rs4Ngw=
 kmodules.xyz/objectstore-api v0.0.0-20190715131036-28ef070833ef/go.mod h1:SwUpd3z5BvdUks/Nh8Wtyp8US2ATxhxQmMathe4lyOM=
@@ -867,8 +871,8 @@ kmodules.xyz/openshift v0.0.0-20190508141315-99ec9fc946bf/go.mod h1:5l0No0OizfJ5
 kmodules.xyz/webhook-runtime v0.0.0-20190715115250-a84fbf77dd30/go.mod h1:sojwlxXyjyHoF0arpK238DnHsecWij9VpWf50HtyBzE=
 kubedb.dev/apimachinery v0.0.0-20190718012505-6973f90fefd0 h1:Ryjxxu7oNGYSP4aBDh+S5uCjWw8Z7YQ5ITcbt6MhrTA=
 kubedb.dev/apimachinery v0.0.0-20190718012505-6973f90fefd0/go.mod h1:PaUCqKJTTeaq2X2SINnhcewUhk8PouE5x8QypLZJQ2Q=
-kubevault.dev/operator v0.0.0-20190718164535-ca947abcfc3f h1:g+hP8SnTNGcjp2iNfVBg6WBtZ7VxD65ka0hDfB8LRQw=
-kubevault.dev/operator v0.0.0-20190718164535-ca947abcfc3f/go.mod h1:zSi2h+ys1/h55Gf7frnpYNH85NxKK7+htZ2ZXPSRse8=
+kubevault.dev/operator v0.0.0-20190726013920-b86204295e2c h1:ifS3VzuRWhfLPmi/w777Ueq6JSgVvTMsTH23A81T+xA=
+kubevault.dev/operator v0.0.0-20190726013920-b86204295e2c/go.mod h1:DOKYfWdSyUmsUmjeb5m6mxLsbErpsV7YXnDX+LybzYc=
 pack.ag/amqp v0.8.0/go.mod h1:4/cbmt4EJXSKlG6LCfWHoqmN0uFdy5i/+YFz+fTfhV4=
 pack.ag/amqp v0.11.0/go.mod h1:4/cbmt4EJXSKlG6LCfWHoqmN0uFdy5i/+YFz+fTfhV4=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
@@ -879,3 +883,5 @@ sigs.k8s.io/structured-merge-diff v0.0.0-20190302045857-e85c7b244fd2/go.mod h1:w
 sigs.k8s.io/yaml v1.1.0 h1:4A07+ZFc2wgJwo8YNlQpr1rVlgUDlxXHhPJciaPY5gs=
 sigs.k8s.io/yaml v1.1.0/go.mod h1:UJmg0vDUVViEyp3mgSv9WPwZCDxu4rQW1olrI1uml+o=
 stash.appscode.dev/stash v0.0.0-20190717091949-1c51a7c58f08/go.mod h1:IZ1tG/VuTCKpxLVMKAd4OVJu6HJKSJXSW2ycWxJprCA=
+xorm.io/builder v0.3.5/go.mod h1:ZFbByS/KxZI1FKRjL05PyJ4YrK2bcxlUaAxdum5aTR8=
+xorm.io/core v0.6.3/go.mod h1:8kz/C6arVW/O9vk3PgCiMJO2hIAm1UcuOL3dSPyZ2qo=
