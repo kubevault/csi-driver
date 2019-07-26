@@ -24,7 +24,7 @@ github.com/SermoDigital/jose/jws
 github.com/SermoDigital/jose
 github.com/SermoDigital/jose/crypto
 github.com/SermoDigital/jose/jwt
-# github.com/appscode/go v0.0.0-20190621064509-6b292c9166e3
+# github.com/appscode/go v0.0.0-20190722173419-e454bf744023
 github.com/appscode/go/version
 github.com/appscode/go/runtime
 github.com/appscode/go/flags
@@ -258,8 +258,6 @@ github.com/json-iterator/go
 github.com/juju/errors
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/kubedb/apimachinery v0.0.0-20190506191700-871d6b5d30ee
-github.com/kubedb/apimachinery/apis
 # github.com/kubernetes-csi/csi-lib-utils v0.0.0-20190415202911-789e4ed466cf
 github.com/kubernetes-csi/csi-lib-utils/protosanitizer
 # github.com/kubernetes-csi/csi-test v2.0.0+incompatible => github.com/kubevault/csi-test v2.0.1-0.20190520112505-d88b429c7476+incompatible
@@ -913,7 +911,7 @@ k8s.io/kube-openapi/pkg/handler
 k8s.io/kube-openapi/pkg/util
 k8s.io/kube-openapi/pkg/util/proto
 k8s.io/kube-openapi/pkg/schemaconv
-# k8s.io/kubernetes v1.14.3
+# k8s.io/kubernetes v1.14.2
 k8s.io/kubernetes/pkg/api/legacyscheme
 k8s.io/kubernetes/pkg/apis/core
 # k8s.io/utils v0.0.0-20190506122338-8fab8cb257d5 => k8s.io/utils v0.0.0-20190221042446-c2654d5206da
@@ -931,7 +929,7 @@ kmodules.xyz/client-go
 kmodules.xyz/client-go/apiextensions/v1beta1
 kmodules.xyz/client-go/core/v1
 kmodules.xyz/client-go/tools/clusterid
-# kmodules.xyz/custom-resources v0.0.0-20190508103408-464e8324c3ec
+# kmodules.xyz/custom-resources v0.0.0-20190723185639-711575c0b8a9
 kmodules.xyz/custom-resources/client/clientset/versioned/scheme
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1
 kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1
@@ -955,7 +953,7 @@ kubedb.dev/apimachinery/apis
 kubedb.dev/apimachinery/apis/authorization
 kubedb.dev/apimachinery/apis/catalog
 kubedb.dev/apimachinery/apis/kubedb
-# kubevault.dev/operator v0.0.0-20190718164535-ca947abcfc3f
+# kubevault.dev/operator v0.0.0-20190726013920-b86204295e2c
 kubevault.dev/operator/client/clientset/versioned/scheme
 kubevault.dev/operator/pkg/vault/secret
 kubevault.dev/operator/apis/config/v1alpha1

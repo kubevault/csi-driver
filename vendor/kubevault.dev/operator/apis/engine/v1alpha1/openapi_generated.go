@@ -14577,7 +14577,14 @@ func schema_custom_resources_apis_appcatalog_v1alpha1_AppBindingSpec(ref common.
 				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Used to facilitate programmatic handling of application.",
+							Description: "Type used to facilitate programmatic handling of application.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Version used to facilitate programmatic handling of application.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -15662,8 +15669,7 @@ func schema_operator_apis_engine_v1alpha1_AWSAccessKeyRequest(ref common.Referen
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "AWSAccessKeyRequest",
-				Type:        []string{"object"},
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -15944,8 +15950,7 @@ func schema_operator_apis_engine_v1alpha1_AWSRole(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "AWSRole",
-				Type:        []string{"object"},
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -16078,7 +16083,7 @@ func schema_operator_apis_engine_v1alpha1_AWSRoleSpec(ref common.ReferenceCallba
 				Description: "AWSRoleSpec contains connection information, AWS role info, etc",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"authManagerRef": {
+					"ref": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.AppReference"),
 						},
@@ -16130,6 +16135,12 @@ func schema_operator_apis_engine_v1alpha1_AWSRoleSpec(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"policy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies the IAM policy in JSON format.",
+							Ref:         ref("k8s.io/apimachinery/pkg/runtime.RawExtension"),
+						},
+					},
 					"defaultSTSTTL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The default TTL for STS credentials. When a TTL is not specified when STS credentials are requested, and a default TTL is specified on the role, then this default TTL will be used. Valid only when credential_type is one of assumed_role or federation_token",
@@ -16144,26 +16155,12 @@ func schema_operator_apis_engine_v1alpha1_AWSRoleSpec(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
-					"policy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Specifies the IAM policy in JSON format.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"arn": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Specifies the full ARN reference to the desired existing policy.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
 				Required: []string{"config", "credentialType"},
 			},
 		},
 		Dependencies: []string{
-			"kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.AppReference", "kubevault.dev/operator/apis/engine/v1alpha1.AWSConfig"},
+			"k8s.io/apimachinery/pkg/runtime.RawExtension", "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.AppReference", "kubevault.dev/operator/apis/engine/v1alpha1.AWSConfig"},
 	}
 }
 
@@ -16210,8 +16207,7 @@ func schema_operator_apis_engine_v1alpha1_AzureAccessKeyRequest(ref common.Refer
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "AzureAccessKeyRequest structure",
-				Type:        []string{"object"},
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -16443,8 +16439,7 @@ func schema_operator_apis_engine_v1alpha1_AzureRole(ref common.ReferenceCallback
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "AzureRole",
-				Type:        []string{"object"},
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -16577,7 +16572,7 @@ func schema_operator_apis_engine_v1alpha1_AzureRoleSpec(ref common.ReferenceCall
 				Description: "AzureRoleSpec contains connection information, Azure role info, etc",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"authManagerRef": {
+					"ref": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.AppReference"),
 						},
@@ -16667,8 +16662,7 @@ func schema_operator_apis_engine_v1alpha1_GCPAccessKeyRequest(ref common.Referen
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GCPAccessKeyRequest structure",
-				Type:        []string{"object"},
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -16922,8 +16916,7 @@ func schema_operator_apis_engine_v1alpha1_GCPRole(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GCPRole",
-				Type:        []string{"object"},
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -17056,7 +17049,7 @@ func schema_operator_apis_engine_v1alpha1_GCPRoleSpec(ref common.ReferenceCallba
 				Description: "GCPRoleSpec contains connection information, GCP role info, etc",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"authManagerRef": {
+					"ref": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.AppReference"),
 						},
