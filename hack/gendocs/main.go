@@ -46,9 +46,10 @@ menu:
 menu_name: docs_{{ .Version }}
 section_menu_id: reference
 {{- if .RootCmd }}
+url: /docs/{{ .Version }}/reference/csi-driver/
 aliases:
-  - /docs/{{ .Version }}/reference/csi-driver/
-{{ end }}
+- /docs/{{ .Version }}/reference/csi-driver/{{ .ID }}/
+{{- end }}
 ---
 `))
 )
