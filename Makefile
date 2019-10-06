@@ -46,7 +46,8 @@ endif
 ### These variables should not need tweaking.
 ###
 
-SRC_DIRS := cmd pkg # directories which hold app source (not vendored)
+SRC_PKGS := cmd pkg # directories which hold app source excluding tests (not vendored)
+SRC_DIRS := $(SRC_PKGS) hack/gendocs # directories which hold app source (not vendored)
 
 DOCKER_PLATFORMS := linux/amd64 linux/arm linux/arm64
 BIN_PLATFORMS    := $(DOCKER_PLATFORMS)
@@ -65,7 +66,7 @@ TAG              := $(VERSION)_$(OS)_$(ARCH)
 TAG_PROD         := $(TAG)
 TAG_DBG          := $(VERSION)-dbg_$(OS)_$(ARCH)
 
-GO_VERSION       ?= 1.12.6
+GO_VERSION       ?= 1.12.10
 BUILD_IMAGE      ?= appscode/golang-dev:$(GO_VERSION)-stretch
 
 OUTBIN = bin/$(OS)_$(ARCH)/$(BIN)
@@ -76,7 +77,10 @@ endif
 # Directories that we need created to build/test.
 BUILD_DIRS  := bin/$(OS)_$(ARCH)     \
                .go/bin/$(OS)_$(ARCH) \
-               .go/cache
+               .go/cache             \
+               $(HOME)/.credentials  \
+               $(HOME)/.kube         \
+               $(HOME)/.minikube
 
 DOCKERFILE_PROD  = Dockerfile.in
 DOCKERFILE_DBG   = Dockerfile.dbg
@@ -114,15 +118,15 @@ all-container: $(addprefix container-, $(subst /,_, $(DOCKER_PLATFORMS)))
 all-push: $(addprefix push-, $(subst /,_, $(DOCKER_PLATFORMS)))
 
 version:
-	@echo version=$(VERSION)
-	@echo version_strategy=$(version_strategy)
-	@echo git_tag=$(git_tag)
-	@echo git_branch=$(git_branch)
-	@echo commit_hash=$(commit_hash)
-	@echo commit_timestamp=$(commit_timestamp)
+	@echo ::set-output name=version::$(VERSION)
+	@echo ::set-output name=version_strategy::$(version_strategy)
+	@echo ::set-output name=git_tag::$(git_tag)
+	@echo ::set-output name=git_branch::$(git_branch)
+	@echo ::set-output name=commit_hash::$(commit_hash)
+	@echo ::set-output name=commit_timestamp::$(commit_timestamp)
 
-gen:
-	@true
+DOCKER_REPO_ROOT := /go/src/$(GO_PKG)/$(REPO)
+
 
 fmt: $(BUILD_DIRS)
 	@docker run                                                 \
@@ -177,7 +181,7 @@ $(OUTBIN): .go/$(OUTBIN).stamp
 	    "
 	@if [ $(COMPRESS) = yes ] && [ $(OS) != darwin ]; then          \
 		echo "compressing $(OUTBIN)";                               \
-		docker run                                                  \
+		@docker run                                                 \
 		    -i                                                      \
 		    --rm                                                    \
 		    -u $$(id -u):$$(id -g)                                  \
@@ -204,12 +208,12 @@ container: bin/.container-$(DOTFILE_IMAGE)-PROD bin/.container-$(DOTFILE_IMAGE)-
 bin/.container-$(DOTFILE_IMAGE)-%: bin/$(OS)_$(ARCH)/$(BIN) $(DOCKERFILE_%)
 	@echo "container: $(IMAGE):$(TAG_$*)"
 	@sed                                    \
-	    -e 's|{ARG_BIN}|$(BIN)|g'           \
-	    -e 's|{ARG_ARCH}|$(ARCH)|g'         \
-	    -e 's|{ARG_OS}|$(OS)|g'             \
-	    -e 's|{ARG_FROM}|$(BASEIMAGE_$*)|g' \
-	    $(DOCKERFILE_$*) > bin/.dockerfile-$*-$(OS)_$(ARCH)
-	@docker build --pull -t $(IMAGE):$(TAG_$*) -f bin/.dockerfile-$*-$(OS)_$(ARCH) .
+		-e 's|{ARG_BIN}|$(BIN)|g'           \
+		-e 's|{ARG_ARCH}|$(ARCH)|g'         \
+		-e 's|{ARG_OS}|$(OS)|g'             \
+		-e 's|{ARG_FROM}|$(BASEIMAGE_$*)|g' \
+		$(DOCKERFILE_$*) > bin/.dockerfile-$*-$(OS)_$(ARCH)
+	@DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --platform $(OS)/$(ARCH) --load --pull -t $(IMAGE):$(TAG_$*) -f bin/.dockerfile-$*-$(OS)_$(ARCH) .
 	@docker images -q $(IMAGE):$(TAG_$*) > $@
 	@echo
 
@@ -225,7 +229,10 @@ docker-manifest-%:
 	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create -a $(IMAGE):$(VERSION_$*) $(foreach PLATFORM,$(DOCKER_PLATFORMS),$(IMAGE):$(VERSION_$*)_$(subst /,_,$(PLATFORM)))
 	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push $(IMAGE):$(VERSION_$*)
 
-test: $(BUILD_DIRS)
+.PHONY: test
+test: unit-tests e2e-tests
+
+unit-tests: $(BUILD_DIRS)
 	@docker run                                                 \
 	    -i                                                      \
 	    --rm                                                    \
@@ -242,8 +249,55 @@ test: $(BUILD_DIRS)
 	        ARCH=$(ARCH)                                        \
 	        OS=$(OS)                                            \
 	        VERSION=$(VERSION)                                  \
-	        ./hack/test.sh $(SRC_DIRS)                          \
+	        ./hack/test.sh $(SRC_PKGS)                          \
 	    "
+
+# - e2e-tests can hold both ginkgo args (as GINKGO_ARGS) and program/test args (as TEST_ARGS).
+#       make e2e-tests TEST_ARGS="--selfhosted-operator=false --storageclass=standard" GINKGO_ARGS="--flakeAttempts=2"
+#
+# - Minimalist:
+#       make e2e-tests
+#
+# NB: -t is used to catch ctrl-c interrupt from keyboard and -t will be problematic for CI.
+
+GINKGO_ARGS ?=
+TEST_ARGS   ?=
+
+.PHONY: e2e-tests
+e2e-tests: $(BUILD_DIRS)
+	@docker run                                                 \
+	    -i                                                      \
+	    --rm                                                    \
+	    -u $$(id -u):$$(id -g)                                  \
+	    -v $$(pwd):/src                                         \
+	    -w /src                                                 \
+	    --net=host                                              \
+	    -v $(HOME)/.kube:/.kube                                 \
+	    -v $(HOME)/.minikube:$(HOME)/.minikube                  \
+	    -v $(HOME)/.credentials:$(HOME)/.credentials            \
+	    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin                \
+	    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin/$(OS)_$(ARCH)  \
+	    -v $$(pwd)/.go/cache:/.cache                            \
+	    --env HTTP_PROXY=$(HTTP_PROXY)                          \
+	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
+	    --env KUBECONFIG=$(KUBECONFIG)                          \
+	    --env-file=$$(pwd)/hack/config/.env                     \
+	    $(BUILD_IMAGE)                                          \
+	    /bin/bash -c "                                          \
+	        ARCH=$(ARCH)                                        \
+	        OS=$(OS)                                            \
+	        VERSION=$(VERSION)                                  \
+	        DOCKER_REGISTRY=$(REGISTRY)                         \
+	        TAG=$(TAG)                                          \
+	        KUBECONFIG=$${KUBECONFIG#$(HOME)}                   \
+	        GINKGO_ARGS='$(GINKGO_ARGS)'                        \
+	        TEST_ARGS='$(TEST_ARGS)'                            \
+	        ./hack/e2e.sh                                       \
+	    "
+
+.PHONY: e2e-parallel
+e2e-parallel:
+	@$(MAKE) e2e-tests GINKGO_ARGS="-p -stream" --no-print-directory
 
 ADDTL_LINTERS   := goconst,gofmt,goimports,unparam
 
@@ -271,7 +325,7 @@ $(BUILD_DIRS):
 
 .PHONY: install
 install:
-	@APPSCODE_ENV=dev  CSI_VAULT_DOCKER_REGISTRY=$(REGISTRY) CSI_VAULT_IMAGE_TAG=$(TAG) ./hack/deploy/install.sh
+	@APPSCODE_ENV=dev  CSI_VAULT_IMAGE_TAG=$(TAG) ./hack/deploy/install.sh --docker-registry=$(REGISTRY) --image-pull-secret=$(REGISTRY_SECRET)
 
 .PHONY: uninstall
 uninstall:
