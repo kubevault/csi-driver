@@ -15595,11 +15595,17 @@ func schema_kmodulesxyz_offshoot_api_api_v1_ServiceSpec(ref common.ReferenceCall
 							Format:      "int32",
 						},
 					},
+					"sessionAffinityConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "sessionAffinityConfig contains the configurations of session affinity.",
+							Ref:         ref("k8s.io/api/core/v1.SessionAffinityConfig"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kmodules.xyz/offshoot-api/api/v1.ServicePort"},
+			"k8s.io/api/core/v1.SessionAffinityConfig", "kmodules.xyz/offshoot-api/api/v1.ServicePort"},
 	}
 }
 
@@ -15651,6 +15657,13 @@ func schema_operator_apis_config_v1alpha1_VaultServerConfiguration(ref common.Re
 							Format:      "",
 						},
 					},
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies the path which is used for authentication by this AppBinding. If vault server is provisioned by KubeVault, this is usually `kubernetes`.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"serviceAccountName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies the service account name",
@@ -15686,14 +15699,8 @@ func schema_operator_apis_config_v1alpha1_VaultServerConfiguration(ref common.Re
 							Format:      "",
 						},
 					},
-					"authPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Specifies the path where kubernetes auth is enabled default : kubernetes",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
+				Required: []string{"path"},
 			},
 		},
 	}
