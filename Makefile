@@ -125,9 +125,6 @@ version:
 	@echo ::set-output name=commit_hash::$(commit_hash)
 	@echo ::set-output name=commit_timestamp::$(commit_timestamp)
 
-DOCKER_REPO_ROOT := /go/src/$(GO_PKG)/$(REPO)
-
-
 fmt: $(BUILD_DIRS)
 	@docker run                                                 \
 	    -i                                                      \

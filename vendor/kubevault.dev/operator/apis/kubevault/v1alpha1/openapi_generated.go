@@ -15623,11 +15623,17 @@ func schema_kmodulesxyz_offshoot_api_api_v1_ServiceSpec(ref common.ReferenceCall
 							Format:      "int32",
 						},
 					},
+					"sessionAffinityConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "sessionAffinityConfig contains the configurations of session affinity.",
+							Ref:         ref("k8s.io/api/core/v1.SessionAffinityConfig"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kmodules.xyz/offshoot-api/api/v1.ServicePort"},
+			"k8s.io/api/core/v1.SessionAffinityConfig", "kmodules.xyz/offshoot-api/api/v1.ServicePort"},
 	}
 }
 
@@ -15853,6 +15859,13 @@ func schema_operator_apis_kubevault_v1alpha1_AwsKmsSsmSpec(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"ssmKeyPrefix": {
+						SchemaProps: spec.SchemaProps{
+							Description: "An optional Key prefix for SSM Parameter store",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"region": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
@@ -15862,6 +15875,13 @@ func schema_operator_apis_kubevault_v1alpha1_AwsKmsSsmSpec(ref common.ReferenceC
 					"credentialSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies the secret name containing AWS access key and AWS secret key secret data:\n\t- access_key:<value>\n - secret_key:<value>",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"endpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Used to make AWS KMS requests. This is useful, for example, when connecting to KMS over a VPC Endpoint. If not set, Vault will use the default API endpoint for your region.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
