@@ -3,11 +3,6 @@ package driver
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/appscode/pat"
-	"k8s.io/client-go/kubernetes"
-
-	//"k8s.io/client-go/kubernetes"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -15,15 +10,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/appscode/pat"
 	"github.com/kubernetes-csi/csi-test/pkg/sanity"
-	cr "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
-
-	//"kubevault.dev/csi-driver/vault"
 	"github.com/sirupsen/logrus"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
+	cr "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 	appFake "kmodules.xyz/custom-resources/client/clientset/versioned/fake"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
@@ -68,12 +64,12 @@ func TestDriverSuite(t *testing.T) {
 	}
 	defer driver.Stop()
 
-	go driver.Run()
+	go utilruntime.Must(driver.Run())
 
 	tp := os.TempDir() + "/csi-target"
 	sp := os.TempDir() + "/csi-staging"
-	defer os.RemoveAll(tp)
-	defer os.RemoveAll(sp)
+	defer utilruntime.Must(os.RemoveAll(tp))
+	defer utilruntime.Must(os.RemoveAll(sp))
 
 	cfg := &sanity.Config{
 		TargetPath:  tp,
@@ -134,23 +130,25 @@ func NewFakeVaultServer() *httptest.Server {
 	m := pat.New()
 	m.Post("/v1/auth/kubernetes/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var v map[string]interface{}
-		defer r.Body.Close()
-		json.NewDecoder(r.Body).Decode(&v)
+		defer utilruntime.Must(r.Body.Close())
+		utilruntime.Must(json.NewDecoder(r.Body).Decode(&v))
 		if val, ok := v["jwt"]; ok {
 			if val.(string) == "sanity-token" {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(authResp))
+				_, err := w.Write([]byte(authResp))
+				utilruntime.Must(err)
 				return
 			}
 		}
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 	m.Get("/v1/kv/:secret", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+		defer utilruntime.Must(r.Body.Close())
 		if params, found := pat.FromContext(r.Context()); found {
 			if got, want := params.Get(":secret"), "my-key"; got == want {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(secResp))
+				_, err := w.Write([]byte(secResp))
+				utilruntime.Must(err)
 				return
 			}
 		}

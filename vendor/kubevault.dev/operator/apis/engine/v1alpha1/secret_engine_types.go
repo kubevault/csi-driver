@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/appscode/go/encoding/json/types"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
@@ -47,9 +46,9 @@ type SecretEngineSpec struct {
 
 type SecretEngineList struct {
 	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata, omitempty"`
+	metav1.ListMeta `json:"metadata,omitempty"`
 
-	Items []SecretEngine `json:"items, omitempty"`
+	Items []SecretEngine `json:"items,omitempty"`
 }
 
 type SecretEngineConfiguration struct {
@@ -135,7 +134,7 @@ type AzureConfiguration struct {
 	// The Azure environment.
 	// If not specified, Vault will use Azure Public Cloud.
 	// +optional
-	Environment string `json:"environment, omitempty"`
+	Environment string `json:"environment,omitempty"`
 }
 
 // PostgresConfiguration defines a PostgreSQL app configuration.
@@ -222,7 +221,7 @@ type SecretEnginePhase string
 type SecretEngineStatus struct {
 	Phase SecretEnginePhase `json:"phase,omitempty"`
 
-	ObservedGeneration *types.IntHash `json:"observedGeneration,omitempty"`
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 
 	Conditions []SecretEngineCondition `json:"conditions,omitempty"`
 }

@@ -1,5 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/kubevault.dev/csi-driver)](https://goreportcard.com/report/kubevault.dev/csi-driver)
-[![Build Status](https://travis-ci.org/kubevault/csi-driver.svg?branch=master)](https://travis-ci.org/kubevault/csi-driver)
+[![Build Status](https://github.com/kubevault/csi-driver/workflows/CI/badge.svg)](https://github.com/kubevault/csi-driver/actions?workflow=CI)
 [![codecov](https://codecov.io/gh/kubevault/csi-driver/branch/master/graph/badge.svg)](https://codecov.io/gh/kubevault/csi-driver)
 [![Docker Pulls](https://img.shields.io/docker/pulls/kubevault/csi-vault.svg)](https://hub.docker.com/r/kubevault/csi-vault/)
 [![Slack](https://slack.appscode.com/badge.svg)](https://slack.appscode.com)
