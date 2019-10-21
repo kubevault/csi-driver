@@ -5,6 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/version"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"kubevault.dev/csi-driver/pkg/driver"
@@ -43,7 +44,7 @@ type VaultDriver struct {
 }
 
 func (op *VaultDriver) Run(stopCh <-chan struct{}) error {
-	go op.Driver.Run() // stopCh)
+	go utilruntime.Must(op.Driver.Run())
 	return op.GenericAPIServer.PrepareRun().Run(stopCh)
 }
 

@@ -3,7 +3,7 @@ module kubevault.dev/csi-driver
 go 1.12
 
 require (
-	github.com/appscode/go v0.0.0-20191006073906-e3d193d493fc
+	github.com/appscode/go v0.0.0-20191016085057-e186b6c94a3b
 	github.com/appscode/pat v0.0.0-20170521084856-48ff78925b79
 	github.com/container-storage-interface/spec v1.1.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
@@ -23,17 +23,15 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
-	google.golang.org/grpc v1.21.1
+	google.golang.org/grpc v1.22.0
 	k8s.io/api v0.0.0-20190503110853-61630f889b3c
 	k8s.io/apimachinery v0.0.0-20190509063443-7d8f8feb49c5
 	k8s.io/apiserver v0.0.0-20190516230822-f89599b3f645
 	k8s.io/client-go v11.0.0+incompatible
-	k8s.io/component-base v0.0.0-20190509023737-8de8845fb642 // indirect
-	k8s.io/klog v0.3.2 // indirect
-	k8s.io/kubernetes v1.14.2
-	kmodules.xyz/client-go v0.0.0-20191006173540-91f8ee6b6b4b
+	k8s.io/kubernetes v1.14.0
+	kmodules.xyz/client-go v0.0.0-20191021083014-0be9e7d5b970
 	kmodules.xyz/custom-resources v0.0.0-20190927035424-65fe358bb045
-	kubevault.dev/operator v0.0.0-20191008050533-1b4744723ea3
+	kubevault.dev/operator v0.0.0-20191021102158-d9b8135c375d
 )
 
 replace (
@@ -52,6 +50,6 @@ replace (
 	k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.0.0-20190314000639-da8327669ac5
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30
 	k8s.io/metrics => k8s.io/metrics v0.0.0-20190314001731-1bd6a4002213
-	k8s.io/utils => k8s.io/utils v0.0.0-20190221042446-c2654d5206da
+	k8s.io/utils => k8s.io/utils v0.0.0-20190514214443-0a167cbac756
 	sigs.k8s.io/structured-merge-diff => sigs.k8s.io/structured-merge-diff v0.0.0-20190302045857-e85c7b244fd2
 )

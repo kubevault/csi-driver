@@ -78,6 +78,7 @@ endif
 BUILD_DIRS  := bin/$(OS)_$(ARCH)     \
                .go/bin/$(OS)_$(ARCH) \
                .go/cache             \
+               hack/config           \
                $(HOME)/.credentials  \
                $(HOME)/.kube         \
                $(HOME)/.minikube
@@ -315,7 +316,7 @@ lint: $(BUILD_DIRS)
 	    --env GO111MODULE=on                                    \
 	    --env GOFLAGS="-mod=vendor"                             \
 	    $(BUILD_IMAGE)                                          \
-	    golangci-lint run --enable $(ADDTL_LINTERS)
+	    golangci-lint run --enable $(ADDTL_LINTERS) --deadline=10m --skip-files="generated.*\.go$\" --skip-dirs-use-default --skip-dirs=client,vendor
 
 $(BUILD_DIRS):
 	@mkdir -p $@
@@ -336,7 +337,7 @@ purge:
 dev: gen fmt push
 
 .PHONY: ci
-ci: lint test build #cover
+ci: lint build unit-tests #cover
 
 .PHONY: qa
 qa:

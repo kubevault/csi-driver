@@ -15,6 +15,10 @@ func (v VaultPolicy) GetKey() string {
 }
 
 func (v VaultPolicy) PolicyName() string {
+	if v.Spec.VaultPolicyName != "" {
+		return v.Spec.VaultPolicyName
+	}
+
 	cluster := "-"
 	if clusterid.ClusterName() != "" {
 		cluster = clusterid.ClusterName()
@@ -55,7 +59,7 @@ func (v VaultPolicy) CustomResourceDefinition() *apiextensions.CustomResourceDef
 		SpecDefinitionName:      "kubevault.dev/operator/apis/policy/v1alpha1.VaultPolicy",
 		EnableValidation:        true,
 		GetOpenAPIDefinitions:   GetOpenAPIDefinitions,
-		EnableStatusSubresource: apis.EnableStatusSubresource,
+		EnableStatusSubresource: true,
 		AdditionalPrinterColumns: []apiextensions.CustomResourceColumnDefinition{
 			{
 				Name:     "Phase",
