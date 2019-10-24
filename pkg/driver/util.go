@@ -3,8 +3,9 @@ package driver
 import (
 	"strings"
 
-	"github.com/pkg/errors"
 	"kubevault.dev/csi-driver/pkg/util"
+
+	"github.com/pkg/errors"
 )
 
 func getPodInfo(attr map[string]string) (*util.PodInfo, error) {

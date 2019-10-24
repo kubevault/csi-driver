@@ -29,9 +29,9 @@ require (
 	k8s.io/apiserver v0.0.0-20190516230822-f89599b3f645
 	k8s.io/client-go v11.0.0+incompatible
 	k8s.io/kubernetes v1.14.0
-	kmodules.xyz/client-go v0.0.0-20191021083014-0be9e7d5b970
+	kmodules.xyz/client-go v0.0.0-20191023042933-b12d1ccfaf57
 	kmodules.xyz/custom-resources v0.0.0-20190927035424-65fe358bb045
-	kubevault.dev/operator v0.0.0-20191021102158-d9b8135c375d
+	kubevault.dev/operator v0.0.0-20191024030223-f97a02c8b05a
 )
 
 replace (
