@@ -919,7 +919,7 @@ k8s.io/kubernetes/pkg/apis/core
 k8s.io/utils/integer
 k8s.io/utils/trace
 k8s.io/utils/buffer
-# kmodules.xyz/client-go v0.0.0-20191021083014-0be9e7d5b970
+# kmodules.xyz/client-go v0.0.0-20191023042933-b12d1ccfaf57
 kmodules.xyz/client-go/logs
 kmodules.xyz/client-go/tools/cli
 kmodules.xyz/client-go/meta
@@ -941,7 +941,7 @@ kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alph
 kmodules.xyz/monitoring-agent-api/api/v1
 # kmodules.xyz/offshoot-api v0.0.0-20190901210649-de049192326c
 kmodules.xyz/offshoot-api/api/v1
-# kubevault.dev/operator v0.0.0-20191021102158-d9b8135c375d
+# kubevault.dev/operator v0.0.0-20191024030223-f97a02c8b05a
 kubevault.dev/operator/client/clientset/versioned/scheme
 kubevault.dev/operator/pkg/vault/secret
 kubevault.dev/operator/apis/config/v1alpha1

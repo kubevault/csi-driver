@@ -6,9 +6,10 @@ import (
 	"os"
 	"path"
 
+	vaultEng "kubevault.dev/operator/pkg/vault/secret/engines"
+
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
-	vaultEng "kubevault.dev/operator/pkg/vault/secret/engines"
 )
 
 // FetchSecret writes the secret on specified targetPath

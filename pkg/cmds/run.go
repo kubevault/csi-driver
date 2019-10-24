@@ -3,11 +3,12 @@ package cmds
 import (
 	"io"
 
+	"kubevault.dev/csi-driver/pkg/cmds/server"
+
 	"github.com/appscode/go/log"
 	v "github.com/appscode/go/version"
 	"github.com/spf13/cobra"
 	"kmodules.xyz/client-go/tools/cli"
-	"kubevault.dev/csi-driver/pkg/cmds/server"
 )
 
 func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {

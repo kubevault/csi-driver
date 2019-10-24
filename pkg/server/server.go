@@ -1,6 +1,8 @@
 package server
 
 import (
+	"kubevault.dev/csi-driver/pkg/driver"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -8,7 +10,6 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/version"
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	"kubevault.dev/csi-driver/pkg/driver"
 )
 
 var (
