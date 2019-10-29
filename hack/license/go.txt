@@ -13,21 +13,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
-
-import (
-	"os"
-
-	"kubevault.dev/csi-driver/pkg/cmds"
-
-	"kmodules.xyz/client-go/logs"
-)
-
-func main() {
-	logs.InitLogs()
-	defer logs.FlushLogs()
-
-	if err := cmds.NewRootCmd().Execute(); err != nil {
-		os.Exit(1)
-	}
-}
