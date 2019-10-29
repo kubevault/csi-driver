@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Copyright The KubeVault Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +12,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-pushd $GOPATH/src/kubevault.dev/csi-driver/hack/gendocs
-go run main.go
-popd
