@@ -40,31 +40,31 @@ var (
 title: Reference | Vault CSI Driver
 description: Vault CSI Driver Reference
 menu:
-  docs_{{ .Version }}:
+  docs_{{ "{{ .version }}" }}:
     identifier: reference-csi-driver
     name: Vault CSI Driver
     weight: 20
     parent: reference
-menu_name: docs_{{ .Version }}
+menu_name: docs_{{ "{{ .version }}" }}
 ---
 `))
 
 	_ = template.Must(tplFrontMatter.New("cmd").Parse(`---
 title: {{ .Name }}
 menu:
-  docs_{{ .Version }}:
+  docs_{{ "{{ .version }}" }}:
     identifier: {{ .ID }}
     name: {{ .Name }}
     parent: reference-csi-driver
 {{- if .RootCmd }}
     weight: 0
 {{ end }}
-menu_name: docs_{{ .Version }}
+menu_name: docs_{{ "{{ .version }}" }}
 section_menu_id: reference
 {{- if .RootCmd }}
-url: /docs/{{ .Version }}/reference/csi-driver/
+url: /docs/{{ "{{ .version }}" }}/reference/csi-driver/
 aliases:
-- /docs/{{ .Version }}/reference/csi-driver/{{ .ID }}/
+- /docs/{{ "{{ .version }}" }}/reference/csi-driver/{{ .ID }}/
 {{- end }}
 ---
 `))
