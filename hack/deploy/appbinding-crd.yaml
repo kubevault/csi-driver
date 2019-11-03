@@ -113,6 +113,8 @@ spec:
                 parameters that contain secret information, you should ALWAYS store
                 that information in a Secret."
               type: object
+              x-kubernetes-embedded-resource: true
+              x-kubernetes-preserve-unknown-fields: true
             secret:
               description: Secret is the name of the secret to create in the AppBinding's
                 namespace that will hold the credentials associated with the AppBinding.

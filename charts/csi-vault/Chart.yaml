@@ -4,7 +4,7 @@ description: 'HashiCorp Vault CSI Driver for Kubernetes'
 name: csi-vault
 version: 0.2.0
 home: https://github.com/kubevault/csi-driver
-icon: https://cdn.appscode.com/images/icon/kubevault.png
+icon: https://cdn.appscode.com/images/products/kubevault/icons/android-icon-192x192.png
 sources:
   - https://github.com/kubevault/csi-driver
 maintainers:
