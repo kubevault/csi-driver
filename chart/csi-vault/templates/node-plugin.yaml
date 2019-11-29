@@ -13,7 +13,6 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "csi-vault.node.fullname" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.nodePlugin.name }}
@@ -46,7 +45,6 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "csi-vault.node-registrar.fullname" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "csi-vault.labels" . | nindent 4 }}
     component: {{ .Values.nodePlugin.name }}
