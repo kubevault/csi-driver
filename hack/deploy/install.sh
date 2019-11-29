@@ -133,27 +133,27 @@ export CSI_VAULT_NAMESPACE=kube-system
 export CSI_VAULT_DOCKER_REGISTRY=${CSI_VAULT_DOCKER_REGISTRY:-kubevault}
 export CSI_VAULT_DOCKER_REPOSITORY=csi-vault
 export CSI_VAULT_IMAGE_TAG=${CSI_VAULT_IMAGE_TAG:-0.2.0}
-export CSI_VAULT_IMAGE_PULL_SECRET=
+export CSI_VAULT_IMAGE_PULL_SECRET_NAME=
 export CSI_VAULT_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_ATTACHER_DOCKER_REGISTRY=${CSI_ATTACHER_DOCKER_REGISTRY:-quay.io/k8scsi}
 export CSI_ATTACHER_DOCKER_REPOSITORY=csi-attacher
 export CSI_ATTACHER_IMAGE_TAG=v1.2.0
-export CSI_ATTACHER_IMAGE_PULL_SECRET=
+export CSI_ATTACHER_IMAGE_PULL_SECRET_NAME=
 export CSI_ATTACHER_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_PROVISIONER_DOCKER_REGISTRY=quay.io/k8scsi
 export CSI_PROVISIONER_DOCKER_REPOSITORY=csi-provisioner
 export CSI_PROVISIONER_IMAGE_TAG=v1.3.0
-export CSI_PROVISIONER_IMAGE_PULL_SECRET=
+export CSI_PROVISIONER_IMAGE_PULL_SECRET_NAME=
 export CSI_PROVISIONER_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_CLUSTER_REGISTRAR_DOCKER_REGISTRY=quay.io/k8scsi
 export CSI_CLUSTER_REGISTRAR_DOCKER_REPOSITORY=csi-cluster-driver-registrar
 export CSI_CLUSTER_REGISTRAR_IMAGE_TAG=v1.0.1
-export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET=
+export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET_NAME=
 export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_NODE_REGISTRAR_DOCKER_REGISTRY=quay.io/k8scsi
 export CSI_NODE_REGISTRAR_DOCKER_REPOSITORY=csi-node-driver-registrar
 export CSI_NODE_REGISTRAR_IMAGE_TAG=v1.1.0
-export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET=
+export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET_NAME=
 export CSI_NODE_REGISTRAR_IMAGE_PULL_POLICY=IfNotPresent
 export CSI_VAULT_DRIVER_NAME=secrets.csi.kubevault.com
 export CSI_VAULT_UNINSTALL=0
@@ -251,8 +251,7 @@ while test $# -gt 0; do
       shift
       ;;
     --csi-vault-image-pull-secret*)
-      secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-      export CSI_VAULT_IMAGE_PULL_SECRET="name: '$secret'"
+      export CSI_VAULT_IMAGE_PULL_SECRET_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
     --csi-vault-image-tag*)
@@ -264,8 +263,7 @@ while test $# -gt 0; do
       shift
       ;;
     --csi-attacher-image-pull-secret*)
-      secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-      export CSI_ATTACHER_IMAGE_PULL_SECRET="name: '$secret'"
+      export CSI_ATTACHER_IMAGE_PULL_SECRET_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
     --csi-attacher-image-tag*)
@@ -277,8 +275,7 @@ while test $# -gt 0; do
       shift
       ;;
     --csi-provisioner-image-pull-secret*)
-      secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-      export CSI_PROVISIONER_IMAGE_PULL_SECRET="name: '$secret'"
+      export CSI_PROVISIONER_IMAGE_PULL_SECRET_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
     --csi-provisioner-image-tag*)
@@ -290,8 +287,7 @@ while test $# -gt 0; do
       shift
       ;;
     --csi-cluster-registrar-image-pull-secret*)
-      secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-      export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET="name: '$secret'"
+      export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
     --csi-cluster-registrar-image-tag*)
@@ -303,8 +299,7 @@ while test $# -gt 0; do
       shift
       ;;
     --csi-node-registrar-image-pull-secret*)
-      secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-      export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET="name: '$secret'"
+      export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
       shift
       ;;
     --csi-node-registrar-image-tag*)
@@ -381,6 +376,31 @@ while test $# -gt 0; do
       ;;
   esac
 done
+
+export CSI_VAULT_IMAGE_PULL_SECRET=
+if [ -n "$CSI_VAULT_IMAGE_PULL_SECRET_NAME" ]; then
+  export CSI_VAULT_IMAGE_PULL_SECRET="name: '$CSI_VAULT_IMAGE_PULL_SECRET_NAME'"
+fi
+
+export CSI_ATTACHER_IMAGE_PULL_SECRET=
+if [ -n "$CSI_ATTACHER_IMAGE_PULL_SECRET_NAME" ]; then
+  export CSI_ATTACHER_IMAGE_PULL_SECRET="name: '$CSI_ATTACHER_IMAGE_PULL_SECRET_NAME'"
+fi
+
+export CSI_PROVISIONER_IMAGE_PULL_SECRET=
+if [ -n "$CSI_PROVISIONER_IMAGE_PULL_SECRET_NAME" ]; then
+  export CSI_PROVISIONER_IMAGE_PULL_SECRET="name: '$CSI_PROVISIONER_IMAGE_PULL_SECRET_NAME'"
+fi
+
+export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET=
+if [ -n "$CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET_NAME" ]; then
+  export CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET="name: '$CSI_CLUSTER_REGISTRAR_IMAGE_PULL_SECRET_NAME'"
+fi
+
+export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET=
+if [ -n "$CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET_NAME" ]; then
+  export CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET="name: '$CSI_NODE_REGISTRAR_IMAGE_PULL_SECRET_NAME'"
+fi
 
 export PROMETHEUS_NAMESPACE=${PROMETHEUS_NAMESPACE:-$CSI_VAULT_NAMESPACE}
 
