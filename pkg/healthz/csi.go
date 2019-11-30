@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/kubernetes-csi/livenessprobe/pkg/connection"
+	"github.com/kubernetes-csi/csi-lib-utils/connection"
 	lib "k8s.io/apiserver/pkg/server/healthz"
 )
 
@@ -32,7 +32,7 @@ type probe struct {
 	connectionTimeout time.Duration
 }
 
-func NewCSIProbe(csiAddress string, connectionTimeout time.Duration) lib.HealthzChecker {
+func NewCSIProbe(csiAddress string, connectionTimeout time.Duration) lib.HealthChecker {
 	return &probe{
 		csiAddress:        csiAddress,
 		connectionTimeout: connectionTimeout,
