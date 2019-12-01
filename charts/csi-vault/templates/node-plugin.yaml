@@ -190,7 +190,7 @@ spec:
         image: {{ .Values.plugin.registry}}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :
         - run
-        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v={{ .Values.logLevel }}"
         - --secure-port=8443

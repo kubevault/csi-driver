@@ -51,7 +51,7 @@ spec:
         image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
         args :
         - run
-        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v=3"
         - --secure-port=8443
