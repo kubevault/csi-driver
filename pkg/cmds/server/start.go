@@ -88,8 +88,11 @@ func (o VaultDriverOptions) Config() (*server.VaultDriverConfig, error) {
 	// Fixes https://github.com/Azure/AKS/issues/522
 	clientcmd.Fix(serverConfig.ClientConfig)
 
-	// register CSI provbe for health checking
-	probe := healthz.NewCSIProbe(o.ExtraOptions.Endpoint, o.ExtraOptions.ConnectionTimeout)
+	// register CSI probe for health checking
+	probe, err := healthz.NewCSIProbe(o.ExtraOptions.CSIAddress, o.ExtraOptions.ProbeTimeout)
+	if err != nil {
+		return nil, err
+	}
 	serverConfig.HealthzChecks = append(serverConfig.HealthzChecks, probe)
 
 	extraConfig := driver.NewConfig(serverConfig.ClientConfig)

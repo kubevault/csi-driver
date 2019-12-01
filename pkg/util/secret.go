@@ -59,7 +59,7 @@ func FetchSecret(engineName string, vc *vaultapi.Client, opts map[string]string,
 }
 
 func SetRenewal(vc *vaultapi.Client, secret *vaultapi.Secret) (*vaultapi.Renewer, error) {
-	renewer, err := vc.NewRenewer(&vaultapi.RenewerInput{
+	renewer, err := vc.NewLifetimeWatcher(&vaultapi.LifetimeWatcherInput{
 		Secret: secret,
 	})
 	if err != nil {

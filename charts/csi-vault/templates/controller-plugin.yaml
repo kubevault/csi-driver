@@ -194,7 +194,7 @@ spec:
         image: {{ .Values.attacher.registry}}/{{ .Values.attacher.repository }}:{{ .Values.attacher.tag }}
         args:
         - --v={{ .Values.logLevel }}
-        - "--csi-address=$(ADDRESS)"
+        - "--csi-address=$(csi-address)"
         env:
         - name: ADDRESS
           value: {{ .Values.pluginAddress }}
@@ -208,7 +208,7 @@ spec:
         image: {{ .Values.plugin.registry }}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :
         - run
-        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ENDPOINT)"
         - "--node=$(NODE_NAME)"
         - "--v={{ .Values.logLevel }}"
         - --secure-port=8443

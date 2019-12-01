@@ -1,0 +1,143 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: vault
+  name: awsroles.engine.kubevault.com
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Status
+    type: string
+  group: engine.kubevault.com
+  names:
+    categories:
+    - vault
+    - appscode
+    - all
+    kind: AWSRole
+    listKind: AWSRoleList
+    plural: awsroles
+    singular: awsrole
+  preserveUnknownFields: false
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: 'AWSRoleSpec contains connection information, AWS role info,
+            etc More info: https://www.vaultproject.io/api/secret/aws/index.html#parameters-3'
+          properties:
+            credentialType:
+              description: Specifies the type of credential to be used when retrieving
+                credentials from the role
+              type: string
+            defaultSTSTTL:
+              description: The default TTL for STS credentials. When a TTL is not
+                specified when STS credentials are requested, and a default TTL is
+                specified on the role, then this default TTL will be used. Valid only
+                when credential_type is one of assumed_role or federation_token
+              type: string
+            maxSTSTTL:
+              description: The max allowed TTL for STS credentials (credentials TTL
+                are capped to max_sts_ttl). Valid only when credential_type is one
+                of assumed_role or federation_token
+              type: string
+            path:
+              description: 'Path defines the path of the AWS secret engine default:
+                aws More info: https://www.vaultproject.io/docs/auth/aws.html#via-the-cli'
+              type: string
+            policy:
+              description: Specifies the IAM policy in JSON format.
+              type: object
+              x-kubernetes-embedded-resource: true
+              x-kubernetes-preserve-unknown-fields: true
+            policyARNs:
+              description: Specifies the ARNs of the AWS managed policies to be attached
+                to IAM users when they are requested. Valid only when credential_type
+                is iam_user. When credential_type is iam_user, at least one of policy_arns
+                or policy_document must be specified.
+              items:
+                type: string
+              type: array
+            policyDocument:
+              description: The IAM policy document for the role. The behavior depends
+                on the credential type. With iam_user, the policy document will be
+                attached to the IAM user generated and augment the permissions the
+                IAM user has. With assumed_role and federation_token, the policy document
+                will act as a filter on what the credentials can do.
+              type: string
+            roleARNs:
+              description: Specifies the ARNs of the AWS roles this Vault role is
+                allowed to assume. Required when credential_type is assumed_role and
+                prohibited otherwise
+              items:
+                type: string
+              type: array
+            vaultRef:
+              description: VaultRef is the name of a AppBinding referencing to a Vault
+                Server
+              properties:
+                name:
+                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    TODO: Add other useful fields. apiVersion, kind, uid?'
+                  type: string
+              type: object
+          required:
+          - credentialType
+          - vaultRef
+          type: object
+        status:
+          properties:
+            conditions:
+              description: Represents the latest available observations of a AWSRole
+                current state.
+              items:
+                description: AWSRoleCondition describes the state of a AWSRole at
+                  a certain point.
+                properties:
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of AWSRole condition.
+                    type: string
+                type: object
+              type: array
+            observedGeneration:
+              description: ObservedGeneration is the most recent generation observed
+                for this AWSRole. It corresponds to the AWSRole's generation, which
+                is updated on mutation by the API Server.
+              format: int64
+              type: integer
+            phase:
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
