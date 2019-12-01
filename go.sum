@@ -520,8 +520,8 @@ github.com/kubernetes-csi/csi-lib-utils v0.6.1 h1:+AZ58SRSRWh2vmMoWAAGcv7x6fIyBM
 github.com/kubernetes-csi/csi-lib-utils v0.6.1/go.mod h1:GVmlUmxZ+SUjVLXicRFjqWUUvWez0g0Y78zNV9t7KfQ=
 github.com/kubernetes-incubator/service-catalog v0.2.2/go.mod h1:D0CRODiXUJs6VCZDB15TmCkesbuizkac9fYEiTA78BA=
 github.com/kubernetes-sigs/service-catalog v0.2.2/go.mod h1:fmRsWJ38Od93DQ7cOXR9mMSSwmjyDS1EAomWxBlumuo=
-github.com/kubevault/csi-test v1.1.2-0.20191016154743-6931aedb3df0 h1:CeWG/8x5c+LVjJzsCEsYNHNlmysmaFFzwHVNVJBZkFo=
-github.com/kubevault/csi-test v1.1.2-0.20191016154743-6931aedb3df0/go.mod h1:0JHYXISG0wKK4OoXtuyT6CkVyEqmHme4k5VzZphSB3s=
+github.com/kubevault/csi-test v1.1.2-0.20191201160333-490f2b7805bb h1:+Omh8xdPtwzA3vifofEBbEVl5lv4t/1Ty5icgPUi3Bw=
+github.com/kubevault/csi-test v1.1.2-0.20191201160333-490f2b7805bb/go.mod h1:0JHYXISG0wKK4OoXtuyT6CkVyEqmHme4k5VzZphSB3s=
 github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348/go.mod h1:B69LEHPfb2qLo0BaaOLcbitczOKLWTsrBG9LczfCD4k=
 github.com/lib/pq v1.2.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/libopenstorage/openstorage v1.0.0/go.mod h1:Sp1sIObHjat1BeXhfMqLZ14wnOzEhNx2YQedreMcUyc=

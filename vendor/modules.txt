@@ -257,7 +257,7 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/kubernetes-csi/csi-lib-utils/connection
 github.com/kubernetes-csi/csi-lib-utils/protosanitizer
 github.com/kubernetes-csi/csi-lib-utils/rpc
-# github.com/kubernetes-csi/csi-test v2.2.0+incompatible => github.com/kubevault/csi-test v1.1.2-0.20191016154743-6931aedb3df0
+# github.com/kubernetes-csi/csi-test v2.2.0+incompatible => github.com/kubevault/csi-test v1.1.2-0.20191201160333-490f2b7805bb
 github.com/kubernetes-csi/csi-test/pkg/sanity
 github.com/kubernetes-csi/csi-test/utils
 # github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63
