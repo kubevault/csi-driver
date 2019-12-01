@@ -179,10 +179,10 @@ spec:
         image: {{ .Values.provisioner.registry}}/{{ .Values.provisioner.repository}}:{{ .Values.provisioner.tag }}
         args:
         - --provisioner={{ .Values.driverName }}
-        - "--csi-address=$(ADDRESS)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - --v={{ .Values.logLevel }}
         env:
-        - name: ADDRESS
+        - name: CSI_ADDRESS
           value: {{ .Values.pluginAddress}}
         imagePullPolicy: {{ .Values.provisioner.pullPolicy }}
         resources:
@@ -194,9 +194,9 @@ spec:
         image: {{ .Values.attacher.registry}}/{{ .Values.attacher.repository }}:{{ .Values.attacher.tag }}
         args:
         - --v={{ .Values.logLevel }}
-        - "--csi-address=$(csi-address)"
+        - "--csi-address=$(CSI_ADDRESS)"
         env:
-        - name: ADDRESS
+        - name: CSI_ADDRESS
           value: {{ .Values.pluginAddress }}
         imagePullPolicy: {{ .Values.attacher.pullPolicy }}
         resources:
@@ -208,7 +208,7 @@ spec:
         image: {{ .Values.plugin.registry }}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :
         - run
-        - "--csi-address=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--node=$(NODE_NAME)"
         - "--v={{ .Values.logLevel }}"
         - --secure-port=8443
@@ -219,7 +219,7 @@ spec:
         ports:
         - containerPort: 8443
         env:
-        - name: CSI_ENDPOINT
+        - name: CSI_ADDRESS
           value: unix://{{ .Values.pluginAddress }}
         - name: NODE_NAME
               {{- include "csi-vault.node" . | nindent 10 }}

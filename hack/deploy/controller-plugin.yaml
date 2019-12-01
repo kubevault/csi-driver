@@ -26,10 +26,10 @@ spec:
         image: ${CSI_PROVISIONER_DOCKER_REGISTRY}/${CSI_PROVISIONER_DOCKER_REPOSITORY}:${CSI_PROVISIONER_IMAGE_TAG}
         args:
         - --provisioner=${CSI_VAULT_DRIVER_NAME}
-        - "--csi-address=$(ADDRESS)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--v=3"
         env:
-        - name: ADDRESS
+        - name: CSI_ADDRESS
           value: /var/lib/csi/sockets/pluginproxy/csi.sock
         imagePullPolicy: ${CSI_PROVISIONER_IMAGE_PULL_POLICY}
         volumeMounts:
@@ -39,9 +39,9 @@ spec:
         image: ${CSI_ATTACHER_DOCKER_REGISTRY}/${CSI_ATTACHER_DOCKER_REPOSITORY}:${CSI_ATTACHER_IMAGE_TAG}
         args:
         - "--v=3"
-        - "--csi-address=$(ADDRESS)"
+        - "--csi-address=$(CSI_ADDRESS)"
         env:
-        - name: ADDRESS
+        - name: CSI_ADDRESS
           value: /var/lib/csi/sockets/pluginproxy/csi.sock
         imagePullPolicy: ${CSI_ATTACHER_IMAGE_PULL_POLICY}
         volumeMounts:
@@ -51,7 +51,7 @@ spec:
         image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
         args :
         - run
-        - "--csi-address=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--node=$(NODE_NAME)"
         - "--v=3"
         - --secure-port=8443
@@ -62,7 +62,7 @@ spec:
         ports:
           - containerPort: 8443
         env:
-        - name: CSI_ENDPOINT
+        - name: CSI_ADDRESS
           value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
         - name: NODE_NAME
           valueFrom:

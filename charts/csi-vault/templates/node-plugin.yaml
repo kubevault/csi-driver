@@ -169,10 +169,10 @@ spec:
         image: {{ .Values.nodeRegistrar.registry}}/{{ .Values.nodeRegistrar.repository }}:{{ .Values.nodeRegistrar.tag }}
         args:
         - --v={{ .Values.logLevel }}
-        - "--csi-address=$(ADDRESS)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
         env:
-        - name: ADDRESS
+        - name: CSI_ADDRESS
           value: /csi/csi.sock
         - name: DRIVER_REG_SOCK_PATH
           value: /var/lib/kubelet/plugins/{{ .Values.driverName }}/csi.sock
@@ -190,7 +190,7 @@ spec:
         image: {{ .Values.plugin.registry}}/{{ .Values.plugin.repository }}:{{ .Values.plugin.tag }}
         args :
         - run
-        - "--csi-address=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--node=$(NODE_NAME)"
         - "--v={{ .Values.logLevel }}"
         - --secure-port=8443
@@ -201,7 +201,7 @@ spec:
         ports:
         - containerPort: 8443
         env:
-        - name: CSI_ENDPOINT
+        - name: CSI_ADDRESS
           value: unix:///csi/csi.sock
         - name: NODE_NAME
               {{- include "csi-vault.node" . | nindent 10 }}

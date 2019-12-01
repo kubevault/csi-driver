@@ -136,10 +136,10 @@ spec:
         image: ${CSI_NODE_REGISTRAR_DOCKER_REGISTRY}/${CSI_NODE_REGISTRAR_DOCKER_REPOSITORY}:${CSI_NODE_REGISTRAR_IMAGE_TAG}
         args:
         - "--v=3"
-        - "--csi-address=$(ADDRESS)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
         env:
-        - name: ADDRESS
+        - name: CSI_ADDRESS
           value: /csi/csi.sock
         - name: DRIVER_REG_SOCK_PATH
           value: /var/lib/kubelet/plugins/${CSI_VAULT_DRIVER_NAME}/csi.sock
@@ -157,7 +157,7 @@ spec:
         image: ${CSI_VAULT_DOCKER_REGISTRY}/${CSI_VAULT_DOCKER_REPOSITORY}:${CSI_VAULT_IMAGE_TAG}
         args :
         - run
-        - "--csi-address=$(CSI_ENDPOINT)"
+        - "--csi-address=$(CSI_ADDRESS)"
         - "--node=$(NODE_NAME)"
         - "--v=3"
         - --secure-port=8443
@@ -168,7 +168,7 @@ spec:
         ports:
         - containerPort: 8443
         env:
-        - name: CSI_ENDPOINT
+        - name: CSI_ADDRESS
           value: unix:///csi/csi.sock
         - name: NODE_NAME
           valueFrom:
