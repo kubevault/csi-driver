@@ -17,68 +17,65 @@ package healthz
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/golang/glog"
-	"github.com/kubernetes-csi/csi-lib-utils/connection"
+	connlib "github.com/kubernetes-csi/csi-lib-utils/connection"
+	"github.com/kubernetes-csi/csi-lib-utils/rpc"
+	"google.golang.org/grpc"
 	lib "k8s.io/apiserver/pkg/server/healthz"
+	"k8s.io/klog"
 )
 
-// probe implements the simplest possible healthz checker.
-type probe struct {
-	csiAddress        string
-	connectionTimeout time.Duration
+// healthProbe implements the simplest possible healthz checker.
+type healthProbe struct {
+	conn         *grpc.ClientConn
+	driverName   string
+	probeTimeout time.Duration
 }
 
-func NewCSIProbe(csiAddress string, connectionTimeout time.Duration) lib.HealthChecker {
-	return &probe{
-		csiAddress:        csiAddress,
-		connectionTimeout: connectionTimeout,
-	}
-}
-
-func (probe) Name() string {
-	return "csi-probe"
-}
-
-// CSIProbe is a health check that returns true if CSI probe is successful.
-func (p probe) Check(_ *http.Request) error {
-	csiConn, err := p.getCSIConnection()
+func NewCSIProbe(csiAddress string, probeTimeout time.Duration) (lib.HealthChecker, error) {
+	csiConn, err := connlib.Connect(csiAddress)
 	if err != nil {
-		return fmt.Errorf("Failed to get connection to CSI  with error: %v.", err)
+		// connlib should retry forever so a returned error should mean
+		// the grpc client is misconfigured rather than an error on the network
+		return nil, fmt.Errorf("failed to establish connection to CSI driver: %v", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), p.connectionTimeout)
+
+	klog.Infof("calling CSI driver to discover driver name")
+	csiDriverName, err := rpc.GetDriverName(context.Background(), csiConn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get CSI driver name: %v", err)
+	}
+	klog.Infof("CSI driver name: %q", csiDriverName)
+
+	return &healthProbe{
+		conn:         csiConn,
+		driverName:   csiDriverName,
+		probeTimeout: probeTimeout,
+	}, nil
+}
+
+func (h healthProbe) Name() string {
+	return "csi-healthProbe"
+}
+
+func (h healthProbe) Check(req *http.Request) error {
+	ctx, cancel := context.WithTimeout(req.Context(), h.probeTimeout)
 	defer cancel()
-	return p.runProbe(ctx, csiConn)
-}
 
-// ref: https://github.com/kubernetes-csi/livenessprobe/blob/v1.0.1/cmd/main.go#L44
-
-func (p probe) getCSIConnection() (connection.CSIConnection, error) {
-	// Connect to CSI.
-	glog.Infof("Attempting to open a gRPC connection with: %s", p.csiAddress)
-	csiConn, err := connection.NewConnection(p.csiAddress, p.connectionTimeout)
+	klog.Infof("Sending probe request to CSI driver %q", h.driverName)
+	ready, err := rpc.Probe(ctx, h.conn)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("health check failed: %v", err)
 	}
-	return csiConn, nil
-}
 
-func (p probe) runProbe(ctx context.Context, csiConn connection.CSIConnection) error {
-	// Get CSI driver name.
-	glog.Infof("Calling CSI driver to discover driver name.")
-	csiDriverName, err := csiConn.GetDriverName(ctx)
-	if err != nil {
-		return err
+	if !ready {
+		return errors.New("driver responded but is not ready")
 	}
-	glog.Infof("CSI driver name: %q", csiDriverName)
 
-	// Sending Probe request
-	glog.Infof("Sending probe request to CSI driver.")
-	if err := csiConn.LivenessProbe(ctx); err != nil {
-		return err
-	}
+	klog.Infof("Health check succeeded")
 	return nil
 }

@@ -89,7 +89,10 @@ func (o VaultDriverOptions) Config() (*server.VaultDriverConfig, error) {
 	clientcmd.Fix(serverConfig.ClientConfig)
 
 	// register CSI probe for health checking
-	probe := healthz.NewCSIProbe(o.ExtraOptions.Endpoint, o.ExtraOptions.ConnectionTimeout)
+	probe, err := healthz.NewCSIProbe(o.ExtraOptions.CSIAddress, o.ExtraOptions.ProbeTimeout)
+	if err != nil {
+		return nil, err
+	}
 	serverConfig.HealthzChecks = append(serverConfig.HealthzChecks, probe)
 
 	extraConfig := driver.NewConfig(serverConfig.ClientConfig)

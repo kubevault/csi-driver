@@ -69,7 +69,7 @@ type Driver struct {
 	ready   bool
 }
 
-// Run starts the CSI plugin by communication over the given Endpoint
+// Run starts the CSI plugin by communication over the given CSIAddress
 func (d *Driver) Run() error {
 	u, err := url.Parse(d.Endpoint)
 	if err != nil {
