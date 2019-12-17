@@ -357,17 +357,29 @@ lint: $(BUILD_DIRS)
 $(BUILD_DIRS):
 	@mkdir -p $@
 
+ifeq ($(strip $(REGISTRY_SECRET)),)
+	image_pull_secret =
+else
+	image_pull_secret = {$(REGISTRY_SECRET)}
+endif
+
 .PHONY: install
 install:
-	@APPSCODE_ENV=dev  CSI_VAULT_IMAGE_TAG=$(TAG) ./hack/deploy/install.sh --docker-registry=$(REGISTRY) --image-pull-secret=$(REGISTRY_SECRET)
+	@cd ../installer; \
+	helm install csi-vault charts/csi-vault \
+		--namespace=kube-system \
+		--set plugin.registry=$(REGISTRY) \
+		--set plugin.tag=$(TAG) \
+		--set imagePullSecrets=$(image_pull_secret)
 
 .PHONY: uninstall
 uninstall:
-	@./hack/deploy/install.sh --uninstall
+	@cd ../installer; \
+	helm uninstall charts/csi-vault --namespace=kube-system
 
 .PHONY: purge
-purge:
-	@./hack/deploy/install.sh --uninstall --purge
+purge: uninstall
+	@true
 
 .PHONY: dev
 dev: gen fmt push
