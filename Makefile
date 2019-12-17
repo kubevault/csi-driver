@@ -357,10 +357,12 @@ lint: $(BUILD_DIRS)
 $(BUILD_DIRS):
 	@mkdir -p $@
 
+REGISTRY_SECRET ?=
+
 ifeq ($(strip $(REGISTRY_SECRET)),)
-	image_pull_secret =
+	IMAGE_PULL_SECRETS =
 else
-	image_pull_secret = {$(REGISTRY_SECRET)}
+	IMAGE_PULL_SECRETS = --set imagePullSecrets[0]=$(REGISTRY_SECRET)
 endif
 
 .PHONY: install
@@ -371,7 +373,7 @@ install:
 		--set plugin.registry=$(REGISTRY) \
 		--set plugin.tag=$(TAG) \
 		--set plugin.pullPolicy=Always \
-		--set imagePullSecrets=$(image_pull_secret)
+		$(IMAGE_PULL_SECRETS)
 
 .PHONY: uninstall
 uninstall:
