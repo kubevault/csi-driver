@@ -56,7 +56,7 @@ func NewCSIProbe(csiAddress string, probeTimeout time.Duration) (lib.HealthCheck
 	}, nil
 }
 
-func (h healthProbe) Name() string {
+func (h *healthProbe) Name() string {
 	return "csi-vault-healthProbe"
 }
 
