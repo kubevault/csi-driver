@@ -20,6 +20,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"sync"
 	"time"
 
 	connlib "github.com/kubernetes-csi/csi-lib-utils/connection"
@@ -31,38 +33,53 @@ import (
 
 // healthProbe implements the simplest possible healthz checker.
 type healthProbe struct {
-	conn         *grpc.ClientConn
-	driverName   string
+	addr         string
 	probeTimeout time.Duration
+
+	conn       *grpc.ClientConn
+	driverName string
+	init       sync.Once
 }
 
 func NewCSIProbe(csiAddress string, probeTimeout time.Duration) (lib.HealthChecker, error) {
-	csiConn, err := connlib.Connect(csiAddress)
+	u, err := url.Parse(csiAddress)
 	if err != nil {
-		// connlib should retry forever so a returned error should mean
-		// the grpc client is misconfigured rather than an error on the network
-		return nil, fmt.Errorf("failed to establish connection to CSI driver: %v", err)
+		return nil, fmt.Errorf("unable to parse address: %q", err)
 	}
-
-	klog.Infof("calling CSI driver to discover driver name")
-	csiDriverName, err := rpc.GetDriverName(context.Background(), csiConn)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get CSI driver name: %v", err)
+	if u.Scheme != "unix" {
+		return nil, fmt.Errorf("%v endpoint scheme not supported", u.Scheme)
 	}
-	klog.Infof("CSI driver name: %q", csiDriverName)
 
 	return &healthProbe{
-		conn:         csiConn,
-		driverName:   csiDriverName,
+		addr:         u.Path,
 		probeTimeout: probeTimeout,
 	}, nil
 }
 
 func (h healthProbe) Name() string {
-	return "csi-healthProbe"
+	return "csi-vault-healthProbe"
 }
 
-func (h healthProbe) Check(req *http.Request) error {
+func (h *healthProbe) Check(req *http.Request) error {
+	h.init.Do(func() {
+		csiConn, err := connlib.Connect(h.addr)
+		if err != nil {
+			// connlib should retry forever so a returned error should mean
+			// the grpc client is misconfigured rather than an error on the network
+			klog.Fatalf("Failed to establish connection to CSI driver: %v", err)
+		}
+
+		klog.Infof("calling CSI driver to discover driver name")
+		csiDriverName, err := rpc.GetDriverName(context.Background(), csiConn)
+		if err != nil {
+			klog.Fatalf("Failed to get CSI driver name: %v", err)
+		}
+		klog.Infof("CSI driver name: %q", csiDriverName)
+
+		h.conn = csiConn
+		h.driverName = csiDriverName
+	})
+
 	ctx, cancel := context.WithTimeout(req.Context(), h.probeTimeout)
 	defer cancel()
 

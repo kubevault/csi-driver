@@ -370,12 +370,13 @@ install:
 		--namespace=kube-system \
 		--set plugin.registry=$(REGISTRY) \
 		--set plugin.tag=$(TAG) \
+		--set plugin.pullPolicy=Always \
 		--set imagePullSecrets=$(image_pull_secret)
 
 .PHONY: uninstall
 uninstall:
 	@cd ../installer; \
-	helm uninstall charts/csi-vault --namespace=kube-system
+	helm uninstall csi-vault --namespace=kube-system
 
 .PHONY: purge
 purge: uninstall

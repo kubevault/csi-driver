@@ -17,10 +17,10 @@ package driver
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"sync"
 
@@ -28,7 +28,6 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	vaultapi "github.com/hashicorp/vault/api"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/kubernetes"
@@ -73,30 +72,32 @@ type Driver struct {
 func (d *Driver) Run() error {
 	u, err := url.Parse(d.Endpoint)
 	if err != nil {
-		return errors.Errorf("unable to parse address: %q", err)
+		return fmt.Errorf("unable to parse address: %q", err)
 	}
 
-	addr := path.Join(u.Host, filepath.FromSlash(u.Path))
-	if u.Host == "" {
-		addr = filepath.FromSlash(u.Path)
-	}
-
-	// CSI plugins talk only over UNIX sockets currently
-	if u.Scheme != "unix" {
-		return errors.Errorf("currently only unix domain sockets are supported, have: %s", u.Scheme)
-	} else {
-		// remove the socket if it's already there. This can happen if we
-		// deploy a new version and the socket was created from the old running
-		// plugin.
-		d.log.WithField("socket", addr).Info("removing socket")
+	var addr string
+	if u.Scheme == "unix" {
+		addr = u.Path
 		if err := os.Remove(addr); err != nil && !os.IsNotExist(err) {
-			return errors.Errorf("failed to remove unix domain socket file %s, error: %s", addr, err)
+			return fmt.Errorf("failed to remove %s, error: %s", addr, err.Error())
 		}
+
+		listenDir := filepath.Dir(addr)
+		if _, err := os.Stat(listenDir); err != nil {
+			if os.IsNotExist(err) {
+				return fmt.Errorf("expected Kubelet plugin watcher to create parent dir %s but did not find such a dir", listenDir)
+			} else {
+				return fmt.Errorf("failed to stat %s, error: %s", listenDir, err.Error())
+			}
+		}
+	} else {
+		return fmt.Errorf("%v endpoint scheme not supported", u.Scheme)
 	}
 
+	d.log.Infof("Start listening with scheme %v, addr %v", u.Scheme, addr)
 	listener, err := net.Listen(u.Scheme, addr)
 	if err != nil {
-		return errors.Errorf("failed to listen: %v", err)
+		return fmt.Errorf("failed to listen: %v", err)
 	}
 
 	// log response errors for better observability

@@ -38,7 +38,7 @@ type ExtraOptions struct {
 func NewExtraOptions() *ExtraOptions {
 	hostname, _ := os.Hostname()
 	return &ExtraOptions{
-		CSIAddress:   "unix:///var/lib/kubelet/plugins/com.kubevault.csi.secrets/csi.sock",
+		CSIAddress:   "unix:/tmp/csi/csi.sock",
 		ProbeTimeout: time.Second,
 		NodeName:     hostname,
 		QPS:          100,
