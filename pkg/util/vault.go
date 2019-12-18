@@ -29,6 +29,10 @@ import (
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
+const (
+	PolicyBindingRole = "secrets.csi.kubevault.com/policy-binding-role"
+)
+
 type PodInfo struct {
 	KubeClient kubernetes.Interface
 	AppClient  appcat_cs.AppcatalogV1alpha1Interface
@@ -58,8 +62,24 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 	binding.Namespace = pi.Namespace
 
 	if cf.UsePodServiceAccountForCSIDriver {
-		binding.Spec.Secret = nil
+		// Use the JWT token of pod's service account
+		// to perform Kubernetes auth in the Vault server.
 		cf.ServiceAccountName = pi.ServiceAccount
+		binding.Spec.Secret = nil
+
+		// Get pod's service account
+		sa, err := pi.KubeClient.CoreV1().ServiceAccounts(pi.Namespace).Get(pi.ServiceAccount, metav1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get pod's service account")
+		}
+
+		// Get the role name from service account annotations.
+		// Kubernetes authentication will be performed in the Vault server against this role.
+		if pbRole, ok := sa.Annotations[PolicyBindingRole]; ok {
+			cf.PolicyControllerRole = pbRole
+		} else {
+			return nil, errors.New("failed to get policy binding role from pod's service account")
+		}
 	}
 
 	rawData, err := json.Marshal(cf)
