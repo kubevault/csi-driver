@@ -307,32 +307,6 @@ e2e-tests: $(BUILD_DIRS)
 e2e-parallel:
 	@$(MAKE) e2e-tests GINKGO_ARGS="-p -stream" --no-print-directory
 
-.PHONY: ct
-ct: $(BUILD_DIRS)
-	@docker run                                                 \
-	    -i                                                      \
-	    --rm                                                    \
-	    -v $$(pwd):/src                                         \
-	    -w /src                                                 \
-	    --net=host                                              \
-	    -v $(HOME)/.kube:/.kube                                 \
-	    -v $(HOME)/.minikube:$(HOME)/.minikube                  \
-	    -v $(HOME)/.credentials:$(HOME)/.credentials            \
-	    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin                \
-	    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin/$(OS)_$(ARCH)  \
-	    -v $$(pwd)/.go/cache:/.cache                            \
-	    --env HTTP_PROXY=$(HTTP_PROXY)                          \
-	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
-	    --env KUBECONFIG=$(subst $(HOME),,$(KUBECONFIG))        \
-	    $(CHART_TEST_IMAGE)                                     \
-	    /bin/sh -c "                                            \
-		    kubectl -n kube-system create sa tiller;            \
-			kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller;   \
-			helm init --service-account tiller;                 \
-			kubectl wait --for=condition=Ready pods -n kube-system --all --timeout=5m;  \
-			ct lint-and-install --all;                          \
-	    "
-
 ADDTL_LINTERS   := goconst,gofmt,goimports,unparam
 
 .PHONY: lint
