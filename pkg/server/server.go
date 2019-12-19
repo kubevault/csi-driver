@@ -60,7 +60,9 @@ type VaultDriver struct {
 }
 
 func (op *VaultDriver) Run(stopCh <-chan struct{}) error {
-	go utilruntime.Must(op.Driver.Run())
+	go func() {
+		utilruntime.Must(op.Driver.Run())
+	}()
 	return op.GenericAPIServer.PrepareRun().Run(stopCh)
 }
 
