@@ -47,7 +47,7 @@ func init() {
 
 func TestDriverSuite(t *testing.T) {
 	socket := "/tmp/csi.sock"
-	endpoint := "unix://" + socket
+	endpoint := "unix:" + socket
 	if err := os.Remove(socket); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("failed to remove unix domain socket file %s, error: %s", socket, err)
 	}
@@ -79,7 +79,9 @@ func TestDriverSuite(t *testing.T) {
 	}
 	defer driver.Stop()
 
-	go utilruntime.Must(driver.Run())
+	go func() {
+		utilruntime.Must(driver.Run())
+	}()
 
 	tp := os.TempDir() + "/csi-target"
 	sp := os.TempDir() + "/csi-staging"
@@ -155,7 +157,9 @@ func NewFakeVaultServer() *httptest.Server {
 	m := pat.New()
 	m.Post("/v1/auth/kubernetes/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var v map[string]interface{}
-		defer utilruntime.Must(r.Body.Close())
+		defer func() {
+			utilruntime.Must(r.Body.Close())
+		}()
 		utilruntime.Must(json.NewDecoder(r.Body).Decode(&v))
 		if val, ok := v["jwt"]; ok {
 			if val.(string) == "sanity-token" {
@@ -194,6 +198,9 @@ func setupKubernetes(kc kubernetes.Interface) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "sanity-service",
 			Namespace: testNamespace,
+			Annotations: map[string]string{
+				"secrets.csi.kubevault.com/policy-binding-role": "demo-role",
+			},
 		},
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceAccount",
