@@ -85,8 +85,12 @@ func TestDriverSuite(t *testing.T) {
 
 	tp := os.TempDir() + "/csi-target"
 	sp := os.TempDir() + "/csi-staging"
-	defer utilruntime.Must(os.RemoveAll(tp))
-	defer utilruntime.Must(os.RemoveAll(sp))
+	defer func() {
+		utilruntime.Must(os.RemoveAll(tp))
+	}()
+	defer func() {
+		utilruntime.Must(os.RemoveAll(sp))
+	}()
 
 	cfg := &sanity.Config{
 		TargetPath:  tp,
@@ -172,7 +176,9 @@ func NewFakeVaultServer() *httptest.Server {
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 	m.Get("/v1/kv/:secret", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer utilruntime.Must(r.Body.Close())
+		defer func() {
+			utilruntime.Must(r.Body.Close())
+		}()
 		if params, found := pat.FromContext(r.Context()); found {
 			if got, want := params.Get(":secret"), "my-key"; got == want {
 				w.WriteHeader(http.StatusOK)
