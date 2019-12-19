@@ -161,9 +161,7 @@ func NewFakeVaultServer() *httptest.Server {
 	m := pat.New()
 	m.Post("/v1/auth/kubernetes/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var v map[string]interface{}
-		defer func() {
-			utilruntime.Must(r.Body.Close())
-		}()
+		defer r.Body.Close()
 		utilruntime.Must(json.NewDecoder(r.Body).Decode(&v))
 		if val, ok := v["jwt"]; ok {
 			if val.(string) == "sanity-token" {
@@ -176,9 +174,7 @@ func NewFakeVaultServer() *httptest.Server {
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 	m.Get("/v1/kv/:secret", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			utilruntime.Must(r.Body.Close())
-		}()
+		defer r.Body.Close()
 		if params, found := pat.FromContext(r.Context()); found {
 			if got, want := params.Get(":secret"), "my-key"; got == want {
 				w.WriteHeader(http.StatusOK)
