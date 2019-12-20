@@ -23,6 +23,7 @@ import (
 
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -59,7 +60,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 	}
 
 	binding := app.DeepCopy()
-	binding.Namespace = pi.Namespace
+	var saRef *core.ObjectReference
 
 	if cf.UsePodServiceAccountForCSIDriver {
 		// Use the JWT token of pod's service account
@@ -73,12 +74,21 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 			return nil, errors.Wrap(err, "failed to get pod's service account")
 		}
 
+		saRef = &core.ObjectReference{
+			Namespace: sa.Namespace,
+			Name:      sa.Name,
+		}
 		// Get the role name from service account annotations.
 		// Kubernetes authentication will be performed in the Vault server against this role.
 		if pbRole, ok := sa.Annotations[PolicyBindingRole]; ok {
 			cf.PolicyControllerRole = pbRole
 		} else {
 			return nil, errors.New("failed to get policy binding role from pod's service account")
+		}
+	} else if cf.ServiceAccountName != "" {
+		saRef = &core.ObjectReference{
+			Name:      cf.ServiceAccountName,
+			Namespace: binding.Namespace,
 		}
 	}
 
@@ -91,6 +101,5 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 		Raw: rawData,
 	}
 
-	return vaultauth.NewClientWithAppBinding(pi.KubeClient, binding)
-
+	return vaultauth.NewClientWithAppBindingAndSaRef(pi.KubeClient, binding, saRef)
 }
