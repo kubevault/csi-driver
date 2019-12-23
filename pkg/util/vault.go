@@ -60,7 +60,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 	}
 
 	binding := app.DeepCopy()
-	var saRef *core.ObjectReference
+	var sar *core.ObjectReference
 
 	if cf.UsePodServiceAccountForCSIDriver {
 		// Use the JWT token of pod's service account
@@ -74,9 +74,9 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 			return nil, errors.Wrap(err, "failed to get pod's service account")
 		}
 
-		saRef = &core.ObjectReference{
-			Namespace: sa.Namespace,
+		sar = &core.ObjectReference{
 			Name:      sa.Name,
+			Namespace: sa.Namespace,
 		}
 		// Get the role name from service account annotations.
 		// Kubernetes authentication will be performed in the Vault server against this role.
@@ -86,7 +86,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 			return nil, errors.New("failed to get policy binding role from pod's service account")
 		}
 	} else if cf.ServiceAccountName != "" {
-		saRef = &core.ObjectReference{
+		sar = &core.ObjectReference{
 			Name:      cf.ServiceAccountName,
 			Namespace: binding.Namespace,
 		}
@@ -101,5 +101,5 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 		Raw: rawData,
 	}
 
-	return vaultauth.NewClientWithAppBindingAndSaRef(pi.KubeClient, binding, saRef)
+	return vaultauth.NewClientWithAppBindingAndSaRef(pi.KubeClient, binding, sar)
 }
