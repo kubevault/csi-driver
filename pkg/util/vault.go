@@ -20,18 +20,19 @@ import (
 
 	config "kubevault.dev/operator/apis/config/v1alpha1"
 	vaultauth "kubevault.dev/operator/pkg/vault"
+	authtype "kubevault.dev/operator/pkg/vault/auth/types"
 
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	"kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
 )
 
 const (
-	PolicyBindingRole = "secrets.csi.kubevault.com/policy-binding-role"
+	VaultRole = "secrets.csi.kubevault.com/vault-role"
 )
 
 type PodInfo struct {
@@ -59,47 +60,44 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 		return nil, errors.Wrap(err, "failed to unmarshal parameters")
 	}
 
-	binding := app.DeepCopy()
-	var sar *core.ObjectReference
-
-	if cf.UsePodServiceAccountForCSIDriver {
-		// Use the JWT token of pod's service account
-		// to perform Kubernetes auth in the Vault server.
-		cf.ServiceAccountName = pi.ServiceAccount
-		binding.Spec.Secret = nil
-
-		// Get pod's service account
-		sa, err := pi.KubeClient.CoreV1().ServiceAccounts(pi.Namespace).Get(pi.ServiceAccount, metav1.GetOptions{})
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get pod's service account")
+	// If Kubernetes authentication information is given,
+	// perform Kubernetes auth to the Vault servers.
+	if cf.Kubernetes != nil {
+		authInfo := &authtype.AuthInfo{
+			VaultApp: app,
 		}
 
-		sar = &core.ObjectReference{
-			Name:      sa.Name,
-			Namespace: sa.Namespace,
-		}
-		// Get the role name from service account annotations.
-		// Kubernetes authentication will be performed in the Vault server against this role.
-		if pbRole, ok := sa.Annotations[PolicyBindingRole]; ok {
-			cf.PolicyControllerRole = pbRole
+		if cf.Kubernetes.UsePodServiceAccountForCSIDriver {
+			// Get pod's service account
+			sa, err := pi.KubeClient.CoreV1().ServiceAccounts(pi.Namespace).Get(pi.ServiceAccount, metav1.GetOptions{})
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get pod's service account")
+			}
+			authInfo.ServiceAccountRef = &core.ObjectReference{
+				Name:      sa.Name,
+				Namespace: sa.Namespace,
+			}
+
+			// Get the role name from service account annotations.
+			// Kubernetes authentication will be performed in the Vault server against this role.
+			if pbRole, ok := sa.Annotations[VaultRole]; ok {
+				authInfo.VaultRole = pbRole
+			} else {
+				return nil, errors.New("failed to get policy binding role from pod's service account")
+			}
 		} else {
-			return nil, errors.New("failed to get policy binding role from pod's service account")
+			authInfo.ServiceAccountRef = &core.ObjectReference{
+				Name:      cf.Kubernetes.ServiceAccountName,
+				Namespace: app.Namespace,
+			}
+			authInfo.VaultRole = cf.VaultRole
 		}
-	} else if cf.ServiceAccountName != "" {
-		sar = &core.ObjectReference{
-			Name:      cf.ServiceAccountName,
-			Namespace: binding.Namespace,
-		}
+
+		return vaultauth.NewClientWithAppBinding(pi.KubeClient, authInfo)
 	}
 
-	rawData, err := json.Marshal(cf)
-	if err != nil {
-		return nil, err
-	}
-
-	binding.Spec.Parameters = &runtime.RawExtension{
-		Raw: rawData,
-	}
-
-	return vaultauth.NewClientWithAppBindingAndSaRef(pi.KubeClient, binding, sar)
+	return vaultauth.NewClient(pi.KubeClient, pi.AppClient, &v1alpha1.AppReference{
+		Name:      app.Name,
+		Namespace: app.Namespace,
+	})
 }
