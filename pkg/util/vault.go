@@ -71,7 +71,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 			// Get pod's service account
 			sa, err := pi.KubeClient.CoreV1().ServiceAccounts(pi.Namespace).Get(pi.ServiceAccount, metav1.GetOptions{})
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to get pod's service account")
+				return nil, errors.Wrapf(err, "failed to get pod's service account: %s/%s", pi.Namespace, pi.ServiceAccount)
 			}
 			authInfo.ServiceAccountRef = &core.ObjectReference{
 				Name:      sa.Name,
@@ -83,7 +83,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 			if pbRole, ok := sa.Annotations[VaultRole]; ok {
 				authInfo.VaultRole = pbRole
 			} else {
-				return nil, errors.New("failed to get policy binding role from pod's service account")
+				return nil, errors.Errorf("pod's service account: %s/%s is missing annotation: %s", sa.Namespace, sa.Name, VaultRole)
 			}
 		} else {
 			authInfo.ServiceAccountRef = &core.ObjectReference{
