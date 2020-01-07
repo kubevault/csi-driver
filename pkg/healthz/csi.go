@@ -27,6 +27,7 @@ import (
 	connlib "github.com/kubernetes-csi/csi-lib-utils/connection"
 	"github.com/kubernetes-csi/csi-lib-utils/rpc"
 	"google.golang.org/grpc"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	lib "k8s.io/apiserver/pkg/server/healthz"
 	"k8s.io/klog"
 )
@@ -38,7 +39,7 @@ type healthProbe struct {
 
 	conn       *grpc.ClientConn
 	driverName string
-	init       sync.Once
+	once       sync.Once
 }
 
 func NewCSIProbe(csiAddress string, probeTimeout time.Duration) (lib.HealthChecker, error) {
@@ -57,27 +58,32 @@ func NewCSIProbe(csiAddress string, probeTimeout time.Duration) (lib.HealthCheck
 }
 
 func (h *healthProbe) Name() string {
-	return "csi-vault-healthProbe"
+	return "csi-vault-health-probe"
+}
+
+func (h *healthProbe) init() error {
+	csiConn, err := connlib.Connect(h.addr)
+	if err != nil {
+		// connlib should retry forever so a returned error should mean
+		// the grpc client is misconfigured rather than an error on the network
+		return fmt.Errorf("failed to establish connection to CSI driver: %v", err)
+	}
+
+	klog.Infof("calling CSI driver to discover driver name")
+	csiDriverName, err := rpc.GetDriverName(context.Background(), csiConn)
+	if err != nil {
+		return fmt.Errorf("failed to get CSI driver name: %v", err)
+	}
+	klog.Infof("CSI driver name: %q", csiDriverName)
+
+	h.conn = csiConn
+	h.driverName = csiDriverName
+	return nil
 }
 
 func (h *healthProbe) Check(req *http.Request) error {
-	h.init.Do(func() {
-		csiConn, err := connlib.Connect(h.addr)
-		if err != nil {
-			// connlib should retry forever so a returned error should mean
-			// the grpc client is misconfigured rather than an error on the network
-			klog.Fatalf("Failed to establish connection to CSI driver: %v", err)
-		}
-
-		klog.Infof("calling CSI driver to discover driver name")
-		csiDriverName, err := rpc.GetDriverName(context.Background(), csiConn)
-		if err != nil {
-			klog.Fatalf("Failed to get CSI driver name: %v", err)
-		}
-		klog.Infof("CSI driver name: %q", csiDriverName)
-
-		h.conn = csiConn
-		h.driverName = csiDriverName
+	h.once.Do(func() {
+		utilruntime.Must(h.init())
 	})
 
 	ctx, cancel := context.WithTimeout(req.Context(), h.probeTimeout)
