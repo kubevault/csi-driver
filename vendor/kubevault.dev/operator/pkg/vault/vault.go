@@ -18,6 +18,7 @@ package vault
 
 import (
 	vaultauth "kubevault.dev/operator/pkg/vault/auth"
+	authtype "kubevault.dev/operator/pkg/vault/auth/types"
 	vaultutil "kubevault.dev/operator/pkg/vault/util"
 
 	vaultapi "github.com/hashicorp/vault/api"
@@ -35,17 +36,25 @@ func NewClient(kc kubernetes.Interface, appc appcat_cs.AppcatalogV1alpha1Interfa
 		return nil, err
 	}
 
-	return NewClientWithAppBinding(kc, vApp)
-}
-
-func NewClientWithAppBinding(kc kubernetes.Interface, vApp *appcat.AppBinding) (*vaultapi.Client, error) {
-	if vApp == nil {
-		return nil, errors.New("AppBinding is nil")
+	authInfo, err := authtype.GetAuthInfoFromAppBinding(kc, vApp)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get authentication information")
 	}
 
-	auth, err := vaultauth.NewAuth(kc, vApp)
+	return NewClientWithAppBinding(kc, authInfo)
+}
+
+func NewClientWithAppBinding(kc kubernetes.Interface, authInfo *authtype.AuthInfo) (*vaultapi.Client, error) {
+	if authInfo == nil {
+		return nil, errors.New("authentication information is empty")
+	}
+	if authInfo.VaultApp == nil {
+		return nil, errors.New("AppBinding is empty")
+	}
+
+	auth, err := vaultauth.NewAuth(kc, authInfo)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create auth method")
 	}
 
 	token, err := auth.Login()
@@ -53,7 +62,7 @@ func NewClientWithAppBinding(kc kubernetes.Interface, vApp *appcat.AppBinding) (
 		return nil, errors.Wrap(err, "failed to login")
 	}
 
-	cfg, err := vaultutil.VaultConfigFromAppBinding(vApp)
+	cfg, err := vaultutil.VaultConfigFromAppBinding(authInfo.VaultApp)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to create vault client config")
 	}

@@ -345,13 +345,14 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.SecretTransform":      schema_custom_resources_apis_appcatalog_v1alpha1_SecretTransform(ref),
 		"kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.ServiceReference":     schema_custom_resources_apis_appcatalog_v1alpha1_ServiceReference(ref),
 		"kmodules.xyz/monitoring-agent-api/api/v1.AgentSpec":                          schema_kmodulesxyz_monitoring_agent_api_api_v1_AgentSpec(ref),
+		"kmodules.xyz/monitoring-agent-api/api/v1.PrometheusExporterSpec":             schema_kmodulesxyz_monitoring_agent_api_api_v1_PrometheusExporterSpec(ref),
 		"kmodules.xyz/monitoring-agent-api/api/v1.PrometheusSpec":                     schema_kmodulesxyz_monitoring_agent_api_api_v1_PrometheusSpec(ref),
 		"kmodules.xyz/offshoot-api/api/v1.ContainerRuntimeSettings":                   schema_kmodulesxyz_offshoot_api_api_v1_ContainerRuntimeSettings(ref),
 		"kmodules.xyz/offshoot-api/api/v1.IONiceSettings":                             schema_kmodulesxyz_offshoot_api_api_v1_IONiceSettings(ref),
 		"kmodules.xyz/offshoot-api/api/v1.NiceSettings":                               schema_kmodulesxyz_offshoot_api_api_v1_NiceSettings(ref),
 		"kmodules.xyz/offshoot-api/api/v1.ObjectMeta":                                 schema_kmodulesxyz_offshoot_api_api_v1_ObjectMeta(ref),
+		"kmodules.xyz/offshoot-api/api/v1.PartialObjectMeta":                          schema_kmodulesxyz_offshoot_api_api_v1_PartialObjectMeta(ref),
 		"kmodules.xyz/offshoot-api/api/v1.PersistentVolumeClaim":                      schema_kmodulesxyz_offshoot_api_api_v1_PersistentVolumeClaim(ref),
-		"kmodules.xyz/offshoot-api/api/v1.PersistentVolumeClaimObjectMeta":            schema_kmodulesxyz_offshoot_api_api_v1_PersistentVolumeClaimObjectMeta(ref),
 		"kmodules.xyz/offshoot-api/api/v1.PodRuntimeSettings":                         schema_kmodulesxyz_offshoot_api_api_v1_PodRuntimeSettings(ref),
 		"kmodules.xyz/offshoot-api/api/v1.PodSpec":                                    schema_kmodulesxyz_offshoot_api_api_v1_PodSpec(ref),
 		"kmodules.xyz/offshoot-api/api/v1.PodTemplateSpec":                            schema_kmodulesxyz_offshoot_api_api_v1_PodTemplateSpec(ref),
@@ -15999,6 +16000,72 @@ func schema_kmodulesxyz_monitoring_agent_api_api_v1_AgentSpec(ref common.Referen
 					},
 					"args": {
 						SchemaProps: spec.SchemaProps{
+							Description: "Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell Deprecated: use prometheus.exporter.args",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"env": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "name",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "List of environment variables to set in the container. Cannot be updated. Deprecated Deprecated: use prometheus.exporter.env",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.EnvVar"),
+									},
+								},
+							},
+						},
+					},
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Compute Resources required by exporter container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/ Deprecated: use prometheus.exporter.resources",
+							Ref:         ref("k8s.io/api/core/v1.ResourceRequirements"),
+						},
+					},
+					"securityContext": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Security options the pod should run with. More info: https://kubernetes.io/docs/concepts/policy/security-context/ More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ Deprecated: use prometheus.exporter.securityContext",
+							Ref:         ref("k8s.io/api/core/v1.SecurityContext"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.EnvVar", "k8s.io/api/core/v1.ResourceRequirements", "k8s.io/api/core/v1.SecurityContext", "kmodules.xyz/monitoring-agent-api/api/v1.PrometheusSpec"},
+	}
+}
+
+func schema_kmodulesxyz_monitoring_agent_api_api_v1_PrometheusExporterSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"port": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Port number for the exporter side car.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"args": {
+						SchemaProps: spec.SchemaProps{
 							Description: "Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -16046,7 +16113,7 @@ func schema_kmodulesxyz_monitoring_agent_api_api_v1_AgentSpec(ref common.Referen
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.EnvVar", "k8s.io/api/core/v1.ResourceRequirements", "k8s.io/api/core/v1.SecurityContext", "kmodules.xyz/monitoring-agent-api/api/v1.PrometheusSpec"},
+			"k8s.io/api/core/v1.EnvVar", "k8s.io/api/core/v1.ResourceRequirements", "k8s.io/api/core/v1.SecurityContext"},
 	}
 }
 
@@ -16058,21 +16125,21 @@ func schema_kmodulesxyz_monitoring_agent_api_api_v1_PrometheusSpec(ref common.Re
 				Properties: map[string]spec.Schema{
 					"port": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Port number for the exporter side car.",
+							Description: "Port number for the exporter side car. Deprecated: use exporter.port",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Namespace of Prometheus. Service monitors will be created in this namespace.",
+							Description: "Namespace of Prometheus. Service monitors will be created in this namespace. Deprecated: will be removed in a future release",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"labels": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Labels are key value pairs that is used to select Prometheus instance via ServiceMonitor labels.",
+							Description: "Labels are key value pairs that is used to select Prometheus instance via ServiceMonitor labels. Deprecated: will be removed in a future release",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
@@ -16087,14 +16154,21 @@ func schema_kmodulesxyz_monitoring_agent_api_api_v1_PrometheusSpec(ref common.Re
 					},
 					"interval": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Interval at which metrics should be scraped",
+							Description: "Interval at which metrics should be scraped Deprecated: will be removed in a future release",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"exporter": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kmodules.xyz/monitoring-agent-api/api/v1.PrometheusExporterSpec"),
 						},
 					},
 				},
 			},
 		},
+		Dependencies: []string{
+			"kmodules.xyz/monitoring-agent-api/api/v1.PrometheusExporterSpec"},
 	}
 }
 
@@ -16258,54 +16332,7 @@ func schema_kmodulesxyz_offshoot_api_api_v1_ObjectMeta(ref common.ReferenceCallb
 	}
 }
 
-func schema_kmodulesxyz_offshoot_api_api_v1_PersistentVolumeClaim(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "PersistentVolumeClaim is a user's request for and claim to a persistent volume",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
-							Ref:         ref("kmodules.xyz/offshoot-api/api/v1.PersistentVolumeClaimObjectMeta"),
-						},
-					},
-					"spec": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Spec defines the desired characteristics of a volume requested by a pod author. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
-							Ref:         ref("k8s.io/api/core/v1.PersistentVolumeClaimSpec"),
-						},
-					},
-					"status": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Status represents the current information/status of a persistent volume claim. Read-only. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
-							Ref:         ref("k8s.io/api/core/v1.PersistentVolumeClaimStatus"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/api/core/v1.PersistentVolumeClaimSpec", "k8s.io/api/core/v1.PersistentVolumeClaimStatus", "kmodules.xyz/offshoot-api/api/v1.PersistentVolumeClaimObjectMeta"},
-	}
-}
-
-func schema_kmodulesxyz_offshoot_api_api_v1_PersistentVolumeClaimObjectMeta(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kmodulesxyz_offshoot_api_api_v1_PartialObjectMeta(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -16387,6 +16414,53 @@ func schema_kmodulesxyz_offshoot_api_api_v1_PersistentVolumeClaimObjectMeta(ref 
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"},
+	}
+}
+
+func schema_kmodulesxyz_offshoot_api_api_v1_PersistentVolumeClaim(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PersistentVolumeClaim is a user's request for and claim to a persistent volume",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
+							Ref:         ref("kmodules.xyz/offshoot-api/api/v1.PartialObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Spec defines the desired characteristics of a volume requested by a pod author. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
+							Ref:         ref("k8s.io/api/core/v1.PersistentVolumeClaimSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status represents the current information/status of a persistent volume claim. Read-only. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
+							Ref:         ref("k8s.io/api/core/v1.PersistentVolumeClaimStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.PersistentVolumeClaimSpec", "k8s.io/api/core/v1.PersistentVolumeClaimStatus", "kmodules.xyz/offshoot-api/api/v1.PartialObjectMeta"},
 	}
 }
 
@@ -17149,7 +17223,7 @@ func schema_operator_apis_kubevault_v1alpha1_AzureKeyVault(ref common.ReferenceC
 				Description: "AzureKeyVault contain the fields that required to unseal vault using azure key vault",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"vaultBaseUrl": {
+					"vaultBaseURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Azure key vault url, for example https://myvault.vault.azure.net",
 							Type:        []string{"string"},
@@ -17192,7 +17266,7 @@ func schema_operator_apis_kubevault_v1alpha1_AzureKeyVault(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"vaultBaseUrl", "tenantID"},
+				Required: []string{"vaultBaseURL", "tenantID"},
 			},
 		},
 	}
@@ -17273,12 +17347,12 @@ func schema_operator_apis_kubevault_v1alpha1_BackendStorageSpec(ref common.Refer
 							Ref: ref("kubevault.dev/operator/apis/kubevault/v1alpha1.AzureSpec"),
 						},
 					},
-					"postgreSQL": {
+					"postgresql": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("kubevault.dev/operator/apis/kubevault/v1alpha1.PostgreSQLSpec"),
 						},
 					},
-					"mySQL": {
+					"mysql": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("kubevault.dev/operator/apis/kubevault/v1alpha1.MySQLSpec"),
 						},
@@ -17288,7 +17362,7 @@ func schema_operator_apis_kubevault_v1alpha1_BackendStorageSpec(ref common.Refer
 							Ref: ref("kubevault.dev/operator/apis/kubevault/v1alpha1.FileSpec"),
 						},
 					},
-					"dynamoDB": {
+					"dynamodb": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("kubevault.dev/operator/apis/kubevault/v1alpha1.DynamoDBSpec"),
 						},
@@ -17443,7 +17517,7 @@ func schema_operator_apis_kubevault_v1alpha1_DynamoDBSpec(ref common.ReferenceCa
 				Description: "vault doc: https://www.vaultproject.io/docs/configuration/storage/dynamodb.html\n\nDynamoDBSpec defines configuration to set up DynamoDB Storage as backend storage in vault",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"endPoint": {
+					"endpoint": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies an alternative, AWS compatible, DynamoDB endpoint.",
 							Type:        []string{"string"},
@@ -17596,10 +17670,18 @@ func schema_operator_apis_kubevault_v1alpha1_FileSpec(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"volumeClaimTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "volumeClaimTemplate is a claim that pods are allowed to reference. The VaultServer controller is responsible for deploying the claim and update the volumeMounts in the Vault server container in the template.",
+							Ref:         ref("kmodules.xyz/offshoot-api/api/v1.PersistentVolumeClaim"),
+						},
+					},
 				},
 				Required: []string{"path"},
 			},
 		},
+		Dependencies: []string{
+			"kmodules.xyz/offshoot-api/api/v1.PersistentVolumeClaim"},
 	}
 }
 
@@ -17837,7 +17919,7 @@ func schema_operator_apis_kubevault_v1alpha1_PostgreSQLSpec(ref common.Reference
 				Description: "vault doc: https://www.vaultproject.io/docs/configuration/storage/postgresql.html\n\nPostgreSQLSpec defines configuration to set up PostgreSQL storage as backend storage in vault",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"connectionUrlSecret": {
+					"connectionURLSecret": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies the name of the secret containing the connection string to use to authenticate and connect to PostgreSQL. A full list of supported parameters can be found in the pq library documentation(https://godoc.org/github.com/lib/pq#hdr-Connection_String_Parameters). secret data:\n\t- connection_url:<data>",
 							Type:        []string{"string"},
@@ -17859,7 +17941,7 @@ func schema_operator_apis_kubevault_v1alpha1_PostgreSQLSpec(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"connectionUrlSecret"},
+				Required: []string{"connectionURLSecret"},
 			},
 		},
 	}
@@ -17879,7 +17961,7 @@ func schema_operator_apis_kubevault_v1alpha1_S3Spec(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
-					"endPoint": {
+					"endpoint": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies an alternative, AWS compatible, S3 endpoint.",
 							Type:        []string{"string"},
@@ -17914,7 +17996,7 @@ func schema_operator_apis_kubevault_v1alpha1_S3Spec(ref common.ReferenceCallback
 							Format:      "int64",
 						},
 					},
-					"s3ForcePathStyle": {
+					"forcePathStyle": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies whether to use host bucket style domains with the configured endpoint.",
 							Type:        []string{"boolean"},
@@ -17942,7 +18024,7 @@ func schema_operator_apis_kubevault_v1alpha1_SwiftSpec(ref common.ReferenceCallb
 				Description: "vault doc: https://www.vaultproject.io/docs/configuration/storage/swift.html\n\nSwiftSpec defines configuration to set up Swift Storage as backend storage in vault",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"authUrl": {
+					"authURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies the OpenStack authentication endpoint.",
 							Type:        []string{"string"},
@@ -18005,7 +18087,7 @@ func schema_operator_apis_kubevault_v1alpha1_SwiftSpec(ref common.ReferenceCallb
 							Format:      "",
 						},
 					},
-					"storageUrl": {
+					"storageURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Specifies storage URL from alternate authentication.",
 							Type:        []string{"string"},
@@ -18027,7 +18109,7 @@ func schema_operator_apis_kubevault_v1alpha1_SwiftSpec(ref common.ReferenceCallb
 						},
 					},
 				},
-				Required: []string{"authUrl", "container", "credentialSecret"},
+				Required: []string{"authURL", "container", "credentialSecret"},
 			},
 		},
 	}
@@ -18252,9 +18334,9 @@ func schema_operator_apis_kubevault_v1alpha1_VaultServerSpec(ref common.Referenc
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"nodes": {
+					"replicas": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Number of nodes to deploy for a Vault deployment. Default: 1.",
+							Description: "Number of replicas to deploy for a Vault deployment. If unspecified, defaults to 1.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},

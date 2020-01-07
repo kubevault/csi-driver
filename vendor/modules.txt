@@ -955,14 +955,13 @@ k8s.io/kube-openapi/pkg/util
 k8s.io/kube-openapi/pkg/util/proto
 # k8s.io/kubernetes v1.16.3 => github.com/kmodules/kubernetes v1.17.0-alpha.0.0.20191127022853-9d027e3886fd
 k8s.io/kubernetes/pkg/api/legacyscheme
-k8s.io/kubernetes/pkg/apis/core
 # k8s.io/utils v0.0.0-20190801114015-581e00157fb1 => k8s.io/utils v0.0.0-20190801114015-581e00157fb1
 k8s.io/utils/buffer
 k8s.io/utils/integer
 k8s.io/utils/path
 k8s.io/utils/pointer
 k8s.io/utils/trace
-# kmodules.xyz/client-go v0.0.0-20191127054604-26981530831d
+# kmodules.xyz/client-go v0.0.0-20200106150425-a0ac4ecfc3da
 kmodules.xyz/client-go
 kmodules.xyz/client-go/discovery
 kmodules.xyz/client-go/logs
@@ -980,11 +979,11 @@ kmodules.xyz/custom-resources/client/clientset/versioned/fake
 kmodules.xyz/custom-resources/client/clientset/versioned/scheme
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1/fake
-# kmodules.xyz/monitoring-agent-api v0.0.0-20191127151826-1eac40b764dc
+# kmodules.xyz/monitoring-agent-api v0.0.0-20191224204126-ee69caffab6c
 kmodules.xyz/monitoring-agent-api/api/v1
-# kmodules.xyz/offshoot-api v0.0.0-20191130175124-5676c4869928
+# kmodules.xyz/offshoot-api v0.0.0-20200103145223-2c4f520520d2
 kmodules.xyz/offshoot-api/api/v1
-# kubevault.dev/operator v0.0.0-20191130190210-a4a972e3ecdd
+# kubevault.dev/operator v0.0.0-20200106154909-33fd833d2a39
 kubevault.dev/operator/api/crds
 kubevault.dev/operator/apis
 kubevault.dev/operator/apis/catalog
