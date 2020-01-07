@@ -201,7 +201,7 @@ func setupKubernetes(kc kubernetes.Interface) error {
 			Name:      "sanity-service",
 			Namespace: testNamespace,
 			Annotations: map[string]string{
-				"secrets.csi.kubevault.com/policy-binding-role": "demo-role",
+				"secrets.csi.kubevault.com/vault-role": "demo-role",
 			},
 		},
 		TypeMeta: metav1.TypeMeta{
@@ -244,9 +244,12 @@ func getAppBindingWithFakeClient(vaultUrl string) (appcat_cs.AppcatalogV1alpha1I
 	data := `{
       "apiVersion": "kubevault.com/v1alpha1",
       "kind": "VaultServerConfiguration",
-      "usePodServiceAccountForCSIDriver": true,
-      "authPath": "kubernetes",
-	  "policyControllerRole": "testrole"
+      "kubernetes": {
+		"serviceAccountName": "demo-sa",
+		"usePodServiceAccountForCSIDriver": true
+		},
+      "path": "kubernetes",
+	  "vaultRole": "testrole"
     }`
 
 	app := cr.AppBinding{
@@ -280,8 +283,12 @@ func TestRaw(t *testing.T) {
 	data := `{
       "apiVersion": "kubevault.com/v1alpha1",
       "kind": "VaultServerConfiguration",
-      "usePodServiceAccountForCSIDriver": "true",
-      "authPath": "kubernetes"
+      "kubernetes": {
+		"serviceAccountName": "demo-sa",
+		"usePodServiceAccountForCSIDriver": true
+		},
+      "path": "kubernetes",
+	  "vaultRole": "testrole"
     }`
 	x, e := json.Marshal(data)
 	fmt.Println(e)
