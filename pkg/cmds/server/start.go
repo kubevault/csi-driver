@@ -24,6 +24,7 @@ import (
 	"kubevault.dev/csi-driver/pkg/healthz"
 	"kubevault.dev/csi-driver/pkg/server"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -116,6 +117,11 @@ func (o VaultDriverOptions) Run(stopCh <-chan struct{}) error {
 	s, err := config.Complete().New()
 	if err != nil {
 		return err
+	}
+
+	err = config.ExtraConfig.EnsureCRDs()
+	if err != nil {
+		return errors.Wrap(err, "failed to register crds")
 	}
 
 	return s.Run(stopCh)
