@@ -1016,8 +1016,8 @@ k8s.io/utils v0.0.0-20190801114015-581e00157fb1 h1:+ySTxfHnfzZb9ys375PXNlLhkJPLK
 k8s.io/utils v0.0.0-20190801114015-581e00157fb1/go.mod h1:sZAwmy6armz5eXlNoLmJcl4F1QuKu7sr+mFQ0byX7Ew=
 kmodules.xyz/client-go v0.0.0-20191127054604-26981530831d h1:hcgo8g2vWx3jVEcbWyeOBZHpWKjS99WPH3Iboik/OIE=
 kmodules.xyz/client-go v0.0.0-20191127054604-26981530831d/go.mod h1:OFxuKCiVR+MYlR2a08FkfaF+IbXkLe0xBetu2LTUuGI=
-kmodules.xyz/client-go v0.0.0-20200106150425-a0ac4ecfc3da h1:qN5EDKp4GNWKsrx1U4Kzknf9+X5RkisRHpFy726Qm1I=
-kmodules.xyz/client-go v0.0.0-20200106150425-a0ac4ecfc3da/go.mod h1:OFxuKCiVR+MYlR2a08FkfaF+IbXkLe0xBetu2LTUuGI=
+kmodules.xyz/client-go v0.0.0-20200108114229-70ba8841e60f h1:5ESkNkJbL/oqn82REmxuQUm4WKVFZeuU3P4mEvI24JM=
+kmodules.xyz/client-go v0.0.0-20200108114229-70ba8841e60f/go.mod h1:OFxuKCiVR+MYlR2a08FkfaF+IbXkLe0xBetu2LTUuGI=
 kmodules.xyz/constants v0.0.0-20191024095500-cd4313df4aa6/go.mod h1:DbiFk1bJ1KEO94t1SlAn7tzc+Zz95rSXgyUKa2nzPmY=
 kmodules.xyz/crd-schema-fuzz v0.0.0-20191129174258-81f984340891/go.mod h1:9NXNZ4xhqof0WngtIuo4vl+WoCQpLJEJcyuEo3mPpiM=
 kmodules.xyz/custom-resources v0.0.0-20191130062942-f41b54f62419 h1:o6KD8XMxdyRR3rqScTsWvcufFDT7vQBnYXpHUp6UtRg=
@@ -1028,8 +1028,8 @@ kmodules.xyz/offshoot-api v0.0.0-20200103145223-2c4f520520d2 h1:c/wxNy8KgaS8v/ht
 kmodules.xyz/offshoot-api v0.0.0-20200103145223-2c4f520520d2/go.mod h1:k1M+OOFHbMeS6N6OB2j9smKfMCyQOEQjZ3SLZ/KSe+w=
 kmodules.xyz/openshift v0.0.0-20191127054841-113eeb13704f/go.mod h1:de9+Zk2+wtGhRmGFBZ9T4+0lJZr4rHXW0dHffCaeO+g=
 kmodules.xyz/webhook-runtime v0.0.0-20191127075323-d4bfdee6974d/go.mod h1:aaaxyAmKOpw0ey3LrpBkqWq0LTl35f9PW6mhwVDBMow=
-kubevault.dev/operator v0.0.0-20200106154909-33fd833d2a39 h1:k3TYI6xVo0CcXOFm3IjqR2mKu6xwn++02/nlXb/sOsM=
-kubevault.dev/operator v0.0.0-20200106154909-33fd833d2a39/go.mod h1:RN/ToSeZd4+iARlxddO3NvRHuzD18LWsyUvTtJ+F1zQ=
+kubevault.dev/operator v0.3.0 h1:oWMuuf7irbs2pZNRTqrro9Y2o5ecDaAVDt52is7G9WQ=
+kubevault.dev/operator v0.3.0/go.mod h1:WP/xQt9OKDptISJBiOadbHhURQnezA9vJ5HorScI9jw=
 layeh.com/radius v0.0.0-20190322222518-890bc1058917/go.mod h1:fywZKyu//X7iRzaxLgPWsvc0L26IUpVvE/aeIL2JtIQ=
 modernc.org/cc v1.0.0/go.mod h1:1Sk4//wdnYJiUIxnW8ddKpaOJCF37yAdqYnkxUpaYxw=
 modernc.org/golex v1.0.0/go.mod h1:b/QX9oBD/LhixY6NDh+IdGv17hgB+51fET1i2kPSmvk=
