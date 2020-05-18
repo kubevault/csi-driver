@@ -3,7 +3,7 @@ module kubevault.dev/csi-driver
 go 1.12
 
 require (
-	github.com/appscode/go v0.0.0-20191119085241-0887d8ec2ecc
+	github.com/appscode/go v0.0.0-20200323182826-54e98e09185a
 	github.com/appscode/pat v0.0.0-20170521084856-48ff78925b79
 	github.com/container-storage-interface/spec v1.1.0
 	github.com/golang/protobuf v1.3.2
@@ -28,9 +28,9 @@ require (
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/klog v0.4.0
 	k8s.io/kubernetes v1.16.3
-	kmodules.xyz/client-go v0.0.0-20200108114229-70ba8841e60f
+	kmodules.xyz/client-go v0.0.0-20200518125232-435dcc370844
 	kmodules.xyz/custom-resources v0.0.0-20191130062942-f41b54f62419
-	kubevault.dev/operator v0.3.0
+	kubevault.dev/operator v0.3.1-0.20200518182915-4e709413c4d1
 )
 
 replace (
