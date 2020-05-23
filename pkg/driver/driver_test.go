@@ -16,6 +16,7 @@ limitations under the License.
 package driver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -215,7 +216,7 @@ func setupKubernetes(kc kubernetes.Interface) error {
 			},
 		},
 	}
-	_, err := kc.CoreV1().ServiceAccounts(testNamespace).Create(&svc)
+	_, err := kc.CoreV1().ServiceAccounts(testNamespace).Create(context.TODO(), &svc, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -233,7 +234,7 @@ func setupKubernetes(kc kubernetes.Interface) error {
 			"token": []byte("sanity-token"),
 		},
 	}
-	if _, err = kc.CoreV1().Secrets(testNamespace).Create(&secret); err != nil {
+	if _, err = kc.CoreV1().Secrets(testNamespace).Create(context.TODO(), &secret, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
@@ -272,7 +273,7 @@ func getAppBindingWithFakeClient(vaultUrl string) (appcat_cs.AppcatalogV1alpha1I
 		},
 	}
 	client := appFake.NewSimpleClientset().AppcatalogV1alpha1()
-	_, err := client.AppBindings(testNamespace).Create(&app)
+	_, err := client.AppBindings(testNamespace).Create(context.TODO(), &app, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}

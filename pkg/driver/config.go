@@ -16,6 +16,8 @@ limitations under the License.
 package driver
 
 import (
+	"context"
+
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/sirupsen/logrus"
 	crd_api "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -60,7 +62,7 @@ func (c *Config) EnsureCRDs() error {
 	crds := []*crd_api.CustomResourceDefinition{
 		appcat.AppBinding{}.CustomResourceDefinition(),
 	}
-	return crdutils.RegisterCRDs(c.KubeClient.Discovery(), c.CRDClient, crds)
+	return crdutils.RegisterCRDs(context.TODO(), c.KubeClient.Discovery(), c.CRDClient, crds)
 }
 
 func (c *Config) New() (*Driver, error) {
