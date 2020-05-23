@@ -16,6 +16,7 @@ limitations under the License.
 package util
 
 import (
+	"context"
 	"encoding/json"
 
 	config "kubevault.dev/operator/apis/config/v1alpha1"
@@ -49,7 +50,7 @@ type PodInfo struct {
 }
 
 func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
-	app, err := pi.AppClient.AppBindings(pi.RefNamespace).Get(pi.RefName, metav1.GetOptions{})
+	app, err := pi.AppClient.AppBindings(pi.RefNamespace).Get(context.TODO(), pi.RefName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 
 		if cf.Kubernetes.UsePodServiceAccountForCSIDriver {
 			// Get pod's service account
-			sa, err := pi.KubeClient.CoreV1().ServiceAccounts(pi.Namespace).Get(pi.ServiceAccount, metav1.GetOptions{})
+			sa, err := pi.KubeClient.CoreV1().ServiceAccounts(pi.Namespace).Get(context.TODO(), pi.ServiceAccount, metav1.GetOptions{})
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to get pod's service account: %s/%s", pi.Namespace, pi.ServiceAccount)
 			}

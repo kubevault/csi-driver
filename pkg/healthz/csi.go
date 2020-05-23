@@ -25,6 +25,7 @@ import (
 	"time"
 
 	connlib "github.com/kubernetes-csi/csi-lib-utils/connection"
+	"github.com/kubernetes-csi/csi-lib-utils/metrics"
 	"github.com/kubernetes-csi/csi-lib-utils/rpc"
 	"google.golang.org/grpc"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -62,7 +63,7 @@ func (h *healthProbe) Name() string {
 }
 
 func (h *healthProbe) init() error {
-	csiConn, err := connlib.Connect(h.addr)
+	csiConn, err := connlib.Connect(h.addr, metrics.NewCSIMetricsManager("secrets.csi.kubevault.com"))
 	if err != nil {
 		// connlib should retry forever so a returned error should mean
 		// the grpc client is misconfigured rather than an error on the network
