@@ -16,15 +16,12 @@ limitations under the License.
 package driver
 
 import (
-	"context"
-
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/sirupsen/logrus"
-	crd_api "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	crdutils "kmodules.xyz/client-go/apiextensions/v1beta1"
+	"kmodules.xyz/client-go/apiextensions"
 	"kmodules.xyz/client-go/discovery"
 	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 	appcat_cs "kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1"
@@ -41,7 +38,7 @@ type Config struct {
 	ClientConfig *rest.Config
 	KubeClient   kubernetes.Interface
 	AppClient    appcat_cs.AppcatalogV1alpha1Interface
-	CRDClient    crd_cs.ApiextensionsV1beta1Interface
+	CRDClient    crd_cs.Interface
 }
 
 func NewConfig(clientConfig *rest.Config) *Config {
@@ -59,10 +56,10 @@ func isSupportedVersion(kc kubernetes.Interface) error {
 }
 
 func (c *Config) EnsureCRDs() error {
-	crds := []*crd_api.CustomResourceDefinition{
+	crds := []*apiextensions.CustomResourceDefinition{
 		appcat.AppBinding{}.CustomResourceDefinition(),
 	}
-	return crdutils.RegisterCRDs(context.TODO(), c.KubeClient.Discovery(), c.CRDClient, crds)
+	return apiextensions.RegisterCRDs(c.CRDClient, crds)
 }
 
 func (c *Config) New() (*Driver, error) {

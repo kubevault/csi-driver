@@ -27,9 +27,9 @@ require (
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/klog v1.0.0
 	k8s.io/kubernetes v1.18.3
-	kmodules.xyz/client-go v0.0.0-20200523180309-e14e2743ead4
-	kmodules.xyz/custom-resources v0.0.0-20200521070540-2221c4957ef6
-	kubevault.dev/operator v0.3.1-0.20200523200258-b817c589e102
+	kmodules.xyz/client-go v0.0.0-20200525195850-2fd180961371
+	kmodules.xyz/custom-resources v0.0.0-20200525205248-56eeb11ebcf3
+	kubevault.dev/operator v0.4.0-alpha.0
 )
 
 replace (
@@ -51,6 +51,7 @@ replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.0.0
 	go.etcd.io/etcd => go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
+	k8s.io/api => github.com/kmodules/api v0.18.4-0.20200524125823-c8bc107809b9
 	k8s.io/apimachinery => github.com/kmodules/apimachinery v0.19.0-alpha.0.0.20200520235721-10b58e57a423
 	k8s.io/apiserver => github.com/kmodules/apiserver v0.18.4-0.20200521000930-14c5f6df9625
 	k8s.io/client-go => k8s.io/client-go v0.18.3
