@@ -66,10 +66,17 @@ aliases:
 `))
 )
 
+func docsDir() string {
+	if dir, ok := os.LookupEnv("DOCS_ROOT"); ok {
+		return dir
+	}
+	return runtime.GOPath() + "/src/kubevault.dev/docs"
+}
+
 // ref: https://github.com/spf13/cobra/blob/master/doc/md_docs.md
 func main() {
 	rootCmd := cmds.NewRootCmd()
-	dir := runtime.GOPath() + "/src/kubevault.dev/docs/docs/reference/csi-driver"
+	dir := filepath.Join(docsDir(), "docs", "reference", "csi-driver")
 	fmt.Printf("Generating cli markdown tree in: %v\n", dir)
 	err := os.RemoveAll(dir)
 	if err != nil {
