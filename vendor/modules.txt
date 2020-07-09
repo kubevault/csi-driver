@@ -1052,7 +1052,7 @@ kmodules.xyz/custom-resources/crds
 kmodules.xyz/monitoring-agent-api/api/v1
 # kmodules.xyz/offshoot-api v0.0.0-20200521035628-e135bf07b226
 kmodules.xyz/offshoot-api/api/v1
-# kubevault.dev/operator v0.4.0-alpha.0
+# kubevault.dev/operator v0.4.0-beta.0
 kubevault.dev/operator/api/crds
 kubevault.dev/operator/apis
 kubevault.dev/operator/apis/catalog
