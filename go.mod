@@ -27,7 +27,7 @@ require (
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/klog v1.0.0
 	k8s.io/kubernetes v1.18.3
-	kmodules.xyz/client-go v0.0.0-20200730042423-9c59c231fe96
+	kmodules.xyz/client-go v0.0.0-20200805154632-5bf10f227624
 	kmodules.xyz/custom-resources v0.0.0-20200604135349-9e9f5c4fdba9
 	kubevault.dev/operator v0.4.0-beta.0
 )
