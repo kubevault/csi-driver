@@ -58,7 +58,7 @@ OS   := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
 ARCH := $(if $(GOARCH),$(GOARCH),$(shell go env GOARCH))
 
 BASEIMAGE_PROD   ?= alpine:3.9
-BASEIMAGE_DBG    ?= debian:stretch
+BASEIMAGE_DBG    ?= debian:buster
 
 IMAGE            := $(REGISTRY)/$(BIN)
 VERSION_PROD     := $(VERSION)
