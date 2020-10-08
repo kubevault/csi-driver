@@ -84,8 +84,8 @@ BUILD_DIRS  := bin/$(OS)_$(ARCH)     \
                $(HOME)/.kube         \
                $(HOME)/.minikube
 
-DOCKERFILE_PROD  = in.Dockerfile
-DOCKERFILE_DBG   = dbg.Dockerfile
+DOCKERFILE_PROD  = Dockerfile.in
+DOCKERFILE_DBG   = Dockerfile.dbg
 
 DOCKER_REPO_ROOT := /go/src/$(GO_PKG)/$(REPO)
 
