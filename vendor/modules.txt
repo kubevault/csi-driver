@@ -1097,7 +1097,7 @@ kmodules.xyz/client-go/tools/analytics
 kmodules.xyz/client-go/tools/cli
 kmodules.xyz/client-go/tools/clientcmd
 kmodules.xyz/client-go/tools/clusterid
-# kmodules.xyz/custom-resources v0.0.0-20200922210108-70f2815a43bb
+# kmodules.xyz/custom-resources v0.0.0-20201008012351-6d8090f759d4
 kmodules.xyz/custom-resources/apis/appcatalog
 kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1
 kmodules.xyz/custom-resources/client/clientset/versioned
@@ -1106,7 +1106,7 @@ kmodules.xyz/custom-resources/client/clientset/versioned/scheme
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 kmodules.xyz/custom-resources/crds
-# kmodules.xyz/monitoring-agent-api v0.0.0-20200922204510-b8b5610e5385
+# kmodules.xyz/monitoring-agent-api v0.0.0-20201007104803-408a1ff2de8d
 kmodules.xyz/monitoring-agent-api/api/v1
 # kmodules.xyz/offshoot-api v0.0.0-20200922211229-36acc531abab
 kmodules.xyz/offshoot-api/api/v1
