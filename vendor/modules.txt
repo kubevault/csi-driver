@@ -1106,7 +1106,7 @@ kmodules.xyz/custom-resources/client/clientset/versioned/scheme
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1
 kmodules.xyz/custom-resources/client/clientset/versioned/typed/appcatalog/v1alpha1/fake
 kmodules.xyz/custom-resources/crds
-# kmodules.xyz/monitoring-agent-api v0.0.0-20201007104803-408a1ff2de8d
+# kmodules.xyz/monitoring-agent-api v0.0.0-20201022103441-f51a42fb9ac8
 kmodules.xyz/monitoring-agent-api/api/v1
 # kmodules.xyz/offshoot-api v0.0.0-20200922211229-36acc531abab
 kmodules.xyz/offshoot-api/api/v1

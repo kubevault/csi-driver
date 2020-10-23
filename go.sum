@@ -1688,8 +1688,6 @@ kmodules.xyz/client-go v0.0.0-20200915091229-7df16c29f4e8 h1:C6+M9aTLhPCmsJ8dmhP
 kmodules.xyz/client-go v0.0.0-20200915091229-7df16c29f4e8/go.mod h1:sY/eoe4ktxZEoHpr5NpAQ5s22VSwTE8psJtKVeVgLRY=
 kmodules.xyz/client-go v0.0.0-20200922200830-63d86b6e5b63 h1:luKlEul8LMhyyftoZN34+vboL9MWAeQpSAUZxaLZBGg=
 kmodules.xyz/client-go v0.0.0-20200922200830-63d86b6e5b63/go.mod h1:JZN34jqk6ZlR+QOnBPpnUVBab4rmfamqxfSvLaulBMY=
-kmodules.xyz/client-go v0.0.0-20201007024140-3223988adf40 h1:XQLn2whq+TYbGxVloiyopxSM9jsqjqvWQjltXFKd+aA=
-kmodules.xyz/client-go v0.0.0-20201007024140-3223988adf40/go.mod h1:pnRh7gtJ6ErPJQBkQeRlpD95KRtxhD4eGrYagZEU8RM=
 kmodules.xyz/client-go v0.0.0-20201021051118-03dac1aea508 h1:LjidyEzvw1rSlwRQLWNfElleLJ6vr9Uu5tn5H6JO+QA=
 kmodules.xyz/client-go v0.0.0-20201021051118-03dac1aea508/go.mod h1:pnRh7gtJ6ErPJQBkQeRlpD95KRtxhD4eGrYagZEU8RM=
 kmodules.xyz/constants v0.0.0-20200506032633-a21e58ceec72/go.mod h1:DbiFk1bJ1KEO94t1SlAn7tzc+Zz95rSXgyUKa2nzPmY=
@@ -1701,8 +1699,8 @@ kmodules.xyz/custom-resources v0.0.0-20201008012351-6d8090f759d4 h1:eftT0CrrAYK1
 kmodules.xyz/custom-resources v0.0.0-20201008012351-6d8090f759d4/go.mod h1:+YU32jSWaGGE4etTr/iCF88tLAeDNq1lhptVymjUbjg=
 kmodules.xyz/monitoring-agent-api v0.0.0-20200915181828-7e94cbcaa0f3 h1:MAWWNvZ7ESi2gkcxqNvqshz02yTBwn4Aw3DLQNIUKv8=
 kmodules.xyz/monitoring-agent-api v0.0.0-20200915181828-7e94cbcaa0f3/go.mod h1:YkI5McpM0icVJwceLhdxP1cmBJ1odD/aefiFLWuO08Q=
-kmodules.xyz/monitoring-agent-api v0.0.0-20201007104803-408a1ff2de8d h1:HFdWHhAkJZpoyMkp0kayKPf896IEkI7fWIpeJK4sY1o=
-kmodules.xyz/monitoring-agent-api v0.0.0-20201007104803-408a1ff2de8d/go.mod h1:ySvogFmyMVUNEFdUYnHp9T4njsB7o661ClfwNLcBWVo=
+kmodules.xyz/monitoring-agent-api v0.0.0-20201022103441-f51a42fb9ac8 h1:4WDb9Dt6/mLqLunbd+MseB7FtI8sO8334T8u1kCxZkI=
+kmodules.xyz/monitoring-agent-api v0.0.0-20201022103441-f51a42fb9ac8/go.mod h1:cfJEY2nsOqFF1tLzVqPj6n4KHWfbpRNf/WinOOD/bT4=
 kmodules.xyz/offshoot-api v0.0.0-20200521035628-e135bf07b226 h1:RZ7H0gl1z/9jLI74YOlGEtNeAknxTEKeAeYH0jakUcM=
 kmodules.xyz/offshoot-api v0.0.0-20200521035628-e135bf07b226/go.mod h1:IbK+hCI23UfTDMzG7hos9sERCase2xsFK+XC0Ns3OCg=
 kmodules.xyz/offshoot-api v0.0.0-20200922211229-36acc531abab h1:d/4AFAN0TfKgwhjbQYzwXXHT/5/vTP7SAAvS4uJX+wQ=
