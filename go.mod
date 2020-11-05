@@ -29,6 +29,8 @@ require (
 	k8s.io/kubernetes v1.18.9
 	kmodules.xyz/client-go v0.0.0-20201027113349-01a6d453d836
 	kmodules.xyz/custom-resources v0.0.0-20201008012351-6d8090f759d4
+	kmodules.xyz/monitoring-agent-api v0.0.0-20201022103441-f51a42fb9ac8 // indirect
+	kmodules.xyz/offshoot-api v0.0.0-20201027212804-f5e6dc573558 // indirect
 	kubevault.dev/operator v0.4.0-beta.0.0.20200916012456-e364d9c63cd9
 )
 
