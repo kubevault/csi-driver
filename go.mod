@@ -30,8 +30,6 @@ require (
 	k8s.io/kubernetes v1.18.9
 	kmodules.xyz/client-go v0.0.0-20201105071625-0b277310b9b8
 	kmodules.xyz/custom-resources v0.0.0-20201105075444-3c6af51b4f79
-	kmodules.xyz/monitoring-agent-api v0.0.0-20201105074044-be7a1044891a // indirect
-	kmodules.xyz/offshoot-api v0.0.0-20201105074700-8675f5f686f2 // indirect
 	kubevault.dev/operator v0.4.0-beta.0.0.20200916012456-e364d9c63cd9
 )
 
