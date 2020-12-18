@@ -11,7 +11,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/vault/api v1.0.5-0.20191108163347-bdd38fca2cff
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
-	github.com/juju/testing v0.0.0-20201030020617-7189b3728523 // indirect
+	github.com/juju/testing v0.0.0-20201216035041-2be42bba85f3 // indirect
 	github.com/kubernetes-csi/csi-lib-utils v0.7.0
 	github.com/kubernetes-csi/csi-test v2.2.0+incompatible
 	github.com/pkg/errors v0.9.1
@@ -30,8 +30,6 @@ require (
 	k8s.io/kubernetes v1.18.9
 	kmodules.xyz/client-go v0.0.0-20201208053851-a1d7be95e006
 	kmodules.xyz/custom-resources v0.0.0-20201124062543-bd8d35c21b0c
-	kmodules.xyz/monitoring-agent-api v0.0.0-20201105074044-be7a1044891a // indirect
-	kmodules.xyz/offshoot-api v0.0.0-20201105074700-8675f5f686f2 // indirect
 	kubevault.dev/operator v0.4.0-beta.0.0.20200916012456-e364d9c63cd9
 )
 
