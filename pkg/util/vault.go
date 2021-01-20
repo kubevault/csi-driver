@@ -66,6 +66,7 @@ func NewVaultClient(pi *PodInfo) (*vaultapi.Client, error) {
 	if cf.Kubernetes != nil {
 		authInfo := &authtype.AuthInfo{
 			VaultApp: app,
+			Path:     cf.Path,
 		}
 
 		if cf.Kubernetes.UsePodServiceAccountForCSIDriver {
