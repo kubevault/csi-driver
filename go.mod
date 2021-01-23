@@ -28,8 +28,10 @@ require (
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/klog v1.0.0
 	k8s.io/kubernetes v1.18.9
-	kmodules.xyz/client-go v0.0.0-20210108092221-c3812eb92bd0
+	kmodules.xyz/client-go v0.0.0-20210118094617-273ba20ad7ca
 	kmodules.xyz/custom-resources v0.0.0-20201124062543-bd8d35c21b0c
+	kmodules.xyz/monitoring-agent-api v0.0.0-20201105074044-be7a1044891a // indirect
+	kmodules.xyz/offshoot-api v0.0.0-20201105074700-8675f5f686f2 // indirect
 	kubevault.dev/operator v0.4.0-beta.0.0.20200916012456-e364d9c63cd9
 )
 
