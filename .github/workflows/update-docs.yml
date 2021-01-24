@@ -44,4 +44,5 @@ jobs:
         run: |
           export DOCS_ROOT=$RUNNER_WORKSPACE/$(basename $DOCS_REPOSITORY)
           ./hack/gendocs/make.sh
+          sed -i 's|Hostname\ (default.*|Hostname|g' $DOCS_ROOT/docs/reference/csi-driver/csi-vault_run.md
           $DOCS_ROOT/hack/scripts/open-pr.sh
