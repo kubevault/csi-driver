@@ -28,8 +28,9 @@ import (
 	"time"
 
 	"github.com/appscode/pat"
-	"github.com/kubernetes-csi/csi-test/pkg/sanity"
+	"github.com/kubernetes-csi/csi-test/v4/pkg/sanity"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -94,10 +95,13 @@ func TestDriverSuite(t *testing.T) {
 		utilruntime.Must(os.RemoveAll(sp))
 	}()
 
-	cfg := &sanity.Config{
+	cfg := sanity.TestConfig{
 		TargetPath:  tp,
 		StagingPath: sp,
 		Address:     endpoint,
+		DialOptions: []grpc.DialOption{
+			grpc.WithInsecure(),
+		},
 		TestVolumeParameters: map[string]string{
 			"engine":                                 "KV",
 			"ref":                                    "default/sanity-app",

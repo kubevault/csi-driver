@@ -31,7 +31,7 @@ import (
 	"google.golang.org/grpc"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	lib "k8s.io/apiserver/pkg/server/healthz"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 // healthProbe implements the simplest possible healthz checker.

@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 
-	config "kubevault.dev/operator/apis/config/v1alpha1"
+	config "kubevault.dev/apimachinery/apis/config/v1alpha1"
 	vaultauth "kubevault.dev/operator/pkg/vault"
 	authtype "kubevault.dev/operator/pkg/vault/auth/types"
 

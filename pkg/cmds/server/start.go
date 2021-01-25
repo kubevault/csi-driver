@@ -28,9 +28,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
+	"k8s.io/apiserver/pkg/features"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
-	"kmodules.xyz/client-go/meta"
+	"k8s.io/apiserver/pkg/util/feature"
 	"kmodules.xyz/client-go/tools/clientcmd"
 )
 
@@ -45,12 +46,12 @@ type VaultDriverOptions struct {
 }
 
 func NewVaultDriverOptions(out, errOut io.Writer) *VaultDriverOptions {
+	_ = feature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=false", features.APIPriorityAndFairness))
 	o := &VaultDriverOptions{
 		// TODO we will nil out the etcd storage options.  This requires a later level of k8s.io/apiserver
 		RecommendedOptions: genericoptions.NewRecommendedOptions(
 			defaultEtcdPathPrefix,
 			server.Codecs.LegacyCodec(admissionv1beta1.SchemeGroupVersion),
-			genericoptions.NewProcessInfo("csi-vault", meta.Namespace()),
 		),
 		ExtraOptions: NewExtraOptions(),
 		StdOut:       out,

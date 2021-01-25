@@ -1,11 +1,11 @@
 /*
-Copyright The KubeVault Authors.
+Copyright AppsCode Inc. and Contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
+Licensed under the AppsCode Community License 1.0.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    https://github.com/appscode/licenses/raw/1.0.0/AppsCode-Community-1.0.0.md
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,10 @@ package util
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
+	"time"
+
+	conapi "kubevault.dev/apimachinery/apis"
 
 	vaultapi "github.com/hashicorp/vault/api"
 	core "k8s.io/api/core/v1"
@@ -34,39 +38,37 @@ const (
 const (
 	// VaultConfigFile is the file that vault pod uses to read config from
 	VaultConfigFile = "/etc/vault/config/vault.hcl"
-
-	// VaultTLSAssetDir is the dir where vault's server TLS sits
-	VaultTLSAssetDir = "/etc/vault/tls/"
 )
 
 var listenerFmt = `
 listener "tcp" {
   address = "0.0.0.0:8200"
   cluster_address = "0.0.0.0:8201"
-  tls_cert_file = "%s"
-  tls_key_file  = "%s"
+  %s
 }
 `
 
-// NewConfigWithDefaultParams appends to given config data some default params:
-// - tcp listener
-func NewConfigWithDefaultParams() string {
-	return fmt.Sprintf(listenerFmt, filepath.Join(VaultTLSAssetDir, core.TLSCertKey), filepath.Join(VaultTLSAssetDir, core.TLSPrivateKeyKey))
-}
-
 // ListenerConfig creates tcp listener config
-func GetListenerConfig() string {
-	listenerCfg := fmt.Sprintf(listenerFmt,
-		filepath.Join(VaultTLSAssetDir, core.TLSCertKey),
-		filepath.Join(VaultTLSAssetDir, core.TLSPrivateKeyKey))
+func GetListenerConfig(mountPath string, isTLSEnabled bool) string {
+	var params []string
+	if isTLSEnabled {
+		params = append(params, fmt.Sprintf(`tls_cert_file = "%s"`, filepath.Join(mountPath, core.TLSCertKey)))
+		params = append(params, fmt.Sprintf(`tls_key_file = "%s"`, filepath.Join(mountPath, core.TLSPrivateKeyKey)))
+		params = append(params, fmt.Sprintf(`tls_client_ca_file = "%s"`, filepath.Join(mountPath, conapi.TLSCACertKey)))
+	} else {
+		params = append(params, "tls_disable = true")
+	}
+
+	listenerCfg := fmt.Sprintf(listenerFmt, strings.Join(params, "\n"))
 
 	return listenerCfg
 }
 
-func NewVaultClient(hostname string, port string, tlsConfig *vaultapi.TLSConfig) (*vaultapi.Client, error) {
+func NewVaultClient(url string, tlsConfig *vaultapi.TLSConfig) (*vaultapi.Client, error) {
 	cfg := vaultapi.DefaultConfig()
-	podURL := fmt.Sprintf("https://%s:%s", hostname, port)
-	cfg.Address = podURL
+	cfg.Address = url
+	cfg.Timeout = 30 * time.Second
+
 	err := cfg.ConfigureTLS(tlsConfig)
 	if err != nil {
 		return nil, err

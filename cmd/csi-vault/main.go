@@ -17,18 +17,21 @@ limitations under the License.
 package main
 
 import (
-	"os"
-
 	"kubevault.dev/csi-driver/pkg/cmds"
 
-	"kmodules.xyz/client-go/logs"
+	_ "go.bytebuilders.dev/license-verifier/info"
+	"gomodules.xyz/logs"
+	_ "k8s.io/client-go/kubernetes/fake"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/klog/v2"
 )
 
 func main() {
-	logs.InitLogs()
+	rootCmd := cmds.NewRootCmd()
+	logs.Init(rootCmd, true)
 	defer logs.FlushLogs()
 
-	if err := cmds.NewRootCmd().Execute(); err != nil {
-		os.Exit(1)
+	if err := rootCmd.Execute(); err != nil {
+		klog.Fatal(err)
 	}
 }
