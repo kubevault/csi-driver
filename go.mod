@@ -3,25 +3,25 @@ module kubevault.dev/csi-driver
 go 1.12
 
 require (
-	github.com/appscode/go v0.0.0-20200928211031-cc0c23082d91
 	github.com/appscode/pat v0.0.0-20170521084856-48ff78925b79
-	github.com/container-storage-interface/spec v1.2.0
+	github.com/container-storage-interface/spec v1.3.0
 	github.com/golang/protobuf v1.4.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/hashicorp/vault/api v1.0.5-0.20191108163347-bdd38fca2cff
+	github.com/hashicorp/vault/api v1.0.5-0.20200317185738-82f498082f02
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 	github.com/juju/testing v0.0.0-20201216035041-2be42bba85f3 // indirect
-	github.com/kubernetes-csi/csi-lib-utils v0.7.0
-	github.com/kubernetes-csi/csi-test v2.2.0+incompatible
+	github.com/kubernetes-csi/csi-lib-utils v0.9.0
+	github.com/kubernetes-csi/csi-test/v4 v4.0.0-00010101000000-000000000000
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.6.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
-	gomodules.xyz/pointer v0.0.0-20201105071923-daf60fa55209 // indirect
+	gomodules.xyz/runtime v0.0.0-20201104200926-d838b09dda8b
+	gomodules.xyz/x v0.0.0-20201105065653-91c568df6331
 	google.golang.org/grpc v1.29.1
-	k8s.io/api v0.18.9
+	k8s.io/api v0.19.0
 	k8s.io/apiextensions-apiserver v0.18.9
 	k8s.io/apimachinery v0.18.9
 	k8s.io/apiserver v0.18.9
@@ -30,10 +30,11 @@ require (
 	k8s.io/kubernetes v1.18.9
 	kmodules.xyz/client-go v0.0.0-20210118094617-273ba20ad7ca
 	kmodules.xyz/custom-resources v0.0.0-20201124062543-bd8d35c21b0c
-	kubevault.dev/operator v0.4.0-beta.0.0.20200916012456-e364d9c63cd9
+	kubevault.dev/apimachinery v0.0.0-20210124211354-5738aa125d4d
+	kubevault.dev/operator v0.4.0-beta.0.0.20210124213429-ebb9afa3c57a
 )
 
-replace github.com/kubernetes-csi/csi-test => github.com/kubevault/csi-test v1.1.2-0.20191201160333-490f2b7805bb
+replace github.com/kubernetes-csi/csi-test/v4 => github.com/kubevault/csi-test/v4 v4.0.0-20210130152654-e8b94ac811c3
 
 replace bitbucket.org/ww/goautoneg => gomodules.xyz/goautoneg v0.0.0-20120707110453-a547fc61f48d
 

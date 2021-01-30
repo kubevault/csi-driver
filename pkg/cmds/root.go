@@ -20,11 +20,11 @@ import (
 	"flag"
 	"os"
 
-	"kubevault.dev/operator/client/clientset/versioned/scheme"
+	"kubevault.dev/apimachinery/client/clientset/versioned/scheme"
 
-	"github.com/appscode/go/flags"
-	v "github.com/appscode/go/version"
 	"github.com/spf13/cobra"
+	"gomodules.xyz/x/flags"
+	v "gomodules.xyz/x/version"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	clientsetscheme "k8s.io/client-go/kubernetes/scheme"
