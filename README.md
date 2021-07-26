@@ -1,3 +1,5 @@
+> We recommend using [Secrets Store CSI driver for Kubernetes secrets](https://github.com/kubernetes-sigs/secrets-store-csi-driver)
+
 [![Go Report Card](https://goreportcard.com/badge/kubevault.dev/csi-driver)](https://goreportcard.com/report/kubevault.dev/csi-driver)
 [![Build Status](https://github.com/kubevault/csi-driver/workflows/CI/badge.svg)](https://github.com/kubevault/csi-driver/actions?workflow=CI)
 [![Docker Pulls](https://img.shields.io/docker/pulls/kubevault/csi-vault.svg)](https://hub.docker.com/r/kubevault/csi-vault/)
